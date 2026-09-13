@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Games in C — catalogue &amp; player</title>
+<style>
+/* ------------------------------------------------------------------ tokens
+   The catalogue is a program listing, so it is printed on continuous-feed
+   green-bar paper: ivory stock, alternating ledger bands, sprocket margins,
+   line numbers. Playing switches to the lit terminal the games really run in.
+*/
+:root{
+  --paper:      #f6f4ec;   /* ivory listing stock          */
+  --bar:        #dfe8d5;   /* green ledger band            */
+  --ink:        #1b1d1a;   /* impact-printer black         */
+  --ink-soft:   #6a6f66;   /* faded second-carbon copy     */
+  --rule:       #c3c9b9;   /* fold perforation             */
+  --mark:       #b4331f;   /* red review pencil            */
+  --screen:     #14161a;   /* terminal glass               */
+  --screen-dim: #23262c;
+
+  --display: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+
+  --gutter: 26px;          /* sprocket margin width */
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-text-size-adjust:100%;
+}
+
+/* Sprocket-hole margins running the full height of the sheet. */
+.sheet{
+  max-width:1180px;
+  margin:0 auto;
+  min-height:100vh;
+  position:relative;
+  padding:0 var(--gutter);
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 14px,
+      rgba(0,0,0,.30) 14px 15px,
+      transparent 15px 29px) left  0 top 0/1px 100% no-repeat,
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 14px,
+      rgba(0,0,0,.30) 14px 15px,
+      transparent 15px 29px) right 0 top 0/1px 100% no-repeat;
+}
+.sheet::before,.sheet::after{
+  content:"";position:absolute;top:0;bottom:0;width:var(--gutter);
+  background-image:radial-gradient(circle at 50% 10px,#0000 3.2px,var(--paper) 3.3px);
+  background-size:100% 29px;
+  background-color:#ebe8de;
+  border-inline:1px solid var(--rule);
+}
+.sheet::before{left:0}
+.sheet::after{right:0}
+@media (max-width:720px){ :root{--gutter:12px} .sheet::before,.sheet::after{display:none} }
+
+/* ------------------------------------------------------------------ header */
+header{padding:34px 0 10px}
+.stamp{
+  font-family:var(--display);
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.18em;
+  font-size:clamp(38px,8vw,74px);
+  line-height:.92;
+  margin:0;
+}
+.stamp em{font-style:normal;color:var(--mark)}
+.tagline{
+  margin:10px 0 0;
+  max-width:56ch;
+  color:var(--ink-soft);
+}
+.runhead{
+  margin-top:22px;
+  border-top:1px solid var(--ink);
+  border-bottom:1px solid var(--ink);
+  padding:7px 0;
+  display:flex;
+  flex-wrap:wrap;
+  gap:0 28px;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.14em;
+}
+.runhead b{font-weight:700}
+.runhead span{color:var(--ink-soft)}
+
+/* ------------------------------------------------------------------ filters */
+.controls{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  padding:16px 0;
+}
+.controls input[type=search],.controls select{
+  font:inherit;
+  background:#fffdf6;
+  color:var(--ink);
+  border:1px solid var(--rule);
+  border-radius:0;
+  padding:7px 10px;
+}
+.controls input[type=search]{flex:1 1 240px;min-width:0}
+.controls input[type=search]:focus-visible,
+.controls select:focus-visible,
+.toggle:focus-visible,
+.row:focus-visible,
+button:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+.toggle{
+  font:inherit;cursor:pointer;
+  background:#fffdf6;border:1px solid var(--rule);
+  padding:7px 12px;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.toggle[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.count{margin-left:auto;color:var(--ink-soft);font-size:12px}
+
+/* ------------------------------------------------------------------ listing */
+.listing{border-top:1px solid var(--ink)}
+.colhead{
+  display:grid;grid-template-columns:58px 1fr 108px 190px 74px;
+  gap:12px;padding:6px 8px;
+  font-size:10px;text-transform:uppercase;letter-spacing:.16em;
+  color:var(--ink-soft);border-bottom:1px solid var(--rule);
+}
+.row{
+  display:grid;grid-template-columns:58px 1fr 108px 190px 74px;
+  gap:12px;align-items:baseline;
+  padding:5px 8px;
+  border:0;background:transparent;
+  width:100%;text-align:left;font:inherit;color:inherit;
+  cursor:pointer;
+}
+/* The ledger band is the point of green-bar paper: every other line. */
+.row:nth-child(even){background:var(--bar)}
+.row:hover{background:#fff8d8}
+.row .ln{color:var(--ink-soft);font-variant-numeric:tabular-nums;font-size:12px}
+.row .title{font-weight:700}
+.row .genre,.row .mech{color:var(--ink-soft);font-size:12.5px}
+.row .mech{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .tag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-align:right}
+.row.playable .tag{color:var(--mark);font-weight:700}
+.row.spec .tag{color:var(--ink-soft)}
+.row.spec .title{font-weight:400}
+@media (max-width:760px){
+  .colhead{display:none}
+  .row{grid-template-columns:44px 1fr 62px;row-gap:2px}
+  .row .genre{grid-column:2;font-size:11px}
+  .row .mech{display:none}
+}
+.more{display:block;width:100%;margin:18px 0 40px;padding:12px;
+  font:inherit;cursor:pointer;background:#fffdf6;border:1px solid var(--ink)}
+.more:hover{background:var(--ink);color:var(--paper)}
+.empty{padding:40px 8px;color:var(--ink-soft)}
+
+footer{padding:20px 0 50px;border-top:1px solid var(--rule);
+  color:var(--ink-soft);font-size:12px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* ------------------------------------------------------------------ overlay */
+.overlay{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(20,22,26,.88);
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+.overlay.open{display:flex}
+.panel{
+  background:var(--screen);
+  color:#d6d9d2;
+  border:1px solid #000;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);
+  max-width:min(96vw,1000px);width:100%;
+  max-height:94vh;overflow:auto;
+}
+.panel-bar{
+  display:flex;align-items:center;gap:12px;
+  padding:9px 14px;background:var(--screen-dim);
+  border-bottom:1px solid #000;
+}
+.panel-bar h2{
+  margin:0;font-family:var(--display);font-weight:700;
+  text-transform:uppercase;letter-spacing:.14em;font-size:17px;
+}
+.panel-bar .slug{color:#7b8189;font-size:11px}
+.panel-bar button{
+  margin-left:auto;font:inherit;cursor:pointer;
+  background:transparent;color:#d6d9d2;border:1px solid #454a52;padding:4px 12px;
+}
+.panel-bar button:hover{background:var(--mark);border-color:var(--mark);color:#fff}
+.screen-wrap{padding:14px;display:flex;justify-content:center}
+canvas{
+  display:block;max-width:100%;height:auto;
+  image-rendering:auto;
+  background:var(--screen);
+}
+.helpline{
+  padding:0 14px 12px;color:#868d95;font-size:12px;text-align:center;
+}
+
+/* Spec sheet for catalogued-but-unbuilt entries. */
+.spec-body{padding:18px 20px 24px;color:#c6cac4}
+.spec-body dl{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;margin:0 0 16px}
+.spec-body dt{color:#7b8189;font-size:11px;text-transform:uppercase;letter-spacing:.12em}
+.spec-body dd{margin:0}
+.spec-body p{margin:0 0 14px;max-width:60ch}
+.pips{letter-spacing:2px}
+.pips i{font-style:normal;color:#3d424a}
+.pips i.on{color:#d8a43c}
+
+/* Touch pad: only worth showing where there is no keyboard. */
+.pad{display:none;gap:8px;padding:0 14px 16px;justify-content:center;flex-wrap:wrap}
+.pad button{
+  font:inherit;width:56px;height:46px;cursor:pointer;
+  background:var(--screen-dim);color:#d6d9d2;border:1px solid #454a52;
+}
+.pad button:active{background:var(--mark);color:#fff}
+.pad .wide{width:120px}
+@media (hover:none) and (pointer:coarse){ .pad{display:flex} }
+
+@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <header>
+    <h1 class="stamp">Games<br>in <em>C</em></h1>
+    <p class="tagline">
+      A thousand games specified, forty-nine of them written and playable —
+      the same C logic, rendered here to a terminal in your browser.
+    </p>
+    <div class="runhead">
+      <span>Catalogued</span><b id="stat-total">—</b>
+      <span>Playable now</span><b id="stat-play">—</b>
+      <span>Genres</span><b id="stat-genre">—</b>
+      <span>Dependencies</span><b>none</b>
+    </div>
+  </header>
+
+  <div class="controls">
+    <input type="search" id="q" placeholder="Search titles, mechanics, blurbs…" aria-label="Search the catalogue">
+    <select id="genre" aria-label="Filter by genre"><option value="">All genres</option></select>
+    <button class="toggle" id="only" aria-pressed="false">Playable only</button>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="listing">
+    <div class="colhead">
+      <span>Line</span><span>Title</span><span>Genre</span><span>Mechanic</span><span>Status</span>
+    </div>
+    <div id="rows"></div>
+  </div>
+  <button class="more" id="more" hidden>Print the next 100 lines</button>
+
+  <footer>
+    <span>Terminal build: <code>make &amp;&amp; ./games</code></span>
+    <span id="foot-note"></span>
+  </footer>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+  <div class="panel">
+    <div class="panel-bar">
+      <h2 id="panel-title">—</h2>
+      <span class="slug" id="panel-slug"></span>
+      <button id="close">Close</button>
+    </div>
+    <div id="panel-content"></div>
+  </div>
+</div>
+
+<script src="js/catalog.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/games/board.js"></script>
+<script src="js/games/puzzle.js"></script>
+<script src="js/games/arcade.js"></script>
+<script src="js/games/cards.js"></script>
+<script src="js/games/word.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

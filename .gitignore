@@ -1,5 +1,8 @@
-TODO.md
-*.exe
-.venv/
+# build artefacts
 *.o
+*.exe
+games
+.venv/
 
+# runtime state
+.gic_scores

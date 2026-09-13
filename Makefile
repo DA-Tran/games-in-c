@@ -1,14 +1,45 @@
-CC = gcc
-CFLAGS = -Wall -g
-LIBS = -lncurses -ltinfo
+# Games in C - zero-dependency terminal game suite.
+#   make            build ./games
+#   make run        build and launch the catalog browser
+#   make play G=snake   build and launch one game directly
+#   make catalog    regenerate the 1000-game catalog from tools/gen_catalog.py
+#   make smoke      run the scripted no-crash harness over every game
+#   make web        report how to open the browser version
+#   make clean      remove build artefacts
 
-all: menu
+CC      ?= gcc
+CFLAGS  ?= -std=c99 -Wall -Wextra -O2
+CPPFLAGS = -Iinclude
+LDLIBS   =
 
-menu: game.h menu.c hangman.c rock_paper_scissors.c snakes_and_ladders.c 2048.c snake_game.c pacman.c dino_game.c virtual_piano.c
-	$(CC) $(CFLAGS) -o menu menu.c hangman.c rock_paper_scissors.c snakes_and_ladders.c 2048.c snake_game.c pacman.c dino_game.c virtual_piano.c $(LIBS)
+BIN     = games
+SRC     = $(wildcard src/*.c) $(wildcard src/engine/*.c) $(wildcard src/games/*.c)
+OBJ     = $(SRC:.c=.o)
+
+.PHONY: all run play catalog smoke web clean
+
+all: $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDLIBS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+
+run: $(BIN)
+	./$(BIN)
+
+play: $(BIN)
+	./$(BIN) $(G)
+
+catalog:
+	python3 tools/gen_catalog.py
+
+smoke: $(BIN)
+	./tools/smoke_test.sh
+
+web:
+	@echo "Open web/index.html in any browser - no server required."
 
 clean:
-	rm -f menu *.o
-
-.PHONY: all clean
-
+	rm -f $(OBJ) $(BIN)
