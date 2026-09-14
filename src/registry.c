@@ -60,6 +60,8 @@ const FamilyEntry FAMILY_REGISTRY[] = {
     {"constraint",         fam_constraint},
     {"mathdrill",          fam_mathdrill},
     {"idle",               fam_idle},
+    {"automata",           fam_automata},
+    {"logicgrid",          fam_logicgrid},
     {"wordmisc",           fam_wordmisc},
     {"reaction",           fam_reaction},
     {"pegsolitaire",       fam_pegsolitaire},

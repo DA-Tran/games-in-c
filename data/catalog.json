@@ -1,6 +1,6 @@
 {
  "count": 1000,
- "playable": 686,
+ "playable": 722,
  "families": {
   "abstract": 16,
   "anagram": 11,
@@ -16454,8 +16454,8 @@
     "players": 0,
     "theme": "Detective"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-detective-advanced",
@@ -16477,8 +16477,8 @@
     "players": 0,
     "theme": "Detective"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-dinner-party-standard",
@@ -16500,8 +16500,8 @@
     "players": 0,
     "theme": "Dinner Party"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-dinner-party-advanced",
@@ -16523,8 +16523,8 @@
     "players": 0,
     "theme": "Dinner Party"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-race-results-standard",
@@ -16546,8 +16546,8 @@
     "players": 0,
     "theme": "Race Results"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-race-results-advanced",
@@ -16569,8 +16569,8 @@
     "players": 0,
     "theme": "Race Results"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-office-standard",
@@ -16592,8 +16592,8 @@
     "players": 0,
     "theme": "Office"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-office-advanced",
@@ -16615,8 +16615,8 @@
     "players": 0,
     "theme": "Office"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-school-standard",
@@ -16638,8 +16638,8 @@
     "players": 0,
     "theme": "School"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-school-advanced",
@@ -16661,8 +16661,8 @@
     "players": 0,
     "theme": "School"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-zoo-standard",
@@ -16684,8 +16684,8 @@
     "players": 0,
     "theme": "Zoo"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-zoo-advanced",
@@ -16707,8 +16707,8 @@
     "players": 0,
     "theme": "Zoo"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-festival-standard",
@@ -16730,8 +16730,8 @@
     "players": 0,
     "theme": "Festival"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-festival-advanced",
@@ -16753,8 +16753,8 @@
     "players": 0,
     "theme": "Festival"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-hotel-standard",
@@ -16776,8 +16776,8 @@
     "players": 0,
     "theme": "Hotel"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-hotel-advanced",
@@ -16799,8 +16799,8 @@
     "players": 0,
     "theme": "Hotel"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-voyage-standard",
@@ -16822,8 +16822,8 @@
     "players": 0,
     "theme": "Voyage"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-voyage-advanced",
@@ -16845,8 +16845,8 @@
     "players": 0,
     "theme": "Voyage"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-bakery-standard",
@@ -16868,8 +16868,8 @@
     "players": 0,
     "theme": "Bakery"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-bakery-advanced",
@@ -16891,8 +16891,8 @@
     "players": 0,
     "theme": "Bakery"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "countdown-numbers",
@@ -20732,8 +20732,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "elementary-automaton-rule-54",
@@ -20755,8 +20755,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "elementary-automaton-rule-90",
@@ -20778,8 +20778,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "elementary-automaton-rule-110",
@@ -20801,8 +20801,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "elementary-automaton-rule-150",
@@ -20824,8 +20824,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "elementary-automaton-rule-182",
@@ -20847,8 +20847,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "elementary-automaton-rule-22",
@@ -20870,8 +20870,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "elementary-automaton-rule-60",
@@ -20893,8 +20893,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "conways-game-of-life",
@@ -20916,8 +20916,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "life-variant-highlife",
@@ -20939,8 +20939,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "life-variant-day-and-night",
@@ -20962,8 +20962,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "life-variant-seeds",
@@ -20985,8 +20985,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "life-variant-brians-brain",
@@ -21008,8 +21008,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "life-variant-maze",
@@ -21031,8 +21031,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "life-variant-coral",
@@ -21054,8 +21054,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "langtons-ant",
@@ -21077,8 +21077,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "idle-mine",

@@ -5,7 +5,7 @@
  */
 (function () {
 'use strict';
-var G = window.GIC, C = G.COL, reg = G.register, rnd = G.rnd;
+var G = window.GIC, C = G.COL, reg = G.register, rnd = G.rnd, shuffle = G.shuffle;
 
 var MNAME = ['Countdown Numbers','24 Game','Factor Game','Prime Hunt',
   'Mental Arithmetic','Binary Conversion Race','Collatz Race','Nim-Sum Trainer',
@@ -524,6 +524,231 @@ reg('idle', {
         }
         t.text(18, 16, 'Space gathers by hand, 1-3 buy upgrades', C.dim);
         t.text(18, 18, 'Running ' + Math.floor(secs) + ' s   ', C.fg);
+      }
+    };
+  }
+});
+
+
+/* --------------------------------------------------------------- automata */
+reg('automata', {
+  title: 'Cellular Automata', help: 'Space runs/pauses · S steps · R reseeds · Q quits',
+  start: function (host, p) {
+    var W = 64, H = 20;
+    function M(n) { return 1 << n; }
+    /* kind 0 elementary, 1 life-like, 2 Langton's ant */
+    var RULES = [
+      ['Rule 30',0,30,0,0,2], ['Rule 54',0,54,0,0,2], ['Rule 90',0,90,0,0,2],
+      ['Rule 110',0,110,0,0,2], ['Rule 150',0,150,0,0,2], ['Rule 182',0,182,0,0,2],
+      ['Rule 22',0,22,0,0,2], ['Rule 60',0,60,0,0,2],
+      ["Conway's Life",1,0,M(3),M(2)|M(3),2],
+      ['HighLife',1,0,M(3)|M(6),M(2)|M(3),2],
+      ['Day and Night',1,0,M(3)|M(6)|M(7)|M(8),M(3)|M(4)|M(6)|M(7)|M(8),2],
+      ['Seeds',1,0,M(2),0,2],
+      ["Brian's Brain",1,0,M(2),0,3],
+      ['Maze',1,0,M(3),M(1)|M(2)|M(3)|M(4)|M(5),2],
+      ['Coral',1,0,M(3),M(4)|M(5)|M(6)|M(7)|M(8),2],
+      ["Langton's Ant",2,0,0,0,2]];
+    var V = (p.variant >= 0 && p.variant < 16) ? p.variant : 0;
+    var R = RULES[V], KIND = R[1], RULE = R[2], BIRTH = R[3], SURV = R[4], STATES = R[5];
+    var cell, gen = 0, peak = 0, running = true, cr = H >> 1, cc = W >> 1;
+    var antR = H >> 1, antC = W >> 1, antD = 0;
+
+    function seed() {
+      cell = [];
+      for (var r = 0; r < H; r++) cell.push(new Array(W).fill(0));
+      if (KIND === 0) cell[0][W >> 1] = 1;
+      else if (KIND === 1)
+        for (r = 0; r < H; r++) for (var c = 0; c < W; c++) cell[r][c] = rnd(100) < 28 ? 1 : 0;
+      gen = 0; peak = 0; antR = H >> 1; antC = W >> 1; antD = 0;
+    }
+    function neighbours(r, c) {
+      var n = 0;
+      for (var dr = -1; dr <= 1; dr++) for (var dc = -1; dc <= 1; dc++) {
+        if (!dr && !dc) continue;
+        if (cell[(r + dr + H) % H][(c + dc + W) % W] === 1) n++;
+      }
+      return n;
+    }
+    function step() {
+      var r, c;
+      if (KIND === 0) {
+        /* time flows downwards: each new top row comes from the one below */
+        for (r = H - 1; r > 0; r--) cell[r] = cell[r - 1].slice();
+        var prev = cell[1], row = new Array(W).fill(0);
+        for (c = 0; c < W; c++) {
+          var idx = (prev[(c + W - 1) % W] << 2) | (prev[c] << 1) | prev[(c + 1) % W];
+          row[c] = (RULE >> idx) & 1;
+        }
+        cell[0] = row;
+      } else if (KIND === 2) {
+        var DR = [-1,0,1,0], DC = [0,1,0,-1];
+        if (cell[antR][antC]) { antD = (antD + 3) % 4; cell[antR][antC] = 0; }
+        else { antD = (antD + 1) % 4; cell[antR][antC] = 1; }
+        antR = (antR + DR[antD] + H) % H;
+        antC = (antC + DC[antD] + W) % W;
+      } else {
+        var next = [];
+        for (r = 0; r < H; r++) {
+          next.push(new Array(W).fill(0));
+          for (c = 0; c < W; c++) {
+            var n = neighbours(r, c), v = cell[r][c];
+            if (STATES === 3) next[r][c] = v === 1 ? 2 : v === 2 ? 0 : ((BIRTH & M(n)) ? 1 : 0);
+            else next[r][c] = v ? ((SURV & M(n)) ? 1 : 0) : ((BIRTH & M(n)) ? 1 : 0);
+          }
+        }
+        cell = next;
+      }
+      gen++;
+    }
+    function population() {
+      var n = 0;
+      for (var r = 0; r < H; r++) for (var c = 0; c < W; c++) if (cell[r][c] === 1) n++;
+      return n;
+    }
+    seed();
+    return {
+      tick: function () { if (running) { step(); var p2 = population(); if (p2 > peak) { peak = p2; host.saveScore(peak); } } },
+      key: function (k) {
+        if (k === 'space') running = !running;
+        if (k === 's') step();
+        if (k === 'r') seed();
+        if (k === 'up'    && cr > 0)     cr--;
+        if (k === 'down'  && cr < H - 1) cr++;
+        if (k === 'left'  && cc > 0)     cc--;
+        if (k === 'right' && cc < W - 1) cc++;
+        if (k === 'enter') cell[cr][cc] = cell[cr][cc] ? 0 : 1;
+      },
+      draw: function (t) {
+        t.header('CELLULAR AUTOMATA', R[0] + ' — Space runs/pauses, S steps, R reseeds, arrows+Enter draw');
+        for (var r = 0; r < H; r++) for (var c = 0; c < W; c++) {
+          var v = cell[r][c];
+          var here = (KIND === 2) ? (r === antR && c === antC) : (r === cr && c === cc);
+          if (here) t.put(8 + c, 4 + r, '@', C.white, '#2b4a6b', true);
+          else t.put(8 + c, 4 + r, v === 1 ? '#' : v === 2 ? '+' : '.',
+                     v === 1 ? C.green : v === 2 ? C.blue : C.grey, null, v === 1);
+        }
+        t.text(8, 5 + H, 'Generation ' + gen + '   Population ' + population() +
+               '   Peak ' + peak + '   ' + (running ? 'running' : 'paused ') + '   ', C.fg);
+      }
+    };
+  }
+});
+
+/* -------------------------------------------------------------- logicgrid */
+reg('logicgrid', {
+  title: 'Logic Grid', help: 'Arrows move · 1-N assigns · 0 clears · Q quits',
+  start: function (host, p) {
+    var THEMES = [
+      ['Detective',['Suspect','Weapon','Room'],
+        [['Green','Scarlet','Plum','Peacock','Mustard'],
+         ['rope','candlestick','spanner','dagger','pistol'],
+         ['library','kitchen','study','cellar','ballroom']]],
+      ['Dinner Party',['Guest','Dish','Drink'],
+        [['Aisha','Boris','Clara','Dmitri','Elena'],
+         ['risotto','curry','paella','ramen','tagine'],
+         ['water','cider','wine','juice','tea']]],
+      ['Race Results',['Runner','Place','Colour'],
+        [['Nadia','Omar','Petra','Quinn','Rosa'],
+         ['first','second','third','fourth','fifth'],
+         ['red','blue','green','yellow','white']]],
+      ['Office',['Worker','Desk','Project'],
+        [['Fern','Gus','Hana','Ivo','Jules'],
+         ['window','corner','corridor','atrium','mezzanine'],
+         ['audit','launch','migration','rebrand','rollout']]],
+      ['School',['Pupil','Subject','Day'],
+        [['Kai','Lena','Mo','Nils','Opal'],
+         ['physics','history','music','biology','latin'],
+         ['Monday','Tuesday','Wednesday','Thursday','Friday']]],
+      ['Zoo',['Keeper','Animal','Enclosure'],
+        [['Pia','Rafe','Sasha','Tomas','Uma'],
+         ['otter','lemur','tapir','ibis','okapi'],
+         ['north','south','east','west','central']]],
+      ['Festival',['Act','Stage','Slot'],
+        [['Vera','Wes','Xan','Yara','Zeke'],
+         ['pyramid','meadow','barn','dome','quarry'],
+         ['noon','dusk','midnight','dawn','teatime']]],
+      ['Hotel',['Guest','Room','Request'],
+        [['Ada','Bram','Cleo','Dev','Esme'],
+         ['attic','suite','annexe','tower','garden'],
+         ['extra pillows','late supper','an early call','a quiet floor','a sea view']]],
+      ['Voyage',['Passenger','Port','Cabin'],
+        [['Kalo','Lira','Mikk','Nuri','Oona'],
+         ['Bergen','Valletta','Hoorn','Cadiz','Split'],
+         ['forward','aft','upper','lower','midships']]],
+      ['Bakery',['Baker','Bake','Hour'],
+        [['Fritz','Greta','Hugo','Ines','Jonas'],
+         ['brioche','sourdough','stollen','baguette','focaccia'],
+         ['four','five','six','seven','eight']]]];
+    var ti = -1;
+    for (var i = 0; i < 10; i++) if (THEMES[i][0] === p.theme) ti = i;
+    if (ti < 0) ti = (p.variant | 0) % 10;
+    var T = THEMES[ti], N = (p.difficulty || 2) >= 4 ? 5 : 4;
+    var truth, guess, clues, cr, cc, won;
+
+    function build() {
+      truth = []; guess = []; clues = [];
+      for (var cat = 0; cat < 3; cat++) {
+        var perm = [];
+        for (var i = 0; i < N; i++) perm.push(i);
+        truth.push(shuffle(perm));
+        guess.push(new Array(N).fill(-1));
+      }
+      /* every clue below is true of the generated assignment */
+      for (var c2 = 1; c2 < 3; c2++) {
+        var who = rnd(N);
+        clues.push(T[2][0][who] + "'s " + T[1][c2] + ' is the ' + T[2][c2][truth[c2][who]] + '.');
+      }
+      for (var t = 0; t < 40 && clues.length < N * 2 + 2; t++) {
+        var kind = rnd(3), a = rnd(N), b = rnd(N), k1 = 1 + rnd(2);
+        if (a === b) continue;
+        if (kind === 0)
+          clues.push(T[2][0][a] + "'s " + T[1][k1] + ' is not the ' + T[2][k1][truth[k1][b]] + '.');
+        else if (kind === 1) {
+          var k2 = 1 + rnd(2);
+          if (k1 === k2) continue;
+          clues.push('Whoever has the ' + T[2][k1][truth[k1][a]] + ' (' + T[1][k1] +
+                     ') does not have the ' + T[2][k2][truth[k2][b]] + ' (' + T[1][k2] + ').');
+        } else {
+          clues.push('The ' + T[2][1][truth[1][a]] + ' and the ' + T[2][2][truth[2][a]] +
+                     ' belong to the same person.');
+        }
+      }
+      cr = 0; cc = 1; won = false;
+    }
+    function solved() {
+      for (var cat = 1; cat < 3; cat++)
+        for (var i = 0; i < N; i++) if (guess[cat][i] !== truth[cat][i]) return false;
+      return true;
+    }
+    build();
+    return {
+      key: function (k) {
+        if (won) { build(); return; }
+        if (k === 'up'    && cr > 0)     cr--;
+        if (k === 'down'  && cr < N - 1) cr++;
+        if (k === 'left'  && cc > 1)     cc--;
+        if (k === 'right' && cc < 2)     cc++;
+        if (k === '0') guess[cc][cr] = -1;
+        if (/^[1-9]$/.test(k) && +k <= N) guess[cc][cr] = (+k) - 1;
+        if (solved()) { won = true; host.saveScore(N * 200); }
+      },
+      draw: function (t) {
+        t.header('LOGIC GRID', T[0] + ', ' + N + ' each — arrows move, 1-' + N + ' assigns, 0 clears');
+        for (var c = 1; c < 3; c++) t.text(22 + (c - 1) * 22, 4, T[1][c], C.yellow, null, true);
+        for (var r = 0; r < N; r++) {
+          t.text(8, 5 + r, (T[2][0][r] + '            ').slice(0, 12), C.white);
+          for (c = 1; c < 3; c++) {
+            var v = guess[c][r];
+            t.text(22 + (c - 1) * 22, 5 + r,
+                   ((v < 0 ? '?' : T[2][c][v]) + '                  ').slice(0, 18),
+                   v < 0 ? C.grey : C.cyan, (r === cr && c === cc) ? '#2b4a6b' : null);
+          }
+        }
+        t.text(8, 6 + N, 'Clues:', C.white, null, true);
+        for (var i = 0; i < clues.length && i < 10; i++)
+          t.text(8, 7 + N + i, clues[i], C.dim);
+        if (won) t.text(8, 8 + N + Math.min(10, clues.length), 'Solved! Press any key.', C.green, null, true);
       }
     };
   }

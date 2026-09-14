@@ -61,6 +61,8 @@ void fam_quiz(const GParams *p);
 void fam_constraint(const GParams *p);
 void fam_mathdrill(const GParams *p);
 void fam_idle(const GParams *p);
+void fam_automata(const GParams *p);
+void fam_logicgrid(const GParams *p);
 void fam_wordmisc(const GParams *p);
 void fam_reaction(const GParams *p);
 void fam_pegsolitaire(const GParams *p);
