@@ -58,6 +58,7 @@ void fam_dungeon(const GParams *p);
 void fam_piano(const GParams *p);
 void fam_maze(const GParams *p);
 void fam_quiz(const GParams *p);
+void fam_constraint(const GParams *p);
 void fam_pegsolitaire(const GParams *p);
 void fam_matchthree(const GParams *p);
 void fam_wordsearch(const GParams *p);
