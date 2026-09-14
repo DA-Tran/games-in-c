@@ -1,6 +1,6 @@
 {
  "count": 1000,
- "playable": 510,
+ "playable": 531,
  "families": {
   "abstract": 16,
   "anagram": 11,
@@ -4609,8 +4609,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "peg-solitaire-european",
@@ -4632,8 +4632,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "peg-solitaire-triangular",
@@ -4655,8 +4655,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "peg-solitaire-diamond",
@@ -4678,8 +4678,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "peg-solitaire-square",
@@ -4701,8 +4701,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "match-three-gems",
@@ -4724,8 +4724,8 @@
     "players": 0,
     "theme": "Gems"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "match-three-fruit",
@@ -4747,8 +4747,8 @@
     "players": 0,
     "theme": "Fruit"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "match-three-runes",
@@ -4770,8 +4770,8 @@
     "players": 0,
     "theme": "Runes"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "match-three-candy",
@@ -4793,8 +4793,8 @@
     "players": 0,
     "theme": "Candy"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "match-three-stars",
@@ -4816,8 +4816,8 @@
     "players": 0,
     "theme": "Stars"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "match-three-blocks",
@@ -4839,8 +4839,8 @@
     "players": 0,
     "theme": "Blocks"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "tile-rotate",
@@ -15534,8 +15534,8 @@
     "players": 0,
     "theme": "Animals"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "word-search-countries",
@@ -15557,8 +15557,8 @@
     "players": 0,
     "theme": "Countries"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "word-search-capitals",
@@ -15580,8 +15580,8 @@
     "players": 0,
     "theme": "Capitals"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "word-search-computing",
@@ -15603,8 +15603,8 @@
     "players": 0,
     "theme": "Computing"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "word-search-space",
@@ -15626,8 +15626,8 @@
     "players": 0,
     "theme": "Space"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "word-search-food",
@@ -15649,8 +15649,8 @@
     "players": 0,
     "theme": "Food"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "word-search-sports",
@@ -15672,8 +15672,8 @@
     "players": 0,
     "theme": "Sports"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "word-search-films",
@@ -15695,8 +15695,8 @@
     "players": 0,
     "theme": "Films"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "word-search-music",
@@ -15718,8 +15718,8 @@
     "players": 0,
     "theme": "Music"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "word-search-nature",
@@ -15741,8 +15741,8 @@
     "players": 0,
     "theme": "Nature"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "cryptogram",

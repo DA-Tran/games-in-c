@@ -56,6 +56,9 @@ const FamilyEntry FAMILY_REGISTRY[] = {
     {"dungeon",            fam_dungeon},
     {"piano",              fam_piano},
     {"maze",               fam_maze},
+    {"pegsolitaire",       fam_pegsolitaire},
+    {"matchthree",         fam_matchthree},
+    {"wordsearch",         fam_wordsearch},
 };
 
 const int FAMILY_REGISTRY_COUNT =

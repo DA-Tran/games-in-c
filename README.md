@@ -1,6 +1,6 @@
 # Games in C
 
-A thousand games catalogued and bound to engines; 455 playable so far — in the
+A thousand games catalogued and bound to engines; 531 playable so far — in the
 terminal and in the browser, from the same design.
 
 - **Terminal:** pure C99, ANSI escapes, zero dependencies. Builds with `make`
@@ -19,7 +19,7 @@ open web/index.html      # the browser version
 | | |
 |---|---|
 | Catalogued games | 1000, across 17 genres |
-| Playable now | 455, in both C and JavaScript |
+| Playable now | 531, in both C and JavaScript |
 | External dependencies | none, on either side |
 | Compiler warnings | zero, at `-Wall -Wextra` |
 
@@ -45,8 +45,8 @@ A marker names the family it vouches for (`GIC:PARAMETERISED hangman`), so
 several families can share a source file without one of them accidentally
 vouching for the others.
 
-Current state: 48 families done (455 entries), **no engine is left ignoring
-its parameters**, and 32 engines are not yet written (545 entries).
+Current state: 52 families done (531 entries), **no engine is left ignoring
+its parameters**, and 28 engines are not yet written (469 entries).
 
 ## Families completed so far
 
@@ -90,6 +90,16 @@ its parameters**, and 32 engines are not yet written (545 entries).
 - **Reversi** — 5 board sizes, 4x4 to 12x12, with positional weights derived
   from the size rather than a hard-coded 8x8 table.
 - **Dots and Boxes** — 5 lattice sizes, 3x3 to 7x7.
+
+- **Maze** — 55 entries: ten generation algorithms across four sizes. The
+  algorithms are the point, not difficulty tiers. Recursive backtracking
+  leaves long winding corridors; Prim and Kruskal leave short branchy ones;
+  binary tree and sidewinder leave a permanent bias along two edges; Wilson
+  and Aldous-Broder are uniform over all spanning trees and look it. A BFS
+  shortest path drives the hint and the par score.
+- **Word Search** (10 themed grids), **Match Three** (6 symbol sets),
+  **Peg Solitaire** (5 board shapes — English, European, triangular, diamond
+  and square, which are genuinely different puzzles, not skins).
 
 Plus single-configuration families: Pacman, Frogger, Flappy, Dino Run, Pig,
 Higher or Lower.
@@ -180,7 +190,7 @@ Both harnesses drive **every playable catalogue entry with its own
 parameters**, not one representative per engine — so all thirty sudoku
 variants are generated and played, not just one.
 
-Both suites currently pass 455/455.
+Both suites currently pass 531/531.
 
 ## Adding a game
 

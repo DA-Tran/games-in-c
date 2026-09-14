@@ -283,4 +283,242 @@ reg('maze', {
   }
 });
 
+/* ------------------------------------------------------------ word search */
+reg('wordsearch', {
+  title: 'Word Search', help: 'Arrows move · Enter marks each end · Q quits',
+  start: function (host, p) {
+    var WS = 14, NW = 8;
+    var W = window.GICWORDS || { themes: {}, themeOrder: [] };
+    var order = W.themeOrder || Object.keys(W.themes);
+    var theme = (p.theme && W.themes[p.theme]) ? p.theme : order[(p.variant | 0) % order.length];
+    var pool = W.themes[theme] || ['ALPHA','BRAVO','CHARLIE','DELTA'];
+    var DR = [0,0,1,-1,1,1,-1,-1], DC = [1,-1,0,0,1,-1,1,-1];
+    var grid, words, cr, cc, sr, sc, found;
+
+    function fits(w, r, c, dr, dc) {
+      for (var i = 0; i < w.length; i++) {
+        var rr = r + dr * i, cc2 = c + dc * i;
+        if (rr < 0 || rr >= WS || cc2 < 0 || cc2 >= WS) return false;
+        if (grid[rr][cc2] && grid[rr][cc2] !== w[i]) return false;
+      }
+      return true;
+    }
+    function build() {
+      var i;
+      grid = [];
+      for (i = 0; i < WS; i++) grid.push(new Array(WS).fill(''));
+      words = [];
+      for (var tries = 0; tries < 600 && words.length < NW; tries++) {
+        var w = pool[rnd(pool.length)].toUpperCase();
+        if (w.length < 4 || w.length > WS) continue;
+        if (words.some(function (x) { return x.w === w; })) continue;
+        for (i = 0; i < 40; i++) {
+          var d = rnd(8), r = rnd(WS), c = rnd(WS);
+          if (!fits(w, r, c, DR[d], DC[d])) continue;
+          for (var k = 0; k < w.length; k++) grid[r + DR[d]*k][c + DC[d]*k] = w[k];
+          words.push({ w: w, r: r, c: c, dr: DR[d], dc: DC[d], found: false });
+          break;
+        }
+      }
+      for (i = 0; i < WS; i++) for (var j = 0; j < WS; j++)
+        if (!grid[i][j]) grid[i][j] = String.fromCharCode(65 + rnd(26));
+      cr = 0; cc = 0; sr = -1; sc = -1; found = 0;
+    }
+    build();
+    return {
+      key: function (k) {
+        if (found >= words.length) { build(); return; }
+        if (k === 'up'    && cr > 0)      cr--;
+        if (k === 'down'  && cr < WS - 1) cr++;
+        if (k === 'left'  && cc > 0)      cc--;
+        if (k === 'right' && cc < WS - 1) cc++;
+        if (k !== 'enter' && k !== 'space') return;
+        if (sr < 0) { sr = cr; sc = cc; return; }
+        for (var i = 0; i < words.length; i++) {
+          var x = words[i];
+          if (x.found) continue;
+          var er = x.r + x.dr * (x.w.length - 1), ec = x.c + x.dc * (x.w.length - 1);
+          if ((sr === x.r && sc === x.c && cr === er && cc === ec) ||
+              (cr === x.r && cc === x.c && sr === er && sc === ec)) {
+            x.found = true; found++;
+            host.saveScore(found * 100);
+            break;
+          }
+        }
+        sr = sc = -1;
+      },
+      draw: function (t) {
+        t.header('WORD SEARCH', theme + ' — arrows move, Enter marks each end of a word');
+        var lit = [];
+        for (var i = 0; i < WS; i++) lit.push(new Array(WS).fill(false));
+        words.forEach(function (x) {
+          if (!x.found) return;
+          for (var k = 0; k < x.w.length; k++) lit[x.r + x.dr*k][x.c + x.dc*k] = true;
+        });
+        for (var r = 0; r < WS; r++) for (var c = 0; c < WS; c++)
+          t.put(12 + c * 2, 4 + r, grid[r][c], lit[r][c] ? C.green : C.white,
+                (r === cr && c === cc) ? '#2b4a6b' : (r === sr && c === sc) ? '#2f6b2f' : null,
+                lit[r][c]);
+        for (i = 0; i < words.length; i++)
+          t.text(46, 4 + i, (words[i].w + '              ').slice(0, 14),
+                 words[i].found ? C.green : C.grey, null, words[i].found);
+        t.text(12, 5 + WS, 'Found ' + found + ' of ' + words.length + '    ', C.fg);
+        if (found >= words.length) t.center(7 + WS, 'All words found! Press any key.', C.green, true);
+      }
+    };
+  }
+});
+
+/* ------------------------------------------------------------ match three */
+reg('matchthree', {
+  title: 'Match Three', help: 'Arrows move · Enter picks two neighbours · Q quits',
+  start: function (host, p) {
+    var M = 8;
+    var TNAME = ['Gems','Fruit','Runes','Candy','Stars','Blocks'];
+    var TSYM = [['@','#','$','%','&','*'], ['a','b','c','d','e','f'],
+                ['R','U','N','E','S','X'], ['o','O','0','Q','q','8'],
+                ['*','+','x','.','^','~'], ['A','B','C','D','E','F']];
+    var COL = [C.red, C.green, C.yellow, C.cyan, C.magenta, C.white];
+    var ti = TNAME.indexOf(p.theme || '');
+    if (ti < 0) ti = (p.variant | 0) % 6;
+    var grid, score, moves, cr, cc, sr, sc;
+
+    /* Collapse runs of three or more, refill from the top, repeat. */
+    function settle() {
+      for (var guard = 0; guard < 40; guard++) {
+        var cleared = 0, r, c, j;
+        for (r = 0; r < M; r++) for (c = 0; c < M; c++) {
+          var n = 1;
+          while (c + n < M && grid[r][c+n] === grid[r][c] && grid[r][c] >= 0) n++;
+          if (n >= 3 && grid[r][c] >= 0) { for (j = 0; j < n; j++) grid[r][c+j] = -1; cleared += n; }
+        }
+        for (c = 0; c < M; c++) for (r = 0; r < M; r++) {
+          var n2 = 1;
+          while (r + n2 < M && grid[r+n2][c] === grid[r][c] && grid[r][c] >= 0) n2++;
+          if (n2 >= 3 && grid[r][c] >= 0) { for (j = 0; j < n2; j++) grid[r+j][c] = -1; cleared += n2; }
+        }
+        if (!cleared) return;
+        score += cleared * 10;
+        for (c = 0; c < M; c++) {
+          var w = M - 1;
+          for (r = M - 1; r >= 0; r--) if (grid[r][c] >= 0) grid[w--][c] = grid[r][c];
+          while (w >= 0) grid[w--][c] = rnd(6);
+        }
+      }
+    }
+    function reset() {
+      grid = [];
+      for (var r = 0; r < M; r++) { grid.push([]); for (var c = 0; c < M; c++) grid[r].push(rnd(6)); }
+      score = 0; moves = 30; cr = 0; cc = 0; sr = -1; sc = -1;
+      settle();
+      score = 0;
+    }
+    reset();
+    return {
+      key: function (k) {
+        if (moves <= 0) { reset(); return; }
+        if (k === 'up'    && cr > 0)     cr--;
+        if (k === 'down'  && cr < M - 1) cr++;
+        if (k === 'left'  && cc > 0)     cc--;
+        if (k === 'right' && cc < M - 1) cc++;
+        if (k !== 'enter' && k !== 'space') return;
+        if (sr < 0) { sr = cr; sc = cc; return; }
+        if (Math.abs(sr - cr) + Math.abs(sc - cc) === 1) {
+          var t = grid[sr][sc];
+          grid[sr][sc] = grid[cr][cc];
+          grid[cr][cc] = t;
+          moves--;
+          settle();
+          host.saveScore(score);
+        }
+        sr = sc = -1;
+      },
+      draw: function (t) {
+        t.header('MATCH THREE', TNAME[ti] + ' — arrows move, Enter picks two neighbours to swap');
+        for (var r = 0; r < M; r++) for (var c = 0; c < M; c++)
+          t.text(26 + c * 3, 5 + r, ' ' + TSYM[ti][grid[r][c]] + ' ', COL[grid[r][c]],
+                 (r === cr && c === cc) ? '#2b4a6b' : (r === sr && c === sc) ? '#2f6b2f' : null, true);
+        t.text(26, 6 + M, 'Score ' + score + '   Moves left ' + moves + '    ', C.fg);
+        if (moves <= 0) t.center(8 + M, 'Out of moves — press any key.', C.white, true);
+      }
+    };
+  }
+});
+
+/* ---------------------------------------------------------- peg solitaire */
+reg('pegsolitaire', {
+  title: 'Peg Solitaire', help: 'Arrows move · Enter picks a peg then its landing hole · Q quits',
+  start: function (host, p) {
+    var NAMES = ['English','European','Triangular','Diamond','Square'];
+    var SHAPES = [
+      ['  ooo  ','  ooo  ','ooooooo','ooo.ooo','ooooooo','  ooo  ','  ooo  '],
+      ['  ooo  ',' ooooo ','ooooooo','ooo.ooo','ooooooo',' ooooo ','  ooo  '],
+      ['    .    ','   o o   ','  o o o  ',' o o o o ','o o o o o'],
+      ['   o   ','  ooo  ',' ooooo ','ooo.ooo',' ooooo ','  ooo  ','   o   '],
+      ['ooooo','ooooo','oo.oo','ooooo','ooooo']];
+    var v = (p.variant >= 0 && p.variant <= 4) ? p.variant : 0;
+    var bd, rows, cols, cr, cc, sr, sc, msg;
+    var DR = [-2,2,0,0], DC = [0,0,-2,2];
+
+    function reset() {
+      bd = SHAPES[v].map(function (r) { return r.split(''); });
+      rows = bd.length; cols = bd[0].length;
+      cr = 0; cc = 0; sr = -1; sc = -1; msg = null;
+    }
+    function counts() {
+      var pegs = 0, avail = 0, r, c, d;
+      for (r = 0; r < rows; r++) for (c = 0; c < bd[r].length; c++) {
+        if (bd[r][c] !== 'o') continue;
+        pegs++;
+        for (d = 0; d < 4; d++) {
+          var mr = r + DR[d]/2, mc = c + DC[d]/2, tr = r + DR[d], tc = c + DC[d];
+          if (tr < 0 || tr >= rows || tc < 0 || tc >= bd[tr].length) continue;
+          if (bd[mr] && bd[mr][mc] === 'o' && bd[tr][tc] === '.') avail++;
+        }
+      }
+      return [pegs, avail];
+    }
+    reset();
+    return {
+      key: function (k) {
+        if (msg) { reset(); return; }
+        if (k === 'up'    && cr > 0)        cr--;
+        if (k === 'down'  && cr < rows - 1) cr++;
+        if (k === 'left'  && cc > 0)        cc--;
+        if (k === 'right' && cc < cols - 1) cc++;
+        if (k !== 'enter' && k !== 'space') return;
+        if (sr < 0) {
+          if (cc < bd[cr].length && bd[cr][cc] === 'o') { sr = cr; sc = cc; }
+          return;
+        }
+        var dr = cr - sr, dc = cc - sc;
+        if ((Math.abs(dr) === 2 && dc === 0) || (Math.abs(dc) === 2 && dr === 0)) {
+          var mr = sr + dr / 2, mc = sc + dc / 2;
+          if (bd[cr][cc] === '.' && bd[mr][mc] === 'o') {
+            bd[sr][sc] = '.'; bd[mr][mc] = '.'; bd[cr][cc] = 'o';
+          }
+        }
+        sr = sc = -1;
+        var n = counts();
+        if (n[0] === 1) { msg = 'One peg left — perfect!'; host.saveScore(1000); }
+        else if (n[1] === 0) { msg = 'No moves left — ' + n[0] + ' pegs remain.'; host.saveScore(Math.round(1000 / n[0])); }
+      },
+      draw: function (t) {
+        var n = counts();
+        t.header('PEG SOLITAIRE', NAMES[v] + ' board — Enter picks a peg then its landing hole');
+        for (var r = 0; r < rows; r++) for (var c = 0; c < bd[r].length; c++) {
+          var ch = bd[r][c];
+          t.text(32 + c * 2, 5 + r, ch === ' ' ? '  ' : ch + ' ',
+                 ch === 'o' ? C.yellow : C.grey,
+                 (r === cr && c === cc) ? '#2b4a6b' : (r === sr && c === sc) ? '#2f6b2f' : null,
+                 ch === 'o');
+        }
+        t.text(32, 6 + rows, 'Pegs left: ' + n[0] + '   Moves available: ' + n[1] + '   ', C.fg);
+        if (msg) t.center(8 + rows, msg + ' Press any key.', C.white, true);
+      }
+    };
+  }
+});
+
+
 })();
