@@ -76,6 +76,7 @@ function load(rel) {
 
 load('js/catalog.js');
 load('js/words.js');
+load('js/quiz.js');
 load('js/engine.js');
 ['board', 'puzzle', 'puzzle2', 'arcade', 'cards', 'word'].forEach(m => load('js/games/' + m + '.js'));
 

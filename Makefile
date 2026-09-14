@@ -34,6 +34,7 @@ play: $(BIN)
 
 catalog:
 	python3 tools/sync_words.py
+	python3 tools/sync_quiz.py
 	python3 tools/gen_catalog.py
 
 smoke: $(BIN)

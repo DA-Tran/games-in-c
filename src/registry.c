@@ -56,6 +56,7 @@ const FamilyEntry FAMILY_REGISTRY[] = {
     {"dungeon",            fam_dungeon},
     {"piano",              fam_piano},
     {"maze",               fam_maze},
+    {"quiz",               fam_quiz},
     {"pegsolitaire",       fam_pegsolitaire},
     {"matchthree",         fam_matchthree},
     {"wordsearch",         fam_wordsearch},

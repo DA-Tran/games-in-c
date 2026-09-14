@@ -521,4 +521,73 @@ reg('pegsolitaire', {
 });
 
 
+/* ------------------------------------------------------------------- quiz */
+reg('quiz', {
+  title: 'Quiz', help: 'Press 1-4 to answer · Q quits',
+  start: function (host, p) {
+    var Q = window.GICQUIZ || { topics: [], items: [] };
+    var BAND = ['easy', 'medium', 'hard', 'expert'];
+    var ROUND = 6;
+    var topic = Q.topics.indexOf(p.theme || '');
+    if (topic < 0) topic = (p.variant | 0) % Math.max(1, Q.topics.length);
+    /* Catalogue difficulty runs 1..5; the bank has four graded bands. */
+    var level = Math.max(0, Math.min(3, (p.difficulty || 1) - 1));
+
+    var pool = Q.items.filter(function (i) { return i.t === topic && i.l === level; });
+    if (!pool.length) pool = Q.items.filter(function (i) { return i.t === topic; });
+    if (!pool.length) pool = Q.items.slice(0, 6);
+
+    var order, idx, shown, pick, asked, right, done;
+    function nextQuestion() {
+      shown = shuffle([0, 1, 2, 3]);
+      pick = -1;
+    }
+    function reset() {
+      order = shuffle(pool.slice());
+      idx = 0; asked = 0; right = 0; done = false;
+      nextQuestion();
+    }
+    reset();
+    return {
+      key: function (k) {
+        if (done) { reset(); return; }
+        if (pick >= 0) {
+          idx++;
+          if (asked >= ROUND || idx >= order.length) {
+            done = true;
+            host.saveScore(Math.round(right * 100 / Math.max(1, asked)));
+            return;
+          }
+          nextQuestion();
+          return;
+        }
+        if (k < '1' || k > '4') return;
+        pick = (+k) - 1;
+        asked++;
+        if (shown[pick] === order[idx].c) right++;
+      },
+      draw: function (t) {
+        t.header('QUIZ', (Q.topics[topic] || 'Quiz') + ', ' + BAND[level] +
+                 ' — press 1-4 to answer');
+        if (done) {
+          t.center(10, 'You scored ' + right + ' out of ' + asked + '.', C.white, true);
+          t.center(12, 'Press any key to play again.', C.dim);
+          return;
+        }
+        var it = order[idx];
+        t.text(10, 5, 'Question ' + (asked + (pick < 0 ? 1 : 0)) + ' of ' + ROUND + '    ', C.dim);
+        t.text(10, 7, it.q, C.white, null, true);
+        for (var j = 0; j < 4; j++) {
+          var fg = C.white;
+          if (pick >= 0) fg = (shown[j] === it.c) ? C.green : (j === pick ? C.red : C.grey);
+          t.text(12, 10 + j * 2, (j + 1) + ') ' + it.a[shown[j]] + '                    ', fg);
+        }
+        t.text(10, 19, 'Score ' + right + ' of ' + asked + '     ', C.fg);
+        if (pick >= 0) t.text(10, 21, 'Press any key for the next question.', C.dim);
+      }
+    };
+  }
+});
+
+
 })();

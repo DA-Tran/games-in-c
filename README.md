@@ -1,6 +1,6 @@
 # Games in C
 
-A thousand games catalogued and bound to engines; 531 playable so far — in the
+A thousand games catalogued and bound to engines; 594 playable so far — in the
 terminal and in the browser, from the same design.
 
 - **Terminal:** pure C99, ANSI escapes, zero dependencies. Builds with `make`
@@ -19,7 +19,7 @@ open web/index.html      # the browser version
 | | |
 |---|---|
 | Catalogued games | 1000, across 17 genres |
-| Playable now | 531, in both C and JavaScript |
+| Playable now | 594, in both C and JavaScript |
 | External dependencies | none, on either side |
 | Compiler warnings | zero, at `-Wall -Wextra` |
 
@@ -45,8 +45,8 @@ A marker names the family it vouches for (`GIC:PARAMETERISED hangman`), so
 several families can share a source file without one of them accidentally
 vouching for the others.
 
-Current state: 52 families done (531 entries), **no engine is left ignoring
-its parameters**, and 28 engines are not yet written (469 entries).
+Current state: 53 families done (594 entries), **no engine is left ignoring
+its parameters**, and 27 engines are not yet written (406 entries).
 
 ## Families completed so far
 
@@ -97,6 +97,10 @@ its parameters**, and 28 engines are not yet written (469 entries).
   binary tree and sidewinder leave a permanent bias along two edges; Wilson
   and Aldous-Broder are uniform over all spanning trees and look it. A BFS
   shortest path drives the hint and the par score.
+- **Quiz** — 63 entries: sixteen topics across four difficulty bands. The
+  bands are separate question pools, not a shorter timer over the same
+  questions — band 0 is common knowledge and band 3 is specialist. 384
+  questions in all, written once in C and derived for the browser.
 - **Word Search** (10 themed grids), **Match Three** (6 symbol sets),
   **Peg Solitaire** (5 board shapes — English, European, triangular, diamond
   and square, which are genuinely different puzzles, not skins).
@@ -169,10 +173,13 @@ rules and difficulty match exactly.
 paper: ledger bands, sprocket margins, line numbers. Playing switches to the lit
 terminal the games really run in.
 
-**Dictionaries have one source.** `src/games/words.c` holds the themed word
-lists, the by-length guess lists and the typing passages; `tools/sync_words.py`
-derives `web/js/words.js` from it, so the two builds cannot drift. It also
-validates the data — it caught seven words filed under the wrong length.
+**Shared data has one source.** `src/games/words.c` holds the themed word
+lists, the by-length guess lists and the typing passages, and
+`src/games/quiz_data*.c` holds the 384 quiz questions. `tools/sync_words.py`
+and `tools/sync_quiz.py` derive the browser copies, so the two builds cannot
+drift. Both validate as they go: the word sync caught seven words filed under
+the wrong length, and the quiz sync caught a topic-and-band pool one question
+short of a full round, plus a malformed question.
 
 **Input works when piped.** `key_poll()` selects on stdin whether it is a tty or
 a pipe, and treats EOF as a quit. That is what makes the smoke test possible:
@@ -190,7 +197,7 @@ Both harnesses drive **every playable catalogue entry with its own
 parameters**, not one representative per engine — so all thirty sudoku
 variants are generated and played, not just one.
 
-Both suites currently pass 531/531.
+Both suites currently pass 594/594.
 
 ## Adding a game
 

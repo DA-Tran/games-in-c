@@ -1,6 +1,6 @@
 {
  "count": 1000,
- "playable": 531,
+ "playable": 594,
  "families": {
   "abstract": 16,
   "anagram": 11,
@@ -17374,8 +17374,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "general-knowledge-quiz-hard",
@@ -17397,8 +17397,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "general-knowledge-quiz-expert",
@@ -17420,8 +17420,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "geography-quiz-easy",
@@ -17443,8 +17443,8 @@
     "players": 0,
     "theme": "Geography"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "geography-quiz-hard",
@@ -17466,8 +17466,8 @@
     "players": 0,
     "theme": "Geography"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "geography-quiz-expert",
@@ -17489,8 +17489,8 @@
     "players": 0,
     "theme": "Geography"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "history-quiz-easy",
@@ -17512,8 +17512,8 @@
     "players": 0,
     "theme": "History"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "history-quiz-hard",
@@ -17535,8 +17535,8 @@
     "players": 0,
     "theme": "History"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "history-quiz-expert",
@@ -17558,8 +17558,8 @@
     "players": 0,
     "theme": "History"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "science-quiz-easy",
@@ -17581,8 +17581,8 @@
     "players": 0,
     "theme": "Science"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "science-quiz-hard",
@@ -17604,8 +17604,8 @@
     "players": 0,
     "theme": "Science"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "science-quiz-expert",
@@ -17627,8 +17627,8 @@
     "players": 0,
     "theme": "Science"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "film-quiz-easy",
@@ -17650,8 +17650,8 @@
     "players": 0,
     "theme": "Film"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "film-quiz-hard",
@@ -17673,8 +17673,8 @@
     "players": 0,
     "theme": "Film"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "film-quiz-expert",
@@ -17696,8 +17696,8 @@
     "players": 0,
     "theme": "Film"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "music-quiz-easy",
@@ -17719,8 +17719,8 @@
     "players": 0,
     "theme": "Music"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "music-quiz-hard",
@@ -17742,8 +17742,8 @@
     "players": 0,
     "theme": "Music"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "music-quiz-expert",
@@ -17765,8 +17765,8 @@
     "players": 0,
     "theme": "Music"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sport-quiz-easy",
@@ -17788,8 +17788,8 @@
     "players": 0,
     "theme": "Sport"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sport-quiz-hard",
@@ -17811,8 +17811,8 @@
     "players": 0,
     "theme": "Sport"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sport-quiz-expert",
@@ -17834,8 +17834,8 @@
     "players": 0,
     "theme": "Sport"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "literature-quiz-easy",
@@ -17857,8 +17857,8 @@
     "players": 0,
     "theme": "Literature"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "literature-quiz-hard",
@@ -17880,8 +17880,8 @@
     "players": 0,
     "theme": "Literature"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "literature-quiz-expert",
@@ -17903,8 +17903,8 @@
     "players": 0,
     "theme": "Literature"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "computing-quiz-easy",
@@ -17926,8 +17926,8 @@
     "players": 0,
     "theme": "Computing"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "computing-quiz-hard",
@@ -17949,8 +17949,8 @@
     "players": 0,
     "theme": "Computing"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "computing-quiz-expert",
@@ -17972,8 +17972,8 @@
     "players": 0,
     "theme": "Computing"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mythology-quiz-easy",
@@ -17995,8 +17995,8 @@
     "players": 0,
     "theme": "Mythology"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mythology-quiz-hard",
@@ -18018,8 +18018,8 @@
     "players": 0,
     "theme": "Mythology"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mythology-quiz-expert",
@@ -18041,8 +18041,8 @@
     "players": 0,
     "theme": "Mythology"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "art-quiz-easy",
@@ -18064,8 +18064,8 @@
     "players": 0,
     "theme": "Art"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "art-quiz-hard",
@@ -18087,8 +18087,8 @@
     "players": 0,
     "theme": "Art"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "art-quiz-expert",
@@ -18110,8 +18110,8 @@
     "players": 0,
     "theme": "Art"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "nature-quiz-easy",
@@ -18133,8 +18133,8 @@
     "players": 0,
     "theme": "Nature"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "nature-quiz-hard",
@@ -18156,8 +18156,8 @@
     "players": 0,
     "theme": "Nature"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "nature-quiz-expert",
@@ -18179,8 +18179,8 @@
     "players": 0,
     "theme": "Nature"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "space-quiz-easy",
@@ -18202,8 +18202,8 @@
     "players": 0,
     "theme": "Space"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "space-quiz-hard",
@@ -18225,8 +18225,8 @@
     "players": 0,
     "theme": "Space"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "space-quiz-expert",
@@ -18248,8 +18248,8 @@
     "players": 0,
     "theme": "Space"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "food-quiz-easy",
@@ -18271,8 +18271,8 @@
     "players": 0,
     "theme": "Food"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "food-quiz-hard",
@@ -18294,8 +18294,8 @@
     "players": 0,
     "theme": "Food"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "food-quiz-expert",
@@ -18317,8 +18317,8 @@
     "players": 0,
     "theme": "Food"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "language-quiz-easy",
@@ -18340,8 +18340,8 @@
     "players": 0,
     "theme": "Language"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "language-quiz-hard",
@@ -18363,8 +18363,8 @@
     "players": 0,
     "theme": "Language"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "language-quiz-expert",
@@ -18386,8 +18386,8 @@
     "players": 0,
     "theme": "Language"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "inventions-quiz-easy",
@@ -18409,8 +18409,8 @@
     "players": 0,
     "theme": "Inventions"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "inventions-quiz-hard",
@@ -18432,8 +18432,8 @@
     "players": 0,
     "theme": "Inventions"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "inventions-quiz-expert",
@@ -18455,8 +18455,8 @@
     "players": 0,
     "theme": "Inventions"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "reaction-timer",
@@ -21790,8 +21790,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-2",
@@ -21882,8 +21882,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-3",
@@ -21974,8 +21974,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-4",
@@ -22066,8 +22066,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-5",
@@ -22158,8 +22158,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-6",
@@ -22250,8 +22250,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-7",
@@ -22342,8 +22342,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-8",
@@ -22434,8 +22434,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-9",
@@ -22526,8 +22526,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-10",
@@ -22618,8 +22618,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-11",
@@ -22710,8 +22710,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-12",
@@ -22802,8 +22802,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-13",
@@ -22894,8 +22894,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-14",
@@ -22986,8 +22986,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-15",
@@ -23078,8 +23078,8 @@
     "players": 0,
     "theme": "General Knowledge"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sudoku-daily-16",
