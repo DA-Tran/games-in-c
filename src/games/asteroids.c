@@ -1,4 +1,5 @@
-/* asteroids.c - inertial flight with screen wrap and splitting rocks. */
+/* GIC:PARAMETERISED asteroids
+ * asteroids.c - inertial flight with screen wrap and splitting rocks. */
 #include "engine.h"
 #include "games.h"
 
@@ -23,6 +24,12 @@ static void wrap(double *x, double *y)
     if (*y >= H) *y -= H;
 }
 
+static double saucer_x, saucer_y, saucer_vx;
+static int saucer_live;
+
+/* The deluxe entry adds a hostile saucer and splits rocks one step further. */
+static int DELUXE;
+
 static void spawn_rocks(int n)
 {
     int i;
@@ -30,11 +37,12 @@ static void spawn_rocks(int n)
     for (i = 0; i < n && i < MAXR; i++) {
         rock[i].x = rnd(W);
         rock[i].y = rnd(H);
-        rock[i].vx = (rnd_f() - 0.5) * 0.6;
-        rock[i].vy = (rnd_f() - 0.5) * 0.4;
-        rock[i].size = 3;
+        rock[i].vx = (rnd_f() - 0.5) * (DELUXE ? 0.9 : 0.6);
+        rock[i].vy = (rnd_f() - 0.5) * (DELUXE ? 0.6 : 0.4);
+        rock[i].size = DELUXE ? 4 : 3;      /* one more split stage */
         rock[i].live = 1;
     }
+    saucer_live = 0;
 }
 
 static int rocks_left(void)
@@ -50,7 +58,7 @@ static void split(int i)
     rock[i].live = 0;
     score += rock[i].size * 20;
     if (rock[i].size <= 1) return;
-    for (j = 0; j < MAXR && made < 2; j++) {
+    for (j = 0; j < MAXR && made < (DELUXE ? 3 : 2); j++) {
         if (rock[j].live) continue;
         rock[j].x = rock[i].x;
         rock[j].y = rock[i].y;
@@ -64,7 +72,7 @@ static void split(int i)
 
 void fam_asteroids(const GParams *p)
 {
-    (void)p;
+    DELUXE = gp_int(p->variant, 0) == 1;
     for (;;) {
         long last = now_ms();
         int i, j, wave = 4;
@@ -128,6 +136,35 @@ void fam_asteroids(const GParams *p)
                         shot[j].life = 0;
                         split(i);
                         break;
+                    }
+                }
+            }
+            if (DELUXE) {
+                if (!saucer_live && rnd(1000) < 6) {
+                    saucer_live = 1;
+                    saucer_y = rnd(H);
+                    saucer_x = 0;
+                    saucer_vx = 0.5;
+                }
+                if (saucer_live) {
+                    saucer_x += saucer_vx;
+                    /* it drifts toward the player's row */
+                    if (saucer_y < sy_) saucer_y += 0.12;
+                    else if (saucer_y > sy_) saucer_y -= 0.12;
+                    if (saucer_x > W) saucer_live = 0;
+                    {
+                        int si;
+                        for (si = 0; si < MAXS; si++) {
+                            if (!shot[si].life) continue;
+                            if (shot[si].x > saucer_x - 2 && shot[si].x < saucer_x + 2 &&
+                                shot[si].y > saucer_y - 2 && shot[si].y < saucer_y + 2) {
+                                saucer_live = 0; shot[si].life = 0; score += 500;
+                            }
+                        }
+                    }
+                    if (sx_ > saucer_x - 2 && sx_ < saucer_x + 2 &&
+                        sy_ > saucer_y - 2 && sy_ < saucer_y + 2) {
+                        lives--; saucer_live = 0; sleep_ms(400);
                     }
                 }
             }

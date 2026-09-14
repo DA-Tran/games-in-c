@@ -1,4 +1,5 @@
-/* invaders.c - formation shooter that accelerates as the ranks thin out. */
+/* GIC:PARAMETERISED invaders
+ * invaders.c - formation shooter that accelerates as the ranks thin out. */
 #include "engine.h"
 #include "games.h"
 
@@ -21,12 +22,19 @@ static int alive_count(void)
     return n;
 }
 
+/* Galaga peels attackers out of the formation to dive at the player, which is
+ * the difference between the two entries rather than a faster grid. */
+static int DIVING;
+static double dvx, dvy, dvvx;
+static int dv_live, dv_row, dv_col;
+
 static void reset_wave(void)
 {
     int r, c;
     for (r = 0; r < AR; r++) for (c = 0; c < AC; c++) alive[r][c] = 1;
     ax = 2; ay = 1; adir = 1;
     bn = en = 0;
+    dv_live = 0;
 }
 
 static void render(void)
@@ -40,14 +48,15 @@ static void render(void)
     }
     for (i = 0; i < bn; i++)  draw_textf(6 + by_[i], 15 + bx[i], "%s|%s", C_WHITE, C_RESET);
     for (i = 0; i < en; i++)  draw_textf(6 + ey[i],  15 + ex[i], "%s!%s", C_RED, C_RESET);
-    draw_textf(6 + H - 1, 15 + ship, "%s▲%s", C_CYAN, C_RESET);
+    if (dv_live) draw_textf(6 + (int)dvy, 15 + (int)dvx, "%s%s%s", C_BOLD C_RED, "W", C_RESET);
+    draw_textf(6 + H - 1, 15 + ship, "%s^%s", C_CYAN, C_RESET);
     draw_textf(H + 8, 14, "Score %-6d Lives %-3d Wave %-3d   ", score, lives, wave);
     scr_flush();
 }
 
 void fam_invaders(const GParams *p)
 {
-    (void)p;
+    DIVING = gp_int(p->variant, 0) == 1;
     for (;;) {
         long last = now_ms(), lastfire = 0;
         score = 0; lives = 3; wave = 1;
@@ -121,11 +130,49 @@ void fam_invaders(const GParams *p)
                     }
                 }
             }
-            if (alive_count() == 0) { wave++; score += 500; reset_wave(); }
+            if (DIVING) {
+                /* Pull one attacker out of the grid and send it at the ship. */
+                if (!dv_live && rnd(100) < 4) {
+                    int tries;
+                    for (tries = 0; tries < 20; tries++) {
+                        int r = rnd(AR), c = rnd(AC);
+                        if (!alive[r][c]) continue;
+                        dv_row = r; dv_col = c;
+                        dvx = ax + c * 4; dvy = ay + r;
+                        dvvx = 0;
+                        dv_live = 1;
+                        alive[r][c] = 0;
+                        break;
+                    }
+                }
+                if (dv_live) {
+                    dvvx += (ship > dvx) ? 0.12 : -0.12;
+                    if (dvvx > 0.8) dvvx = 0.8;
+                    if (dvvx < -0.8) dvvx = -0.8;
+                    dvx += dvvx;
+                    dvy += 0.45;
+                    if (dvx < 0) dvx = 0;
+                    if (dvx > W - 1) dvx = W - 1;
+                    if ((int)dvy >= H - 1) {
+                        if ((int)dvx >= ship - 1 && (int)dvx <= ship + 1) lives--;
+                        dv_live = 0;
+                    }
+                    for (i = 0; i < bn; i++)
+                        if (bx[i] == (int)dvx && by_[i] == (int)dvy) {
+                            dv_live = 0;
+                            score += 150;             /* divers are worth more */
+                            bx[i] = bx[bn-1]; by_[i] = by_[bn-1]; bn--;
+                            break;
+                        }
+                }
+            }
+            if (alive_count() == 0 && !dv_live) { wave++; score += 500; reset_wave(); }
 
             j = 0; (void)j;
             scr_clear();
-            draw_title("SPACE INVADERS", "Left/Right move, Space fires, Q quits");
+            draw_title(DIVING ? "GALAGA" : "SPACE INVADERS",
+                       DIVING ? "Attackers peel off and dive — Left/Right move, Space fires"
+                              : "Left/Right move, Space fires, Q quits");
             render();
         }
         draw_centered(H + 10, 80, C_BOLD C_RED "Game over" C_RESET);

@@ -1,6 +1,6 @@
 {
  "count": 1000,
- "playable": 429,
+ "playable": 455,
  "families": {
   "abstract": 16,
   "anagram": 11,
@@ -7070,8 +7070,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "battleship-salvo",
@@ -7093,8 +7093,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "battleship-big-board",
@@ -7116,8 +7116,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "battleship-moving-ships",
@@ -7139,8 +7139,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "battleship-fog",
@@ -7162,8 +7162,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "battleship-small",
@@ -7185,8 +7185,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-3x6",
@@ -13096,8 +13096,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "tetris-sprint-40",
@@ -13119,8 +13119,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "tetris-ultra",
@@ -13142,8 +13142,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "tetris-zen",
@@ -13165,8 +13165,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "tetris-big-mode",
@@ -13188,8 +13188,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "tetris-master",
@@ -13211,8 +13211,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "tetris-invisible",
@@ -13234,8 +13234,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "tetris-cascade",
@@ -13257,8 +13257,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "pentix",
@@ -13280,8 +13280,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "pong",
@@ -13441,8 +13441,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "arkanoid",
@@ -13464,8 +13464,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "breakout-multiball",
@@ -13487,8 +13487,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "breakout-gravity",
@@ -13510,8 +13510,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "breakout-boss",
@@ -13533,8 +13533,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "breakout-endless",
@@ -13556,8 +13556,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "brick-breaker-ultra",
@@ -13579,8 +13579,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "space-invaders",
@@ -13602,8 +13602,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "galaga",
@@ -13625,8 +13625,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dino-run",
@@ -13740,8 +13740,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "space-rocks-deluxe",
@@ -13763,8 +13763,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "centipede",
