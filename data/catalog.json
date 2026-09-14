@@ -1,6 +1,6 @@
 {
  "count": 1000,
- "playable": 215,
+ "playable": 325,
  "families": {
   "abstract": 16,
   "anagram": 11,
@@ -5506,8 +5506,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "reversi-6x6",
@@ -5529,8 +5529,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "reversi-8x8",
@@ -5552,8 +5552,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "reversi-10x10",
@@ -5575,8 +5575,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "reversi-12x12",
@@ -5598,8 +5598,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "gomoku-9x9",
@@ -5621,8 +5621,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "renju-9x9",
@@ -5644,8 +5644,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "gomoku-13x13",
@@ -5667,8 +5667,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "renju-13x13",
@@ -5690,8 +5690,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "gomoku-15x15",
@@ -5713,8 +5713,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "renju-15x15",
@@ -5736,8 +5736,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "gomoku-19x19",
@@ -5759,8 +5759,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "renju-19x19",
@@ -5782,8 +5782,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "checkers",
@@ -6104,8 +6104,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "kalah-6-5",
@@ -6127,8 +6127,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "kalah-7-5",
@@ -6150,8 +6150,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "oware-6-4",
@@ -6173,8 +6173,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "oware-6-5",
@@ -6196,8 +6196,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "oware-7-5",
@@ -6219,8 +6219,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "congkak-6-4",
@@ -6242,8 +6242,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "congkak-6-5",
@@ -6265,8 +6265,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "congkak-7-5",
@@ -6288,8 +6288,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sungka-6-4",
@@ -6311,8 +6311,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sungka-6-5",
@@ -6334,8 +6334,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sungka-7-5",
@@ -6357,8 +6357,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "ayo-6-4",
@@ -6380,8 +6380,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "ayo-6-5",
@@ -6403,8 +6403,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "ayo-7-5",
@@ -6426,8 +6426,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dakon-6-4",
@@ -6449,8 +6449,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dakon-6-5",
@@ -6472,8 +6472,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dakon-7-5",
@@ -6495,8 +6495,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "pallanguzhi-6-4",
@@ -6518,8 +6518,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "pallanguzhi-6-5",
@@ -6541,8 +6541,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "pallanguzhi-7-5",
@@ -6564,8 +6564,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "toguz-kumalak-6-4",
@@ -6587,8 +6587,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "toguz-kumalak-6-5",
@@ -6610,8 +6610,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "toguz-kumalak-7-5",
@@ -6633,8 +6633,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "bao",
@@ -6643,7 +6643,7 @@
    "mechanic": "Seed sowing",
    "players": "1-2",
    "difficulty": 5,
-   "blurb": "The deep Swahili four-row sowing game.",
+   "blurb": "A two-row adaptation of the Swahili game, with relay sowing and capture.",
    "family": "mancala",
    "params": {
     "width": 8,
@@ -6656,8 +6656,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "nim",
@@ -6679,8 +6679,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "nim-misere",
@@ -6702,8 +6702,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "nim-subtraction",
@@ -6725,8 +6725,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "wythoffs-game",
@@ -6748,8 +6748,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "fibonacci-nim",
@@ -6771,8 +6771,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "kayles",
@@ -6794,8 +6794,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "moores-nim",
@@ -6817,8 +6817,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dawsons-chess",
@@ -6840,8 +6840,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "turning-turtles",
@@ -6863,8 +6863,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "northcotts-game",
@@ -6886,8 +6886,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mock-turtles",
@@ -6909,8 +6909,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "chomp",
@@ -6932,8 +6932,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dots-and-boxes-3x3",
@@ -6955,8 +6955,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dots-and-boxes-4x4",
@@ -6978,8 +6978,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dots-and-boxes-5x5",
@@ -7001,8 +7001,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dots-and-boxes-6x6",
@@ -7024,8 +7024,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dots-and-boxes-7x7",
@@ -7047,8 +7047,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "battleship",
@@ -7208,8 +7208,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-3x8",
@@ -7231,8 +7231,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-3x10",
@@ -7254,8 +7254,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-4x6",
@@ -7277,8 +7277,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-4x8",
@@ -7300,8 +7300,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-4x10",
@@ -7323,8 +7323,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-5x6",
@@ -7346,8 +7346,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-5x8",
@@ -7369,8 +7369,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-5x10",
@@ -7392,8 +7392,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-6x6",
@@ -7415,8 +7415,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-6x8",
@@ -7438,8 +7438,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mastermind-6x10",
@@ -7461,8 +7461,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "three-mens-morris",
@@ -12567,8 +12567,8 @@
     "players": 0,
     "theme": "Fruit"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-egypt",
@@ -12590,8 +12590,8 @@
     "players": 0,
     "theme": "Egypt"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-space",
@@ -12613,8 +12613,8 @@
     "players": 0,
     "theme": "Space"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-pirate",
@@ -12636,8 +12636,8 @@
     "players": 0,
     "theme": "Pirate"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-jungle",
@@ -12659,8 +12659,8 @@
     "players": 0,
     "theme": "Jungle"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-diamond",
@@ -12682,8 +12682,8 @@
     "players": 0,
     "theme": "Diamond"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-western",
@@ -12705,8 +12705,8 @@
     "players": 0,
     "theme": "Western"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-aztec",
@@ -12728,8 +12728,8 @@
     "players": 0,
     "theme": "Aztec"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-neon",
@@ -12751,8 +12751,8 @@
     "players": 0,
     "theme": "Neon"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-deep-sea",
@@ -12774,8 +12774,8 @@
     "players": 0,
     "theme": "Deep Sea"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-classic",
@@ -12797,8 +12797,8 @@
     "players": 0,
     "theme": "Classic"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "rock-paper-scissors",
@@ -19030,8 +19030,8 @@
     "players": 0,
     "theme": "Catacombs"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "catacombs-crawl-10f",
@@ -19053,8 +19053,8 @@
     "players": 0,
     "theme": "Catacombs"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "catacombs-crawl-20f",
@@ -19076,8 +19076,8 @@
     "players": 0,
     "theme": "Catacombs"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "catacombs-crawl-50f",
@@ -19099,8 +19099,8 @@
     "players": 0,
     "theme": "Catacombs"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "caverns-crawl-5f",
@@ -19122,8 +19122,8 @@
     "players": 0,
     "theme": "Caverns"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "caverns-crawl-10f",
@@ -19145,8 +19145,8 @@
     "players": 0,
     "theme": "Caverns"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "caverns-crawl-20f",
@@ -19168,8 +19168,8 @@
     "players": 0,
     "theme": "Caverns"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "caverns-crawl-50f",
@@ -19191,8 +19191,8 @@
     "players": 0,
     "theme": "Caverns"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sewers-crawl-5f",
@@ -19214,8 +19214,8 @@
     "players": 0,
     "theme": "Sewers"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sewers-crawl-10f",
@@ -19237,8 +19237,8 @@
     "players": 0,
     "theme": "Sewers"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sewers-crawl-20f",
@@ -19260,8 +19260,8 @@
     "players": 0,
     "theme": "Sewers"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sewers-crawl-50f",
@@ -19283,8 +19283,8 @@
     "players": 0,
     "theme": "Sewers"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "ice-caves-crawl-5f",
@@ -19306,8 +19306,8 @@
     "players": 0,
     "theme": "Ice Caves"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "ice-caves-crawl-10f",
@@ -19329,8 +19329,8 @@
     "players": 0,
     "theme": "Ice Caves"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "ice-caves-crawl-20f",
@@ -19352,8 +19352,8 @@
     "players": 0,
     "theme": "Ice Caves"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "ice-caves-crawl-50f",
@@ -19375,8 +19375,8 @@
     "players": 0,
     "theme": "Ice Caves"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "volcano-crawl-5f",
@@ -19398,8 +19398,8 @@
     "players": 0,
     "theme": "Volcano"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "volcano-crawl-10f",
@@ -19421,8 +19421,8 @@
     "players": 0,
     "theme": "Volcano"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "volcano-crawl-20f",
@@ -19444,8 +19444,8 @@
     "players": 0,
     "theme": "Volcano"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "volcano-crawl-50f",
@@ -19467,8 +19467,8 @@
     "players": 0,
     "theme": "Volcano"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sky-temple-crawl-5f",
@@ -19490,8 +19490,8 @@
     "players": 0,
     "theme": "Sky Temple"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sky-temple-crawl-10f",
@@ -19513,8 +19513,8 @@
     "players": 0,
     "theme": "Sky Temple"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sky-temple-crawl-20f",
@@ -19536,8 +19536,8 @@
     "players": 0,
     "theme": "Sky Temple"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sky-temple-crawl-50f",
@@ -19559,8 +19559,8 @@
     "players": 0,
     "theme": "Sky Temple"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "derelict-ship-crawl-5f",
@@ -19582,8 +19582,8 @@
     "players": 0,
     "theme": "Derelict Ship"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "derelict-ship-crawl-10f",
@@ -19605,8 +19605,8 @@
     "players": 0,
     "theme": "Derelict Ship"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "derelict-ship-crawl-20f",
@@ -19628,8 +19628,8 @@
     "players": 0,
     "theme": "Derelict Ship"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "derelict-ship-crawl-50f",
@@ -19651,8 +19651,8 @@
     "players": 0,
     "theme": "Derelict Ship"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "forest-depths-crawl-5f",
@@ -19674,8 +19674,8 @@
     "players": 0,
     "theme": "Forest Depths"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "forest-depths-crawl-10f",
@@ -19697,8 +19697,8 @@
     "players": 0,
     "theme": "Forest Depths"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "forest-depths-crawl-20f",
@@ -19720,8 +19720,8 @@
     "players": 0,
     "theme": "Forest Depths"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "forest-depths-crawl-50f",
@@ -19743,8 +19743,8 @@
     "players": 0,
     "theme": "Forest Depths"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "text-adventure",

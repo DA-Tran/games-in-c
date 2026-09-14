@@ -280,7 +280,8 @@ for name, var in MANCALA_RULES:
              "1-2", 3, "%s sowing with %d houses and %d seeds each."
              % (name, houses, seeds), width=houses, count=seeds, variant=var)
 emit("mancala", "Bao", "Board", "Seed sowing", "1-2", 5,
-     "The deep Swahili four-row sowing game.", width=8, count=2, variant=8)
+     "A two-row adaptation of the Swahili game, with relay sowing and capture.",
+     width=8, count=2, variant=8)
 
 NIM_VARIANTS = [("Nim", "the player taking the last object wins", 0, 2),
                 ("Nim Misere", "taking the last object loses", 1, 2),

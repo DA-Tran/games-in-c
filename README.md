@@ -1,6 +1,6 @@
 # Games in C
 
-A thousand games catalogued and bound to engines; 215 playable so far — in the
+A thousand games catalogued and bound to engines; 325 playable so far — in the
 terminal and in the browser, from the same design.
 
 - **Terminal:** pure C99, ANSI escapes, zero dependencies. Builds with `make`
@@ -19,7 +19,7 @@ open web/index.html      # the browser version
 | | |
 |---|---|
 | Catalogued games | 1000, across 17 genres |
-| Playable now | 215, in both C and JavaScript |
+| Playable now | 325, in both C and JavaScript |
 | External dependencies | none, on either side |
 | Compiler warnings | zero, at `-Wall -Wextra` |
 
@@ -45,8 +45,8 @@ A marker names the family it vouches for (`GIC:PARAMETERISED hangman`), so
 several families can share a source file without one of them accidentally
 vouching for the others.
 
-Current state: 22 families done (215 entries), 26 engines built but still
-ignoring their parameters (240 entries), 32 engines not yet written (545
+Current state: 30 families done (325 entries), 18 engines built but still
+ignoring their parameters (130 entries), 32 engines not yet written (545
 entries).
 
 ## Families completed so far
@@ -70,16 +70,36 @@ entries).
 - **Anagram** — 11 themed entries. **Typing Test** — 9 drill modes.
 - **Wordle** — 5 entries, 4 to 8 letters, each with its own word list.
 - **Guess the Number** (5 ranges), **Bulls and Cows** (4 digit counts).
+- **Mancala** — 25 entries. Kalah, Oware, Congkak, Sungka, Ayo, Dakon,
+  Pallanguzhi, Toguz Kumalak and Bao, each expressed as a real rule set:
+  store-sowing, free turns, relay sowing, three capture rules and tuzdik.
+  Board width and starting seeds vary independently.
+- **Dungeon Crawl** — 32 entries. Eight settings crossed with four target
+  depths; the setting picks the monster roster and the hazard that wears you
+  down in the open, and you win by escaping past the target depth.
+- **Nim** — 12 entries: Nim and misere Nim, Subtraction, Wythoff, Fibonacci,
+  Kayles, Moore's, Dawson's Chess, Turning Turtles, Northcott's, Mock Turtles
+  and Chomp. Each has its own move generator, and the opponent plays a
+  memoised win/lose search, so it plays every variant correctly — including
+  the misere ones, where the last move loses.
+- **Mastermind** — 12 entries, 3-6 pegs against 4-10 colours, with the number
+  of guesses scaled to the difficulty of the code.
+- **Slots** — 11 themed machines. Reel weights and payouts are identical
+  across themes, so the return-to-player does not change with the artwork.
+- **Gomoku** — 8 entries, 9x9 to 19x19, free-style or Renju (where an overline
+  or a double four loses for black).
+- **Reversi** — 5 board sizes, 4x4 to 12x12, with positional weights derived
+  from the size rather than a hard-coded 8x8 table.
+- **Dots and Boxes** — 5 lattice sizes, 3x3 to 7x7.
 
 Plus single-configuration families: Pacman, Frogger, Flappy, Dino Run, Pig,
 Higher or Lower.
 
-**Built, awaiting parameterisation** — Tic Tac Toe, Connect Four, Reversi,
-Gomoku, Checkers, Mancala, Nim, Dots and Boxes, Battleship, Mastermind, Snake,
-Tetris, Pong, Breakout, Space Invaders, Asteroids, Blackjack, Video Poker,
-War, Go Fish, Yahtzee, Slots, Rock Paper Scissors, Simon, Snakes and Ladders,
-Dungeon Crawl, Virtual Piano. These play today at their default configuration;
-their remaining variants are catalogued and waiting.
+**Built, awaiting parameterisation** — Tic Tac Toe, Connect Four, Checkers,
+Battleship, Snake, Tetris, Pong, Breakout, Space Invaders, Asteroids,
+Blackjack, Video Poker, War, Yahtzee, Rock Paper Scissors, Simon, Snakes and
+Ladders, Virtual Piano. These play today at their default configuration; their
+remaining variants are catalogued and waiting.
 
 ## Layout
 
@@ -128,7 +148,7 @@ Both harnesses drive **every playable catalogue entry with its own
 parameters**, not one representative per engine — so all thirty sudoku
 variants are generated and played, not just one.
 
-Both suites currently pass 215/215.
+Both suites currently pass 325/325.
 
 ## Adding a game
 

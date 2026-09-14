@@ -1,8 +1,12 @@
 # build artefacts
 *.o
 *.exe
-games
 .venv/
+
+# The compiled binary, anchored to the repo root. A bare "games" would match
+# any path component of that name and silently exclude src/games/ and
+# web/js/games/ — which is exactly what happened for the first three commits.
+/games
 
 # runtime state
 .gic_scores
