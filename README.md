@@ -1,6 +1,6 @@
 # Games in C
 
-A thousand games catalogued and bound to engines; 325 playable so far — in the
+A thousand games catalogued and bound to engines; 388 playable so far — in the
 terminal and in the browser, from the same design.
 
 - **Terminal:** pure C99, ANSI escapes, zero dependencies. Builds with `make`
@@ -19,7 +19,7 @@ open web/index.html      # the browser version
 | | |
 |---|---|
 | Catalogued games | 1000, across 17 genres |
-| Playable now | 325, in both C and JavaScript |
+| Playable now | 388, in both C and JavaScript |
 | External dependencies | none, on either side |
 | Compiler warnings | zero, at `-Wall -Wextra` |
 
@@ -45,8 +45,8 @@ A marker names the family it vouches for (`GIC:PARAMETERISED hangman`), so
 several families can share a source file without one of them accidentally
 vouching for the others.
 
-Current state: 30 families done (325 entries), 18 engines built but still
-ignoring their parameters (130 entries), 32 engines not yet written (545
+Current state: 37 families done (388 entries), 11 engines built but still
+ignoring their parameters (67 entries), 32 engines not yet written (545
 entries).
 
 ## Families completed so far
@@ -95,11 +95,31 @@ entries).
 Plus single-configuration families: Pacman, Frogger, Flappy, Dino Run, Pig,
 Higher or Lower.
 
-**Built, awaiting parameterisation** — Tic Tac Toe, Connect Four, Checkers,
-Battleship, Snake, Tetris, Pong, Breakout, Space Invaders, Asteroids,
-Blackjack, Video Poker, War, Yahtzee, Rock Paper Scissors, Simon, Snakes and
-Ladders, Virtual Piano. These play today at their default configuration; their
-remaining variants are catalogued and waiting.
+- **Tic Tac Toe** — 12 entries. 3x3 to 6x6 with the target run scaling, plus
+  misere, wild, Order and Chaos, toroidal wrapping, Notakto, nine-board,
+  ultimate and numerical. Each needs its own win test; they are separate
+  games, not board sizes.
+- **Draughts** — 13 entries. English, International, Russian, Brazilian,
+  Turkish, Italian, Spanish, Pool, Suicide, Frisian, Armenian, Canadian and
+  Dameo, separated by backward capture, flying kings, compulsory maximum
+  capture, orthogonal versus diagonal movement, and whether men may take
+  kings. Giveaway inverts the goal.
+- **Connect** — 10 entries, 4-to-7 in a row on boards from 7x6 to 13x9, with
+  an optional pop-out rule that can complete a line for both players at once.
+- **The race games** — 8 entries. Snakes and Ladders, Chutes and Ladders
+  Deluxe, Game of the Goose, Pachisi, Ludo, Senet, the Royal Game of Ur and
+  Yut Nori, differing in board length, what you throw, exact finishes, entry
+  rolls and rosette squares.
+- **Keyboard instrument** — 11 entries: free play, rhythm runner, note
+  trainer, interval ear-training, chord builder, scale practice, drum
+  machine, melody memory, perfect-pitch test, metronome and sequencer.
+- **Simon** (6: four/six/eight colours, reverse, silent, speed),
+  **Rock Paper Scissors** (3: classic, lizard-Spock, best of nine).
+
+**Built, awaiting parameterisation** — Battleship, Snake, Tetris, Pong,
+Breakout, Space Invaders, Asteroids, Blackjack, Video Poker, War, Yahtzee.
+These play today at their default configuration; their remaining variants are
+catalogued and waiting.
 
 ## Layout
 
@@ -148,7 +168,7 @@ Both harnesses drive **every playable catalogue entry with its own
 parameters**, not one representative per engine — so all thirty sudoku
 variants are generated and played, not just one.
 
-Both suites currently pass 325/325.
+Both suites currently pass 388/388.
 
 ## Adding a game
 

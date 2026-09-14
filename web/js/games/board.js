@@ -5,70 +5,265 @@
 'use strict';
 var G = window.GIC, C = G.COL, reg = G.register, rnd = G.rnd;
 
-/* ------------------------------------------------------------ tic tac toe */
+/* ------------------------------------------------------------- tic tac toe */
 reg('tictactoe', {
   title: 'Tic Tac Toe', help: 'Arrows move · Enter places · Q quits',
   start: function (host, p) {
-    var bd, cur = 4, msg = null;
+    var VAR = (p.variant >= 0 && p.variant <= 8) ? p.variant : 0;
+    var N = Math.max(3, Math.min(6, p.size > 0 ? p.size : 3));
+    var K = Math.max(3, Math.min(N, p.count > 0 ? p.count : 3));
+    if (VAR === 8) { N = 3; K = 3; }
+    var NINE = (VAR === 6 || VAR === 7);
+    var SUB = ['Arrows move, Enter places',
+               'MISERE: making a line LOSES',
+               'WILD: place either mark; any line wins',
+               'ORDER: make a line of either mark; Chaos stops you',
+               'TOROIDAL: lines wrap around the edges',
+               'NOTAKTO: both play X; making a line LOSES',
+               'NINE-BOARD: a line on any board wins',
+               'ULTIMATE: win small boards to claim the big one',
+               'NUMERICAL: odds are yours; three summing to 15 wins'][VAR];
+    var DR = [0,1,1,1], DC = [1,0,1,-1];
     var LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    function reset() { bd = '         '.split(''); msg = null; }
-    function winner(b) {
-      for (var i = 0; i < 8; i++) {
-        var L = LINES[i];
-        if (b[L[0]] !== ' ' && b[L[0]] === b[L[1]] && b[L[1]] === b[L[2]]) return b[L[0]];
-      }
-      return b.indexOf(' ') < 0 ? 'D' : 0;
+
+    var bd, cur, pending, mynum, msg;
+    var nb, meta, board, cell, forced;
+
+    function cellAt(r, c) {
+      if (VAR === 4) { r = ((r % N) + N) % N; c = ((c % N) + N) % N; }
+      else if (r < 0 || r >= N || c < 0 || c >= N) return null;
+      return bd[r * N + c];
     }
-    function minimax(b, ai, depth) {
-      var w = winner(b), best, i, v;
-      if (w === 'O') return 10 - depth;
-      if (w === 'X') return depth - 10;
-      if (w === 'D') return 0;
-      best = ai ? -100 : 100;
-      for (i = 0; i < 9; i++) {
-        if (b[i] !== ' ') continue;
-        b[i] = ai ? 'O' : 'X';
-        v = minimax(b, !ai, depth + 1);
-        b[i] = ' ';
-        if (ai) { if (v > best) best = v; } else if (v < best) best = v;
+    function runLen(r, c, d, who) {
+      var n = 1, i;
+      for (i = 1; i < K; i++) { if (cellAt(r + DR[d]*i, c + DC[d]*i) !== who) break; n++; }
+      for (i = 1; i < K; i++) { if (cellAt(r - DR[d]*i, c - DC[d]*i) !== who) break; n++; }
+      return n;
+    }
+    function madeLine(idx) {
+      var r = Math.floor(idx / N), c = idx % N, who = bd[idx], d;
+      if (who === ' ') return false;
+      for (d = 0; d < 4; d++) if (runLen(r, c, d, who) >= K) return true;
+      return false;
+    }
+    function madeFifteen() {
+      for (var i = 0; i < 8; i++) {
+        var a = bd[LINES[i][0]], b = bd[LINES[i][1]], c = bd[LINES[i][2]];
+        if (a === ' ' || b === ' ' || c === ' ') continue;
+        if ((+a) + (+b) + (+c) === 15) return true;
+      }
+      return false;
+    }
+    function boardFull() { return bd.indexOf(' ') < 0; }
+    function heur() {
+      var r, c, d, s = 0;
+      for (r = 0; r < N; r++) for (c = 0; c < N; c++) {
+        var w = bd[r * N + c];
+        if (w === ' ') continue;
+        for (d = 0; d < 4; d++) { var v = Math.pow(runLen(r, c, d, w), 2); s += (w === 'O') ? v : -v; }
+      }
+      return s;
+    }
+    function search(aiturn, depth, lim, alpha, beta) {
+      var i, best;
+      if (depth >= lim || boardFull()) return heur();
+      best = aiturn ? -1e6 : 1e6;
+      for (i = 0; i < N * N; i++) {
+        if (bd[i] !== ' ') continue;
+        bd[i] = aiturn ? 'O' : 'X';
+        var v;
+        if (madeLine(i)) {
+          var win = (VAR === 1 || VAR === 5) ? !aiturn : aiturn;
+          v = win ? 9000 - depth : depth - 9000;
+        } else v = search(!aiturn, depth + 1, lim, alpha, beta);
+        bd[i] = ' ';
+        if (aiturn) { if (v > best) best = v; if (best > alpha) alpha = best; }
+        else        { if (v < best) best = v; if (best < beta)  beta  = best; }
+        if (alpha >= beta) break;
       }
       return best;
     }
+    function aiSimple() {
+      var lim = N <= 3 ? 9 : N === 4 ? 5 : 4;
+      var cand = ['O'], i, ci, best = -1e9, mv = -1, mk = 'O';
+      if (VAR === 2 || VAR === 3) cand = ['X', 'O'];
+      if (VAR === 5) cand = ['X'];
+      for (i = 0; i < N * N; i++) {
+        if (bd[i] !== ' ') continue;
+        for (ci = 0; ci < cand.length; ci++) {
+          bd[i] = cand[ci];
+          var v;
+          if (madeLine(i)) v = (VAR === 1 || VAR === 3 || VAR === 5) ? -9000 : 9000;
+          else if (VAR === 2 || VAR === 3) v = heur() + rnd(3);
+          else v = search(false, 1, lim, -1e6, 1e6);
+          bd[i] = ' ';
+          if (v > best) { best = v; mv = i; mk = cand[ci]; }
+        }
+      }
+      return [mv, mk];
+    }
+    function aiNumerical() {
+      var best = -1e9, mv = -1, n, i;
+      for (n = 2; n <= 8; n += 2) {
+        if (bd.indexOf(String(n)) >= 0) continue;
+        for (i = 0; i < 9; i++) {
+          if (bd[i] !== ' ') continue;
+          bd[i] = String(n);
+          var v = madeFifteen() ? 9000 : rnd(50);
+          bd[i] = ' ';
+          if (v > best) { best = v; mv = i * 16 + n; }
+        }
+      }
+      return mv;
+    }
+    function smallWinner(b) {
+      for (var i = 0; i < 8; i++)
+        if (b[LINES[i][0]] !== ' ' && b[LINES[i][0]] === b[LINES[i][1]] &&
+            b[LINES[i][1]] === b[LINES[i][2]]) return b[LINES[i][0]];
+      return b.indexOf(' ') < 0 ? 'D' : 0;
+    }
+    function smallFull(b) { return b.indexOf(' ') < 0; }
+
+    function reset() {
+      msg = null; pending = 'X'; mynum = 1;
+      if (NINE) {
+        nb = []; meta = [];
+        for (var B = 0; B < 9; B++) { nb.push(new Array(9).fill(' ')); meta.push(0); }
+        board = 4; cell = 4; forced = -1;
+      } else {
+        bd = new Array(N * N).fill(' ');
+        cur = Math.floor(N * N / 2);
+      }
+    }
     reset();
-    return {
-      key: function (k) {
-        if (msg) { reset(); return; }
-        if (k === 'left')  cur = (cur % 3 === 0) ? cur + 2 : cur - 1;
-        if (k === 'right') cur = (cur % 3 === 2) ? cur - 2 : cur + 1;
-        if (k === 'up')    cur = (cur < 3) ? cur + 6 : cur - 3;
-        if (k === 'down')  cur = (cur > 5) ? cur - 6 : cur + 3;
-        if (k !== 'enter' && k !== 'space') return;
-        if (bd[cur] !== ' ') return;
-        bd[cur] = 'X';
-        var w = winner(bd);
-        if (!w) {
-          var best = -100, mv = -1;
-          for (var i = 0; i < 9; i++) {
-            if (bd[i] !== ' ') continue;
-            bd[i] = 'O';
-            var v = minimax(bd, false, 0);
-            bd[i] = ' ';
-            if (v > best) { best = v; mv = i; }
+
+    function keySimple(k) {
+      if (k === 'up')    cur = (cur < N) ? cur + N * (N - 1) : cur - N;
+      if (k === 'down')  cur = (cur >= N * (N - 1)) ? cur - N * (N - 1) : cur + N;
+      if (k === 'left')  cur = (cur % N === 0) ? cur + N - 1 : cur - 1;
+      if (k === 'right') cur = (cur % N === N - 1) ? cur - N + 1 : cur + 1;
+      if (k === 'tab' && (VAR === 2 || VAR === 3)) pending = pending === 'X' ? 'O' : 'X';
+      if (VAR === 8 && /^[13579]$/.test(k)) mynum = +k;
+      if (k !== 'enter' && k !== 'space') return;
+      if (bd[cur] !== ' ') return;
+
+      if (VAR === 8) {
+        if (bd.indexOf(String(mynum)) >= 0) { msg = 'You already used that number.'; return; }
+        bd[cur] = String(mynum);
+        if (madeFifteen()) { msg = 'Fifteen! You win.'; host.saveScore(100); return; }
+      } else {
+        bd[cur] = (VAR === 5) ? 'X' : (VAR === 2 || VAR === 3) ? pending : 'X';
+        if (madeLine(cur)) {
+          var lose = (VAR === 1 || VAR === 5);
+          msg = lose ? 'You made a line — you lose.' : 'You win!';
+          if (!lose) host.saveScore(100);
+          return;
+        }
+      }
+      if (boardFull()) { msg = VAR === 3 ? 'Board full — Chaos wins.' : 'Draw.'; return; }
+
+      if (VAR === 8) {
+        var m = aiNumerical();
+        if (m >= 0) {
+          bd[Math.floor(m / 16)] = String(m % 16);
+          if (madeFifteen()) { msg = 'Computer makes fifteen.'; return; }
+        }
+      } else {
+        var res = aiSimple();
+        if (res[0] >= 0) {
+          bd[res[0]] = res[1];
+          if (madeLine(res[0])) {
+            var al = (VAR === 1 || VAR === 5);
+            msg = al ? 'Computer made a line — you win!' : 'Computer wins.';
+            if (al) host.saveScore(100);
+            return;
           }
-          if (mv >= 0) bd[mv] = 'O';
-          w = winner(bd);
         }
-        if (w) msg = w === 'X' ? 'You win!' : w === 'O' ? 'Computer wins.' : 'Draw.';
-      },
+      }
+      if (boardFull()) msg = VAR === 3 ? 'Board full — Chaos wins.' : 'Draw.';
+    }
+
+    function keyNine(k) {
+      if (k === 'up')    cell = (cell < 3) ? cell + 6 : cell - 3;
+      if (k === 'down')  cell = (cell > 5) ? cell - 6 : cell + 3;
+      if (k === 'left')  cell = (cell % 3 === 0) ? cell + 2 : cell - 1;
+      if (k === 'right') cell = (cell % 3 === 2) ? cell - 2 : cell + 1;
+      if (k === 'tab' && forced < 0) board = (board + 1) % 9;
+      if (k !== 'enter' && k !== 'space') return;
+      if (forced >= 0 && board !== forced) return;
+      if (nb[board][cell] !== ' ') return;
+      if (VAR === 7 && meta[board]) return;
+
+      nb[board][cell] = 'X';
+      var w = smallWinner(nb[board]);
+      if (VAR === 6 && w === 'X') { msg = 'Line on a board — you win!'; host.saveScore(100); return; }
+      if (VAR === 7) {
+        if (w) meta[board] = w;
+        if (smallWinner(meta) === 'X') { msg = 'You win the big board!'; host.saveScore(200); return; }
+      }
+      forced = cell;
+      if (smallFull(nb[forced]) || (VAR === 7 && meta[forced])) forced = -1;
+
+      var tb = forced, i;
+      if (tb < 0) for (i = 0; i < 9; i++) if (!smallFull(nb[i]) && !(VAR === 7 && meta[i])) { tb = i; break; }
+      if (tb < 0) { msg = 'All boards full — draw.'; return; }
+      var best = -1, bc = -1;
+      for (i = 0; i < 9; i++) {
+        if (nb[tb][i] !== ' ') continue;
+        nb[tb][i] = 'O'; var s = (smallWinner(nb[tb]) === 'O') ? 1000 : 0;
+        nb[tb][i] = 'X'; if (smallWinner(nb[tb]) === 'X') s += 500;
+        nb[tb][i] = ' ';
+        s += (i === 4) ? 8 : (i % 2 === 0) ? 4 : 1;
+        s += rnd(3);
+        if (s > best) { best = s; bc = i; }
+      }
+      if (bc < 0) { msg = 'No moves left — draw.'; return; }
+      nb[tb][bc] = 'O';
+      w = smallWinner(nb[tb]);
+      if (VAR === 6 && w === 'O') { msg = 'Computer made a line.'; return; }
+      if (VAR === 7) {
+        if (w) meta[tb] = w;
+        if (smallWinner(meta) === 'O') { msg = 'Computer wins the big board.'; return; }
+      }
+      forced = bc;
+      if (smallFull(nb[forced]) || (VAR === 7 && meta[forced])) forced = -1;
+      board = (forced >= 0) ? forced : tb;
+    }
+
+    return {
+      key: function (k) { if (msg) { reset(); return; } if (NINE) keyNine(k); else keySimple(k); },
       draw: function (t) {
-        t.header('TIC TAC TOE', 'Arrows move · Enter places · Q quits');
-        for (var r = 0; r < 3; r++) for (var c = 0; c < 3; c++) {
-          var i = r * 3 + c, ch = bd[i] === ' ' ? '·' : bd[i];
-          var fg = bd[i] === 'X' ? C.cyan : bd[i] === 'O' ? C.yellow : C.grey;
-          t.put(36 + c * 4, 7 + r * 2, ch, fg, i === cur ? '#2b3038' : null, true);
+        t.header(NINE ? 'NINE BOARD' : 'TIC TAC TOE', SUB);
+        if (NINE) {
+          for (var B = 0; B < 9; B++) {
+            var br = Math.floor(B / 3) * 5 + 5, bc2 = (B % 3) * 14 + 18;
+            var active = (forced < 0 || forced === B);
+            t.text(bc2, br - 1, '#' + (B + 1), active ? C.white : C.grey, null, B === board);
+            for (var r = 0; r < 3; r++) for (var c = 0; c < 3; c++) {
+              var i = r * 3 + c, ch = nb[B][i], col;
+              if (VAR === 7 && meta[B] && meta[B] !== 'D') col = meta[B] === 'X' ? C.cyan : C.yellow;
+              else col = ch === 'X' ? C.cyan : ch === 'O' ? C.yellow : C.grey;
+              t.put(bc2 + c * 2, br + r, ch === ' ' ? '.' : ch, col,
+                    (B === board && i === cell) ? '#2b4a6b' : null);
+            }
+          }
+          t.text(18, 22, msg ? msg : forced >= 0 ? 'You must play in board #' + (forced + 1) + '.   '
+                                                 : 'Play in any open board.        ',
+                 C.white, null, !!msg);
+        } else {
+          var left = Math.max(2, 40 - N * 2);
+          for (var rr = 0; rr < N; rr++) for (var cc = 0; cc < N; cc++) {
+            var idx = rr * N + cc, v = bd[idx];
+            var col2 = v === 'X' ? C.cyan : v === 'O' ? C.yellow : v === ' ' ? C.grey : C.green;
+            t.text(left + cc * 4, 5 + rr * 2, ' ' + (v === ' ' ? '.' : v) + ' ', col2,
+                   idx === cur ? '#2b4a6b' : null, v !== ' ');
+          }
+          if (VAR === 2 || VAR === 3)
+            t.text(left, 7 + N * 2, 'Placing: ' + pending + '  (Tab switches)   ', C.white);
+          if (VAR === 8)
+            t.text(left, 7 + N * 2, 'Your number: ' + mynum + '  (press 1,3,5,7,9)   ', C.white);
+          if (msg) t.text(left, 9 + N * 2, msg + ' Press any key.', C.white, null, true);
         }
-        if (msg) t.center(15, msg, C.white, true);
-        t.center(17, msg ? 'Press any key to play again' : '', C.dim);
       }
     };
   }
@@ -76,54 +271,70 @@ reg('tictactoe', {
 
 /* ----------------------------------------------------------- connect four */
 reg('connect', {
-  title: 'Connect Four', help: 'Left/Right aim · Enter drops · Q quits',
+  title: 'Connect', help: 'Left/Right aim · Enter drops · Tab pop-out · Q quits',
   start: function (host, p) {
-    var W = 7, H = 6, bd, cur = 3, msg = null;
+    var W = Math.max(4, Math.min(13, p.width  > 0 ? p.width  : 7));
+    var H = Math.max(4, Math.min(10, p.height > 0 ? p.height : 6));
+    var K = Math.max(3, p.count > 0 ? p.count : 4);
+    if (K > W && K > H) K = Math.min(W, H);
+    var POP = p.variant === 1;
+    var DR = [0,1,1,1], DC = [1,0,1,-1];
+    var bd, cur, popmode, msg;
+
     function reset() {
       bd = [];
       for (var r = 0; r < H; r++) bd.push(new Array(W).fill(' '));
-      msg = null;
+      cur = Math.floor(W / 2); popmode = false; msg = null;
     }
-    function drop(col, p) {
-      for (var r = H - 1; r >= 0; r--) if (bd[r][col] === ' ') { bd[r][col] = p; return r; }
+    function drop(col, pl) {
+      for (var r = H - 1; r >= 0; r--) if (bd[r][col] === ' ') { bd[r][col] = pl; return r; }
       return -1;
     }
-    function wins(p) {
+    /* Removing your bottom disc slides the whole column down one. */
+    function popout(col) {
+      for (var r = H - 1; r > 0; r--) bd[r][col] = bd[r - 1][col];
+      bd[0][col] = ' ';
+    }
+    function wins(pl) {
       for (var r = 0; r < H; r++) for (var c = 0; c < W; c++) {
-        if (c + 3 < W && bd[r][c] === p && bd[r][c+1] === p && bd[r][c+2] === p && bd[r][c+3] === p) return true;
-        if (r + 3 < H && bd[r][c] === p && bd[r+1][c] === p && bd[r+2][c] === p && bd[r+3][c] === p) return true;
-        if (r + 3 < H && c + 3 < W && bd[r][c] === p && bd[r+1][c+1] === p && bd[r+2][c+2] === p && bd[r+3][c+3] === p) return true;
-        if (r + 3 < H && c - 3 >= 0 && bd[r][c] === p && bd[r+1][c-1] === p && bd[r+2][c-2] === p && bd[r+3][c-3] === p) return true;
+        if (bd[r][c] !== pl) continue;
+        for (var d = 0; d < 4; d++) {
+          var rr = r + DR[d] * (K - 1), cc = c + DC[d] * (K - 1), i;
+          if (rr < 0 || rr >= H || cc < 0 || cc >= W) continue;
+          for (i = 1; i < K; i++) if (bd[r + DR[d]*i][c + DC[d]*i] !== pl) break;
+          if (i === K) return true;
+        }
       }
       return false;
     }
-    function full() { return bd[0].every(function (v) { return v !== ' '; }); }
-    function win4(a, b, c, d) {
-      var v = [a,b,c,d], me = 0, op = 0, sp = 0;
-      v.forEach(function (x) { if (x === 'O') me++; else if (x === 'X') op++; else sp++; });
+    function full() { for (var c = 0; c < W; c++) if (bd[0][c] === ' ') return false; return true; }
+    function window4(r, c, dr, dc) {
+      var me = 0, op = 0, sp = 0;
+      for (var i = 0; i < K; i++) {
+        var v = bd[r + dr*i][c + dc*i];
+        if (v === 'O') me++; else if (v === 'X') op++; else sp++;
+      }
       if (me && op) return 0;
-      if (me === 3 && sp === 1) return 50;
-      if (me === 2 && sp === 2) return 10;
-      if (op === 3 && sp === 1) return -60;
-      if (op === 2 && sp === 2) return -8;
+      if (me && sp) return me * me * 4;
+      if (op && sp) return -(op * op * 5);
       return 0;
     }
     function evaluate() {
-      var s = 0, r, c;
-      for (r = 0; r < H; r++) for (c = 0; c < W; c++) {
-        if (c + 3 < W) s += win4(bd[r][c], bd[r][c+1], bd[r][c+2], bd[r][c+3]);
-        if (r + 3 < H) s += win4(bd[r][c], bd[r+1][c], bd[r+2][c], bd[r+3][c]);
-        if (r + 3 < H && c + 3 < W) s += win4(bd[r][c], bd[r+1][c+1], bd[r+2][c+2], bd[r+3][c+3]);
-        if (r + 3 < H && c >= 3) s += win4(bd[r][c], bd[r+1][c-1], bd[r+2][c-2], bd[r+3][c-3]);
+      var s = 0;
+      for (var r = 0; r < H; r++) for (var c = 0; c < W; c++) for (var d = 0; d < 4; d++) {
+        var rr = r + DR[d] * (K - 1), cc = c + DC[d] * (K - 1);
+        if (rr < 0 || rr >= H || cc < 0 || cc >= W) continue;
+        s += window4(r, c, DR[d], DC[d]);
       }
-      for (r = 0; r < H; r++) s += bd[r][3] === 'O' ? 6 : bd[r][3] === 'X' ? -6 : 0;
+      for (var r2 = 0; r2 < H; r2++)
+        s += bd[r2][W >> 1] === 'O' ? 6 : bd[r2][W >> 1] === 'X' ? -6 : 0;
       return s;
     }
     function negamax(depth, alpha, beta, ai) {
       if (wins('O')) return 100000 + depth;
       if (wins('X')) return -100000 - depth;
       if (full() || depth === 0) return evaluate();
-      var best = ai ? -1e9 : 1e9;
+      var best = ai ? -1e6 : 1e6;
       for (var c = 0; c < W; c++) {
         if (bd[0][c] !== ' ') continue;
         var r = drop(c, ai ? 'O' : 'X');
@@ -135,40 +346,64 @@ reg('connect', {
       }
       return best;
     }
+    function aiMove() {
+      /* Bigger boards get a shallower search so the reply stays quick. */
+      var depth = (W * H <= 42) ? 5 : (W * H <= 72) ? 4 : 3;
+      var best = -1e9, mv = 0, c;
+      for (c = 0; c < W; c++) {
+        if (bd[0][c] !== ' ') continue;
+        var r = drop(c, 'O');
+        var v = negamax(depth - 1, -1e6, 1e6, false) - (c === (W >> 1) ? 0 : 1);
+        bd[r][c] = ' ';
+        if (v > best) { best = v; mv = c; }
+      }
+      if (POP) for (c = 0; c < W; c++) {
+        if (bd[H - 1][c] !== 'O') continue;
+        var save = bd.map(function (row) { return row.slice(); });
+        popout(c);
+        var v2 = wins('O') ? 200000 : wins('X') ? -200000 : negamax(depth - 1, -1e6, 1e6, false);
+        bd = save;
+        if (v2 > best) { best = v2; mv = -(c + 1); }
+      }
+      return mv;
+    }
     reset();
     return {
       key: function (k) {
         if (msg) { reset(); return; }
-        if (k === 'left'  && cur > 0) cur--;
+        if (k === 'left'  && cur > 0)     cur--;
         if (k === 'right' && cur < W - 1) cur++;
+        if (k === 'tab' && POP) popmode = !popmode;
         if (k !== 'enter' && k !== 'space') return;
-        if (bd[0][cur] !== ' ') return;
-        drop(cur, 'X');
-        if (wins('X')) { msg = 'You win!'; return; }
-        if (full())    { msg = 'Draw.';    return; }
-        var order = [3,2,4,1,5,0,6], best = -1e9, mv = -1;
-        for (var i = 0; i < W; i++) {
-          var col = order[i];
-          if (bd[0][col] !== ' ') continue;
-          var r = drop(col, 'O');
-          var v = negamax(4, -1e9, 1e9, false);
-          bd[r][col] = ' ';
-          if (v > best) { best = v; mv = col; }
-        }
-        if (mv >= 0) drop(mv, 'O');
-        if (wins('O')) msg = 'Computer wins.';
-        else if (full()) msg = 'Draw.';
+
+        if (popmode) { if (bd[H - 1][cur] !== 'X') return; popout(cur); }
+        else { if (bd[0][cur] !== ' ') return; drop(cur, 'X'); }
+
+        /* A pop-out can complete a line for both sides at once. */
+        if (wins('X') && wins('O')) { msg = 'Both complete — draw.'; return; }
+        if (wins('X')) { msg = 'You win!'; host.saveScore(100); return; }
+        if (wins('O')) { msg = 'Computer wins.'; return; }
+        if (full() && !POP) { msg = 'Draw.'; return; }
+
+        var m = aiMove();
+        if (m < 0) popout(-m - 1); else drop(m, 'O');
+        if (wins('O') && wins('X')) msg = 'Both complete — draw.';
+        else if (wins('O')) msg = 'Computer wins.';
+        else if (wins('X')) { msg = 'You win!'; host.saveScore(100); }
+        else if (full() && !POP) msg = 'Draw.';
       },
       draw: function (t) {
-        t.header('CONNECT FOUR', 'Left/Right aim · Enter drops · Q quits');
-        t.text(31 + cur * 3, 5, 'v', C.cyan, null, true);
-        for (var r = 0; r < 6; r++) for (var c = 0; c < 7; c++) {
-          var p = bd[r][c];
-          t.put(31 + c * 3, 7 + r, p === ' ' ? '·' : '●',
-                p === 'X' ? C.cyan : p === 'O' ? C.yellow : C.grey, null, p !== ' ');
+        t.header('CONNECT ' + K, (POP ? 'pop-out allowed · Tab toggles · ' : '') +
+                 W + 'x' + H + ' · Left/Right aim, Enter ' + (popmode ? 'POPS' : 'drops'));
+        var left = Math.max(1, 40 - W);
+        for (var c = 0; c < W; c++) t.put(left + c * 2, 4, ' ', C.grey);
+        t.put(left + cur * 2, 4, popmode ? '^' : 'v', popmode ? C.red : C.cyan, null, true);
+        for (var r = 0; r < H; r++) for (var c2 = 0; c2 < W; c2++) {
+          var v = bd[r][c2];
+          t.put(left + c2 * 2, 5 + r, v === ' ' ? '.' : 'O',
+                v === 'X' ? C.cyan : v === 'O' ? C.yellow : C.grey, null, v !== ' ');
         }
-        if (msg) t.center(15, msg, C.white, true);
-        t.center(17, msg ? 'Press any key to play again' : '', C.dim);
+        if (msg) t.text(left, 7 + H, msg + ' Press any key.', C.white, null, true);
       }
     };
   }
@@ -908,99 +1143,212 @@ reg('dotsboxes', {
   }
 });
 
-/* --------------------------------------------------------------- checkers */
+/* --------------------------------------------------------------- draughts */
 reg('checkers', {
-  title: 'Checkers', help: 'Arrows move · Enter selects then targets · Q quits',
+  title: 'Draughts', help: 'Arrows move · Enter selects then targets · Q quits',
   start: function (host, p) {
-    var N = 8, bd, cr = 5, cc = 0, sr = -1, sc = -1, msg = null;
-    var DR = [-1,-1,1,1], DC = [-1,1,-1,1];
-    function mine(p)   { return p === 'x' || p === 'X'; }
-    function theirs(p) { return p === 'o' || p === 'O'; }
-    function king(p)   { return p === 'X' || p === 'O'; }
-    function reset() {
-      bd = [];
-      for (var r = 0; r < N; r++) {
-        var row = [];
-        for (var c = 0; c < N; c++) {
-          if ((r + c) % 2 === 0) row.push('.');
-          else if (r < 3) row.push('o');
-          else if (r > 4) row.push('x');
-          else row.push('.');
-        }
-        bd.push(row);
-      }
-      sr = sc = -1; msg = null;
+    /* back, fly, maxcap, dirs(0 diag/1 orth/2 both), sideMove, menTakeKings,
+     * giveaway, promoteContinues, name */
+    var RULES = [
+      [0,0,0,0,0,1,0,0,'Checkers'],
+      [1,1,1,0,0,1,0,0,'International Draughts'],
+      [1,1,0,0,0,1,0,1,'Russian Draughts'],
+      [1,1,1,0,0,1,0,0,'Brazilian Draughts'],
+      [0,1,1,1,1,1,0,0,'Turkish Draughts'],
+      [0,0,1,0,0,0,0,0,'Italian Draughts'],
+      [0,1,1,0,0,1,0,0,'Spanish Draughts'],
+      [1,1,0,0,0,1,0,0,'Pool Checkers'],
+      [1,0,0,0,0,1,1,0,'Suicide Checkers'],
+      [1,1,1,2,0,1,0,0,'Frisian Draughts'],
+      [1,1,1,1,1,1,0,0,'Armenian Draughts'],
+      [1,1,1,0,0,1,0,0,'Canadian Checkers'],
+      [0,1,1,1,0,1,0,0,'Dameo']];
+    var v = (p.variant >= 0 && p.variant <= 12) ? p.variant : 0;
+    var R = RULES[v];
+    var BACK = R[0], FLY = R[1], MAXCAP = R[2], DIRS = R[3], SIDE = R[4],
+        MTK = R[5], GIVE = R[6], PROMC = R[7], RNAME = R[8];
+    var N = Math.max(8, Math.min(12, p.size > 0 ? p.size : 8));
+    if (N & 1) N++;
+
+    var DR8 = [-1,-1,1,1,-1,1,0,0], DC8 = [-1,1,-1,1,0,0,-1,1];
+    var dlo = DIRS === 1 ? 4 : 0, dhi = DIRS === 0 ? 4 : 8;
+    var bd, cr, cc, sr, sc, msg;
+
+    function mine(x)   { return x === 'x' || x === 'X'; }
+    function theirs(x) { return x === 'o' || x === 'O'; }
+    function king(x)   { return x === 'X' || x === 'O'; }
+    function on(r, c)  { return r >= 0 && r < N && c >= 0 && c < N; }
+
+    function manMay(human, d, capturing) {
+      var dr = DR8[d];
+      var fwd = human ? dr < 0 : dr > 0;
+      if (fwd) return true;
+      if (dr === 0) return !!SIDE;
+      return capturing ? !!BACK : false;
     }
-    function gen(human) {
-      var out = [], jumps = false, r, c, d;
+    function enemyAt(human, r, c) {
+      var x = bd[r][c];
+      if (human ? !theirs(x) : !mine(x)) return false;
+      if (!MTK && king(x)) return false;      /* Italian: men spare kings */
+      return true;
+    }
+    function capsAt(r, c, human) {
+      var pc = bd[r][c], out = [], d;
+      if (human ? !mine(pc) : !theirs(pc)) return out;
+      var isK = king(pc);
+      for (d = dlo; d < dhi; d++) {
+        var dr = DR8[d], dc = DC8[d];
+        if (!isK && !manMay(human, d, true)) continue;
+        if (isK && FLY) {
+          var i = 1;
+          while (on(r + dr*i, c + dc*i) && bd[r + dr*i][c + dc*i] === '.') i++;
+          var tr = r + dr*i, tc = c + dc*i;
+          if (!on(tr, tc) || !enemyAt(human, tr, tc)) continue;
+          i++;
+          while (on(r + dr*i, c + dc*i) && bd[r + dr*i][c + dc*i] === '.') {
+            out.push({r1:r,c1:c,r2:r+dr*i,c2:c+dc*i,cr:tr,cc:tc,jump:1});
+            i++;
+          }
+        } else {
+          var r1 = r+dr, c1 = c+dc, r2 = r+2*dr, c2 = c+2*dc;
+          if (!on(r2, c2) || bd[r2][c2] !== '.') continue;
+          if (!enemyAt(human, r1, c1)) continue;
+          out.push({r1:r,c1:c,r2:r2,c2:c2,cr:r1,cc:c1,jump:1});
+        }
+      }
+      return out;
+    }
+    function doMove(m, human, promote) {
+      var pc = bd[m.r1][m.c1];
+      bd[m.r1][m.c1] = '.';
+      if (m.jump) bd[m.cr][m.cc] = '.';
+      if (promote) {
+        if (human && m.r2 === 0) pc = 'X';
+        if (!human && m.r2 === N - 1) pc = 'O';
+      }
+      bd[m.r2][m.c2] = pc;
+    }
+    function snapshot() { return bd.map(function (x) { return x.slice(); }); }
+    function chainFrom(r, c, human, depth) {
+      if (depth > 12) return 0;
+      var mv = capsAt(r, c, human), best = 0;
+      for (var i = 0; i < mv.length; i++) {
+        var save = snapshot();
+        doMove(mv[i], human, false);
+        var t = 1 + chainFrom(mv[i].r2, mv[i].c2, human, depth + 1);
+        bd = save;
+        if (t > best) best = t;
+      }
+      return best;
+    }
+    function genMoves(human) {
+      var out = [], r, c, d, jumps = false;
       for (r = 0; r < N; r++) for (c = 0; c < N; c++) {
-        var p = bd[r][c];
-        if (human ? !mine(p) : !theirs(p)) continue;
-        for (d = 0; d < 4; d++) {
-          if (!king(p)) { if (human && DR[d] > 0) continue; if (!human && DR[d] < 0) continue; }
-          var r1 = r + DR[d], c1 = c + DC[d], r2 = r + 2*DR[d], c2 = c + 2*DC[d];
-          if (r2 >= 0 && r2 < N && c2 >= 0 && c2 < N && bd[r2][c2] === '.' &&
-              (human ? theirs(bd[r1][c1]) : mine(bd[r1][c1]))) {
-            out.push({ r1: r, c1: c, r2: r2, c2: c2, jump: true }); jumps = true;
-          } else if (r1 >= 0 && r1 < N && c1 >= 0 && c1 < N && bd[r1][c1] === '.') {
-            out.push({ r1: r, c1: c, r2: r1, c2: c1, jump: false });
+        var got = capsAt(r, c, human);
+        if (got.length) { jumps = true; out = out.concat(got); }
+      }
+      if (jumps) {
+        if (MAXCAP) {
+          var len = [], best = 0;
+          for (var i = 0; i < out.length; i++) {
+            var save = snapshot();
+            doMove(out[i], human, false);
+            len[i] = 1 + chainFrom(out[i].r2, out[i].c2, human, 0);
+            bd = save;
+            if (len[i] > best) best = len[i];
+          }
+          out = out.filter(function (_, i) { return len[i] === best; });
+        }
+        return out;                        /* captures are compulsory */
+      }
+      for (r = 0; r < N; r++) for (c = 0; c < N; c++) {
+        var pc = bd[r][c], isK = king(pc);
+        if (human ? !mine(pc) : !theirs(pc)) continue;
+        for (d = dlo; d < dhi; d++) {
+          var dr = DR8[d], dc = DC8[d];
+          if (!isK && !manMay(human, d, false)) continue;
+          if (isK && FLY) {
+            for (var i2 = 1; on(r+dr*i2, c+dc*i2) && bd[r+dr*i2][c+dc*i2] === '.'; i2++)
+              out.push({r1:r,c1:c,r2:r+dr*i2,c2:c+dc*i2,jump:0});
+          } else {
+            var r1 = r+dr, c1 = c+dc;
+            if (on(r1, c1) && bd[r1][c1] === '.') out.push({r1:r,c1:c,r2:r1,c2:c1,jump:0});
           }
         }
       }
-      return jumps ? out.filter(function (m) { return m.jump; }) : out;
+      return out;
     }
-    function apply(m, human) {
-      var p = bd[m.r1][m.c1];
-      bd[m.r1][m.c1] = '.';
-      if (m.jump) bd[(m.r1 + m.r2) >> 1][(m.c1 + m.c2) >> 1] = '.';
-      if (human && m.r2 === 0) p = 'X';
-      if (!human && m.r2 === N - 1) p = 'O';
-      bd[m.r2][m.c2] = p;
-      if (m.jump)
-        return gen(human).some(function (x) { return x.jump && x.r1 === m.r2 && x.c1 === m.c2; });
+    function applyMove(m, human) {
+      var before = bd[m.r1][m.c1];
+      doMove(m, human, true);
+      var promoted = !king(before) && king(bd[m.r2][m.c2]);
+      if (m.jump) {
+        if (promoted && !PROMC) return false;
+        if (capsAt(m.r2, m.c2, human).length) return true;
+      }
       return false;
     }
     function material() {
       var s = 0;
       for (var r = 0; r < N; r++) for (var c = 0; c < N; c++) {
-        var p = bd[r][c];
-        if (p === 'o') s += 10 + r; else if (p === 'O') s += 25;
-        else if (p === 'x') s -= 10 + (N - 1 - r); else if (p === 'X') s -= 25;
+        var x = bd[r][c];
+        if (x === 'o') s += 10 + r;
+        else if (x === 'O') s += 28;
+        else if (x === 'x') s -= 10 + (N - 1 - r);
+        else if (x === 'X') s -= 28;
       }
-      return s;
+      return GIVE ? -s : s;                /* giveaway wants to be taken */
     }
     function aiTurn() {
-      for (;;) {
-        var moves = gen(false);
-        if (!moves.length) return;
+      for (var guard = 0; guard < 24; guard++) {
+        var mv = genMoves(false);
+        if (!mv.length) return;
         var best = -1e9, bi = 0;
-        moves.forEach(function (m, i) {
-          var save = bd.map(function (row) { return row.slice(); });
-          apply(m, false);
-          var v = material() + (m.jump ? 40 : 0) + rnd(3);
+        for (var i = 0; i < mv.length; i++) {
+          var save = snapshot();
+          applyMove(mv[i], false);
+          var val = material() + (mv[i].jump ? (GIVE ? -30 : 40) : 0) + rnd(3);
           bd = save;
-          if (v > best) { best = v; bi = i; }
-        });
-        if (!apply(moves[bi], false)) return;
+          if (val > best) { best = val; bi = i; }
+        }
+        if (!applyMove(mv[bi], false)) return;
       }
+    }
+    function reset() {
+      var rows = N === 8 ? 3 : N === 10 ? 4 : 5;
+      bd = [];
+      for (var r = 0; r < N; r++) {
+        var row = [];
+        for (var c = 0; c < N; c++) {
+          /* Orthogonal games fill whole rows; diagonal games use dark squares. */
+          var usable = (DIRS === 1) ? (r !== 0 && r !== N - 1) : ((r + c) % 2 === 1);
+          if (!usable) row.push('.');
+          else if (r < rows) row.push('o');
+          else if (r >= N - rows) row.push('x');
+          else row.push('.');
+        }
+        bd.push(row);
+      }
+      cr = N - 3; cc = 0; sr = -1; sc = -1; msg = null;
     }
     reset();
     return {
       key: function (k) {
         if (msg) { reset(); return; }
-        if (k === 'up'    && cr > 0) cr--;
+        var mv = genMoves(true);
+        if (!mv.length) { msg = GIVE ? 'No moves left — you win!' : 'No moves — computer wins.'; return; }
+        if (k === 'up'    && cr > 0)     cr--;
         if (k === 'down'  && cr < N - 1) cr++;
-        if (k === 'left'  && cc > 0) cc--;
+        if (k === 'left'  && cc > 0)     cc--;
         if (k === 'right' && cc < N - 1) cc++;
         if (k !== 'enter' && k !== 'space') return;
-        var moves = gen(true);
         if (sr < 0) { if (mine(bd[cr][cc])) { sr = cr; sc = cc; } return; }
         if (sr === cr && sc === cc) { sr = sc = -1; return; }
-        var found = moves.filter(function (m) {
-          return m.r1 === sr && m.c1 === sc && m.r2 === cr && m.c2 === cc;
-        })[0];
-        if (!found) return;
-        if (apply(found, true)) { sr = cr; sc = cc; return; }
+        var found = -1;
+        for (var i = 0; i < mv.length; i++)
+          if (mv[i].r1 === sr && mv[i].c1 === sc && mv[i].r2 === cr && mv[i].c2 === cc) found = i;
+        if (found < 0) return;
+        if (applyMove(mv[found], true)) { sr = cr; sc = cc; return; }
         sr = sc = -1;
         aiTurn();
         var m2 = 0, t2 = 0;
@@ -1008,29 +1356,36 @@ reg('checkers', {
           if (mine(bd[r][c])) m2++;
           if (theirs(bd[r][c])) t2++;
         }
-        if (!t2 || !gen(false).length) { msg = 'You win!'; host.saveScore(m2 * 10); }
-        else if (!m2 || !gen(true).length) msg = 'Computer wins.';
+        if (GIVE) {
+          if (m2 === 0) { msg = 'All gone — you win!'; host.saveScore(100); }
+          else if (t2 === 0) msg = 'Computer shed everything first.';
+        } else {
+          if (t2 === 0 || !genMoves(false).length) { msg = 'You win!'; host.saveScore(100); }
+          else if (m2 === 0) msg = 'Computer wins.';
+        }
       },
       draw: function (t) {
-        t.header('CHECKERS', 'Arrows move · Enter selects then targets · Q quits');
-        t.text(28, 4, '  a  b  c  d  e  f  g  h', C.dim);
-        for (var r = 0; r < 8; r++) {
-          t.text(28, 5 + r, String(8 - r), C.dim);
-          for (var c = 0; c < 8; c++) {
-            var p = bd[r][c], dark = (r + c) % 2 === 1;
+        t.header('DRAUGHTS', RNAME + ' — ' +
+                 (DIRS === 1 ? 'orthogonal' : DIRS === 2 ? 'orth+diagonal' : 'diagonal') +
+                 (FLY ? ', flying kings' : '') + (MAXCAP ? ', must take the most' : '') +
+                 (GIVE ? ', LOSE everything to win' : ''));
+        var left = Math.max(2, 40 - (N * 3) / 2);
+        for (var r = 0; r < N; r++) {
+          t.text(left - 4, 4 + r, String(N - r).padStart(2, ' '), C.dim);
+          for (var c = 0; c < N; c++) {
+            var pc = bd[r][c], dark = ((r + c) % 2) === 1;
             var bg = (r === cr && c === cc) ? '#2b4a6b'
-                   : (r === sr && c === sc) ? '#2f5a33'
-                   : (dark ? '#1b1e23' : null);
-            var ch = p === '.' ? (dark ? '·' : ' ') : (king(p) ? 'K' : '●');
-            t.put(31 + c * 3, 5 + r, ch, mine(p) ? C.cyan : theirs(p) ? C.red : C.grey, bg, true);
+                   : (r === sr && c === sc) ? '#2f6b2f'
+                   : (dark ? '#1c1f24' : null);
+            var fg = mine(pc) ? C.cyan : theirs(pc) ? C.red : C.grey;
+            var g = pc === '.' ? (dark ? '.' : ' ') : (king(pc) ? 'K' : 'o');
+            t.text(left + c * 3, 4 + r, ' ' + g + ' ', fg, bg, king(pc));
           }
         }
-        var mv = gen(true);
-        t.text(28, 15, mv.length && mv[0].jump ? 'Capture available — you must jump.' : '                                   ', C.yellow);
-        if (msg) t.center(17, msg, C.white, true);
+        if (msg) t.text(left - 4, 6 + N, msg + ' Press any key.', C.white, null, true);
       }
     };
   }
 });
 
-}());
+})();

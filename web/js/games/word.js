@@ -331,195 +331,408 @@ reg('bullscows', {
   }
 });
 
-/* ------------------------------------------------- rock paper scissors */
+/* -------------------------------------------------------- rock paper scissors
+ * With the throws in this cyclic order, a throw beats the n/2 entries behind
+ * it — one rule covering both the 3-throw and 5-throw games.
+ */
 reg('rps', {
-  title: 'Rock Paper Scissors', help: 'R rock · P paper · S scissors · Q quits',
+  title: 'Rock Paper Scissors', help: 'Press a throw key · Q quits',
   start: function (host, p) {
-    var NAME = ['Rock','Paper','Scissors'], ART = ['✊','✋','✌'];
-    var freq = [0,0,0], wins = 0, losses = 0, draws = 0, me = null, ai = null, msg = '';
+    var VAR = p.variant | 0;
+    var N3 = ['Rock','Paper','Scissors'], K3 = ['r','p','s'];
+    var N5 = ['Rock','Spock','Paper','Lizard','Scissors'], K5 = ['r','k','p','l','s'];
+    var VERB = [
+      ['','','covers','crushes','crushes'],
+      ['vaporizes','','','poisons','smashes'],
+      ['covers','disproves','','','eats'],
+      ['crushes','poisons','eats','',''],
+      ['crushes','smashes','cuts','decapitates','']];
+    var n = VAR === 1 ? 5 : 3;
+    var NAME = VAR === 1 ? N5 : N3, KEYS = VAR === 1 ? K5 : K3;
+    var target = VAR === 2 ? 5 : 0;
+    var freq = [0,0,0,0,0], wins = 0, losses = 0, draws = 0, last = null, done = null;
+
     return {
       key: function (k) {
-        var pick = k === 'r' ? 0 : k === 'p' ? 1 : k === 's' ? 2 : -1;
-        if (pick < 0) return;
-        me = pick;
-        var most = 0;
-        for (var i = 1; i < 3; i++) if (freq[i] > freq[most]) most = i;
-        /* Counter the player's most frequent throw most of the time. */
-        ai = (freq[most] > 0 && rnd(100) < 65) ? (most + 1) % 3 : rnd(3);
+        if (done) { wins = losses = draws = 0; freq = [0,0,0,0,0]; last = null; done = null; return; }
+        var me = KEYS.indexOf(k);
+        if (me < 0) return;
+        var most = 0, i;
+        for (i = 1; i < n; i++) if (freq[i] > freq[most]) most = i;
+        var ai = (freq[most] > 0 && rnd(100) < 65) ? (most + 1) % n : rnd(n);
         freq[me]++;
-        var result = (me - ai + 3) % 3;
-        if (result === 1) { wins++; msg = 'You win the round!'; }
-        else if (result === 2) { losses++; msg = 'Computer wins.'; }
-        else { draws++; msg = 'Draw.'; }
-        host.saveScore(wins);
+        var d = (me - ai + n) % n;
+        if (d === 0) { draws++; last = 'Draw.'; }
+        else if (d <= n / 2) { wins++; last = NAME[me] + ' ' + (VERB[me][ai] || 'beats') + ' ' + NAME[ai] + ' — you win!'; }
+        else { losses++; last = NAME[ai] + ' ' + (VERB[ai][me] || 'beats') + ' ' + NAME[me] + ' — computer wins.'; }
+        if (target && (wins >= target || losses >= target)) {
+          done = wins >= target ? 'You take the match!' : 'Computer takes the match.';
+          host.saveScore(wins);
+        }
       },
       draw: function (t) {
-        t.header('ROCK PAPER SCISSORS', 'R rock · P paper · S scissors · Q quits');
-        t.text(28, 6, 'Wins ' + wins + '  Losses ' + losses + '  Draws ' + draws + '   ', C.fg);
-        t.text(28, 8, 'The computer tracks your habits.', C.dim);
-        if (me !== null) {
-          t.text(28, 11, 'You: ' + ART[me] + ' ' + (NAME[me] + '        ').slice(0, 9) +
-                         '   CPU: ' + ART[ai] + ' ' + NAME[ai] + '        ', C.white);
-          t.text(28, 13, msg + '                    ', C.yellow, null, true);
-        }
+        t.header('ROCK PAPER SCISSORS',
+                 KEYS.map(function (c, i) { return c + ' ' + NAME[i]; }).join('   '));
+        t.text(22, 6, 'Wins ' + wins + '   Losses ' + losses + '   Draws ' + draws + '   ', C.fg);
+        t.text(22, 8, target ? 'First to ' + target + ' takes the match.'
+                             : 'The computer is tracking your habits.', C.dim);
+        if (last) t.text(22, 11, last + '                    ', C.white, null, true);
+        if (done) t.center(14, done + ' Press any key.', C.green, true);
       }
     };
   }
 });
 
-/* ------------------------------------------------------------------ simon */
+/* ------------------------------------------------------------------- simon */
 reg('simon', {
-  title: 'Simon', help: 'Watch, then repeat with R G B Y · Q quits',
-  realtime: true, step: 450,
+  title: 'Simon', help: 'Repeat the sequence · Q quits',
   start: function (host, p) {
-    var CN = ['RED','GREEN','BLUE','YELLOW'], CC = [C.red, C.green, C.blue, C.yellow];
-    var KEYS = ['r','g','b','y'];
-    var seq, showIdx, mode, inputIdx, flash, over;
-    function newRound() {
-      seq.push(rnd(4));
-      showIdx = 0; mode = 'show'; inputIdx = 0; flash = -1;
-    }
-    function reset() { seq = []; over = null; newRound(); }
+    var VAR = p.variant | 0;
+    var CN = ['RED','GREEN','BLUE','YELLOW','MAGENTA','CYAN','WHITE','GREY'];
+    var CC = [C.red,C.green,C.blue,C.yellow,C.magenta,C.cyan,C.white,C.grey];
+    var KEYS = ['r','g','b','y','m','c','w','k'];
+    var ncol = VAR === 1 ? 6 : VAR === 2 ? 8 : 4;
+    var reverse = VAR === 3, silent = VAR === 4;
+    var showTicks = VAR === 5 ? 3 : 6, gapTicks = VAR === 5 ? 1 : 2;
+
+    var seq, step, phase, flashIdx, timer, msg, best = 0;
+    function reset() { seq = []; step = 0; phase = 'grow'; flashIdx = 0; timer = 0; msg = null; }
     reset();
+
     return {
+      tick: function () {
+        if (phase === 'grow') { seq.push(rnd(ncol)); flashIdx = 0; timer = 0; phase = 'show'; return; }
+        if (phase !== 'show') return;
+        timer++;
+        if (timer >= showTicks + gapTicks) { timer = 0; flashIdx++; if (flashIdx >= seq.length) { phase = 'input'; step = 0; } }
+      },
       key: function (k) {
-        if (over) { reset(); return; }
-        if (mode !== 'input') return;
+        if (msg) { reset(); return; }
+        if (phase !== 'input') return;
         var pick = KEYS.indexOf(k);
-        if (pick < 0) return;
-        flash = pick;
-        if (pick !== seq[inputIdx]) {
-          over = 'Wrong — you reached round ' + seq.length + '.';
+        if (pick < 0 || pick >= ncol) return;
+        var want = reverse ? seq[seq.length - 1 - step] : seq[step];
+        if (pick !== want) {
+          msg = 'Wrong — you reached round ' + seq.length + '.';
           host.saveScore(seq.length - 1);
           return;
         }
-        inputIdx++;
-        if (inputIdx >= seq.length) newRound();
-      },
-      tick: function () {
-        if (over || mode !== 'show') return;
-        if (showIdx >= seq.length) { mode = 'input'; flash = -1; return; }
-        flash = seq[showIdx];
-        showIdx++;
+        step++;
+        if (step >= seq.length) { if (seq.length > best) best = seq.length; phase = 'grow'; }
       },
       draw: function (t) {
-        t.header('SIMON', 'Watch the sequence, then repeat with R G B Y');
-        t.text(30, 6, 'Round ' + seq.length, C.fg, null, true);
-        if (flash >= 0) {
-          t.text(30, 9, '  ██████  ', CC[flash], null, true);
-          t.text(30, 11, (CN[flash] + '        ').slice(0, 8), CC[flash], null, true);
+        t.header('SIMON', 'Repeat' + (reverse ? ' BACKWARDS' : '') + ' with ' +
+                 KEYS.slice(0, ncol).join(' ') + (silent ? ' (no sound)' : ''));
+        t.text(28, 6, 'Round ' + Math.max(1, seq.length) + '   Best ' + best + '  ', C.fg);
+        if (phase === 'show' && flashIdx < seq.length && timer < showTicks) {
+          var s = seq[flashIdx];
+          t.text(28, 9, '  ######  ', CC[s], null, true);
+          t.text(28, 11, CN[s] + '        ', CC[s]);
         } else {
-          t.text(30, 9, '          ', C.grey);
-          t.text(30, 11, '        ', C.grey);
+          t.text(28, 9, '          ', C.grey);
+          t.text(28, 11, '            ', C.grey);
         }
-        t.text(30, 14, mode === 'show' ? 'Watch...' :
-                       'Your turn — ' + inputIdx + '/' + seq.length + '        ', C.cyan);
-        if (over) t.center(17, over + ' Press any key.', C.white, true);
+        if (phase === 'input')
+          t.text(28, 13, 'Your turn — ' + seq.length + ' step' + (seq.length === 1 ? '' : 's') +
+                 (reverse ? ', backwards' : '') + '   ', C.cyan);
+        else t.text(28, 13, '                                  ', C.grey);
+        if (msg) t.center(16, msg + ' Press any key.', C.white, true);
       }
     };
   }
 });
 
-/* ------------------------------------------------------ snakes and ladders */
+/* --------------------------------------------------------------- race games
+ * Eight historical race games separated by five switches: board length, what
+ * you throw, exact finish, an entry roll, and squares granting another turn.
+ */
 reg('snakesladders', {
-  title: 'Snakes and Ladders', help: 'Enter rolls the die · Q quits',
+  title: 'Race', help: 'Enter throws · Q quits',
   start: function (host, p) {
-    var FROM = [1,4,9,21,28,36,51,71,80,16,47,49,56,62,64,87,93,95,98];
-    var TO   = [38,14,31,42,84,44,67,91,100,6,26,11,53,19,60,24,73,75,78];
-    var pos, turn, msg, over;
-    function reset() { pos = [0, 0]; turn = 0; msg = 'Press Enter to roll.'; over = null; }
-    function move(who) {
-      var die = G.rndRange(1, 6), from = pos[who];
-      if (from + die <= 100) pos[who] = from + die;
-      msg = (who ? 'Computer' : 'You') + ' rolled ' + die + ': ' + from + ' → ' + pos[who];
-      var i = FROM.indexOf(pos[who]);
-      if (i >= 0) {
-        msg += ', then ' + (TO[i] > pos[who] ? 'climbs' : 'slides') + ' to ' + TO[i] + '!';
-        pos[who] = TO[i];
+    var SL_F=[1,4,9,21,28,36,51,71,80,16,47,49,56,62,64,87,93,95,98];
+    var SL_T=[38,14,31,42,84,44,67,91,100,6,26,11,53,19,60,24,73,75,78];
+    var DX_F=SL_F.concat([6,20,33,45,68]), DX_T=SL_T.concat([27,41,12,72,50]);
+    var RACES = [
+      {name:'Snakes and Ladders',        sq:100,dice:0,exact:0,entry:0,ros:0,f:SL_F,t:SL_T},
+      {name:'Chutes and Ladders Deluxe', sq:100,dice:0,exact:0,entry:0,ros:0,f:DX_F,t:DX_T},
+      {name:'Game of the Goose',         sq:63, dice:0,exact:1,entry:0,ros:0,
+        f:[6,12,18,24,30,36,42,48,54,58,19,31,42,52], t:[12,18,24,30,36,42,48,54,60,63,55,12,26,30]},
+      {name:'Pachisi',                   sq:60, dice:0,exact:1,entry:0,ros:0,f:[12,25,38,51],t:[30,44,57,60]},
+      {name:'Ludo',                      sq:56, dice:0,exact:1,entry:6,ros:0,f:[9,22,35,48],t:[27,40,53,56]},
+      {name:'Senet',                     sq:30, dice:1,exact:1,entry:0,ros:0,f:[15,26,27,28],t:[1,15,15,15]},
+      {name:'Royal Game of Ur',          sq:20, dice:1,exact:1,entry:0,ros:1,f:[],t:[]},
+      {name:'Yut Nori',                  sq:29, dice:2,exact:0,entry:0,ros:0,f:[5,10,22],t:[15,20,27]}];
+    var R = RACES[(p.variant >= 0 && p.variant < 8) ? p.variant : 0];
+    var cols = 10, rows = Math.ceil(R.sq / cols);
+    var pos, live, turn, msg, note, cpuWait;
+
+    function rosette(sq) { return sq === 4 || sq === 8 || sq === 14; }
+    function roll() {
+      if (R.dice === 1) { var s = 0; for (var i = 0; i < 4; i++) s += rnd(2); return s === 0 ? 5 : s; }
+      if (R.dice === 2) { var W = [35,30,20,10,5], r = rnd(100), a = 0;
+        for (var j = 0; j < 5; j++) { a += W[j]; if (r < a) return j + 1; } return 1; }
+      return 1 + rnd(6);
+    }
+    function reset() {
+      pos = [0,0]; live = [!R.entry, !R.entry]; turn = 0; msg = null; note = ''; cpuWait = 0;
+    }
+    function step() {
+      var die = roll(), from = pos[turn], again = 0, who = turn === 0 ? 'You' : 'Computer';
+      if (!live[turn]) {
+        if (die === R.entry) { live[turn] = 1; pos[turn] = 1; note = who + ' rolled ' + die + ' and enters.'; }
+        else note = who + ' rolled ' + die + ' — still waiting for a ' + R.entry + '.';
+      } else if (from + die > R.sq && R.exact) {
+        note = who + ' rolled ' + die + ' — overshoots, no move.';
+      } else {
+        pos[turn] = Math.min(R.sq, from + die);
+        note = who + ' rolled ' + die + ': ' + from + ' -> ' + pos[turn];
+        for (var i = 0; i < R.f.length; i++) if (R.f[i] === pos[turn]) {
+          note = who + ' rolled ' + die + ': ' + from + ' -> ' + pos[turn] + ', then ' +
+                 (R.t[i] > pos[turn] ? 'climbs' : 'falls back') + ' to ' + R.t[i] + '!';
+          pos[turn] = R.t[i];
+          break;
+        }
+        if (R.ros && rosette(pos[turn])) { again = 1; note += '  Rosette — throw again!'; }
       }
-      if (pos[who] >= 100) {
-        over = who ? 'Computer reaches 100.' : 'You reach 100 — you win!';
-        host.saveScore(who ? 0 : 100);
+      if (pos[turn] >= R.sq) {
+        msg = turn === 0 ? 'You reach home — you win!' : 'Computer reaches home first.';
+        if (turn === 0) host.saveScore(R.sq);
+        return;
       }
+      if (!again) turn = 1 - turn;
     }
     reset();
     return {
+      tick: function () {
+        if (msg || turn !== 1) return;
+        if (++cpuWait < 3) return;
+        cpuWait = 0;
+        step();
+      },
       key: function (k) {
-        if (over) { reset(); return; }
+        if (msg) { reset(); return; }
+        if (turn !== 0) return;
         if (k !== 'enter' && k !== 'space') return;
-        move(0);
-        if (!over) move(1);
+        step();
       },
       draw: function (t) {
-        t.header('SNAKES AND LADDERS', 'Enter rolls the die · Q quits');
-        for (var i = 0; i < 10; i++) {
-          for (var c = 0; c < 10; c++) {
-            var row = 9 - i;
-            var sq = row * 10 + (row % 2 === 0 ? c + 1 : 10 - c);
-            var j = FROM.indexOf(sq);
-            var col = j < 0 ? C.grey : (TO[j] > sq ? C.green : C.red);
-            var label;
-            if (pos[0] === sq && pos[1] === sq) { label = '[**]'; col = C.white; }
-            else if (pos[0] === sq) { label = '[Y ]'; col = C.cyan; }
-            else if (pos[1] === sq) { label = '[ C]'; col = C.magenta; }
-            else label = String(sq).padStart(3, ' ') + ' ';
-            t.text(22 + c * 4, 4 + i, label, col, null, label[0] === '[');
-          }
+        t.header('RACE', R.name + ' — ' +
+                 (R.dice === 1 ? 'throw sticks' : R.dice === 2 ? 'throw yut' : 'roll a die') +
+                 (R.exact ? ', exact finish' : '') + (R.entry ? ', roll a 6 to start' : ''));
+        for (var i = 0; i < rows; i++) for (var c = 0; c < cols; c++) {
+          var row = rows - 1 - i;
+          var sq = row * cols + ((row % 2 === 0) ? c + 1 : cols - c);
+          var x = 14 + c * 5, y = 4 + i;
+          if (sq > R.sq) { t.text(x, y, '     ', C.grey); continue; }
+          var col = C.grey, j;
+          for (j = 0; j < R.f.length; j++) if (R.f[j] === sq) col = R.t[j] > sq ? C.green : C.red;
+          if (R.ros && rosette(sq)) col = C.magenta;
+          if (pos[0] === sq && pos[1] === sq) t.text(x, y, '[**] ', C.white, null, true);
+          else if (pos[0] === sq) t.text(x, y, '[Y ] ', C.cyan, null, true);
+          else if (pos[1] === sq) t.text(x, y, '[ C] ', C.magenta, null, true);
+          else t.text(x, y, String(sq).padStart(3, ' ') + '  ', col);
         }
-        t.text(22, 15, 'You: ' + pos[0] + '   CPU: ' + pos[1] + '     ', C.fg);
-        t.text(22, 16, 'Green = ladder, red = snake', C.dim);
-        t.text(22, 18, (msg || '') + '                                        ', C.white);
-        if (over) t.center(20, over + ' Press any key.', C.white, true);
+        t.text(14, 5 + rows, 'You: ' + pos[0] + '   CPU: ' + pos[1] + '   ' +
+               (turn === 0 ? 'Your turn ' : 'CPU turn  '), C.fg);
+        t.text(14, 7 + rows, note + '                                        ', C.white);
+        if (msg) t.center(9 + rows, msg + ' Press any key.', C.green, true);
       }
     };
   }
 });
 
-/* ----------------------------------------------------------- virtual piano */
+/* ------------------------------------------------------ keyboard instrument */
 reg('piano', {
-  title: 'Virtual Piano', help: 'Play with z s x d c v g b h n j m and q 2 w 3 e r 5 t 6 y 7 u',
+  title: 'Piano', help: 'Play the keys · Q quits',
   start: function (host, p) {
-    var KEYS = 'zsxdcvgbhnjm,l.;/q2w3er5t6y7ui9o0p';
-    var NAMES = ['C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4',
-                 'C5','C#5','D5','D#5','E5','F5','F#5','G5','G#5','A5','A#5','B5',
-                 'C6','C#6','D6','D#6','E6','F6','F#6','G6','G#6','A6'];
-    var FREQ = [262,277,294,311,330,349,370,392,415,440,466,494,
-                523,554,587,622,659,698,740,784,831,880,932,988,
-                1047,1109,1175,1245,1319,1397,1480,1568,1661,1760];
-    var last = null, history = [], audio = null;
-    function tone(hz) {
+    var PKEYS = 'zsxdcvgbhnjm,l.;/q2w3er5t6y7ui9o0p'.split('');
+    var PN = ['C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4',
+              'C5','C#5','D5','D#5','E5','F5','F#5','G5','G#5','A5','A#5','B5',
+              'C6','C#6','D6','D#6','E6','F6','F#6','G6','G#6','A6'];
+    var PF = [262,277,294,311,330,349,370,392,415,440,466,494,523,554,587,622,
+              659,698,740,784,831,880,932,988,1047,1109,1175,1245,1319,1397,
+              1480,1568,1661,1760];
+    var IVAL = ['unison','minor 2nd','major 2nd','minor 3rd','major 3rd',
+                'perfect 4th','tritone','perfect 5th','minor 6th','major 6th',
+                'minor 7th','major 7th','octave'];
+    var CHORD = ['major','minor','diminished','augmented','dominant 7th'];
+    var CIVL = [[0,4,7],[0,3,7],[0,3,6],[0,4,8],[0,4,7,10]];
+    var SCALE = ['major','natural minor','pentatonic','blues'];
+    var SIVL = [[0,2,4,5,7,9,11,12],[0,2,3,5,7,8,10,12],[0,2,4,7,9,12],[0,3,5,6,7,10,12]];
+    var V = p.variant | 0;
+
+    /* WebAudio if the browser gives it to us; silent everywhere else. */
+    var actx = null;
+    /* delay is scheduled on the audio clock rather than with a timer: it is
+     * sample-accurate, and it keeps this working under the headless test stub
+     * where no setTimeout exists. */
+    function tone(f, ms, delay) {
       try {
-        if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
-        var osc = audio.createOscillator(), gain = audio.createGain();
-        osc.type = 'triangle';
-        osc.frequency.value = hz;
-        gain.gain.setValueAtTime(0.18, audio.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.45);
-        osc.connect(gain).connect(audio.destination);
-        osc.start();
-        osc.stop(audio.currentTime + 0.45);
-      } catch (e) { /* audio blocked: the keyboard still shows the note */ }
+        if (!actx && typeof AudioContext !== 'undefined') actx = new AudioContext();
+        if (!actx) return;
+        var at = actx.currentTime + (delay || 0) / 1000;
+        var o = actx.createOscillator(), g = actx.createGain();
+        o.frequency.value = f; o.type = 'sine';
+        g.gain.value = 0.06;
+        o.connect(g); g.connect(actx.destination);
+        o.start(at); o.stop(at + ms / 1000);
+      } catch (e) { /* no audio available */ }
     }
+    function idxOf(k) { return PKEYS.indexOf(k); }
+
+    var history = [], score = 0, asked = 0, note = '', target = null, step = 0;
+    var seq = [], phase = 'grow', flash = 0, timer = 0, sub = [], nlen = 0, root = 0, kind = 0;
+    var lane = [0,0,0,0,0,0].map(function(){return -1;}), misses = 0, tick = 0;
+    var drum = [[],[],[],[]], i0;
+    for (i0 = 0; i0 < 4; i0++) for (var j0 = 0; j0 < 16; j0++) drum[i0][j0] = 0;
+
+    function newQuestion() {
+      if (V === 2 || V === 8) { target = rnd(24); note = V === 2 ? 'Find ' + PN[target] : 'Listen...'; if (V === 8) tone(PF[target], 320); }
+      else if (V === 3) { root = rnd(21); step = 1 + rnd(12); note = 'Listen to the two notes...';
+                          tone(PF[root], 200); tone(PF[root + step], 200, 270); }
+      else if (V === 4 || V === 5) {
+        root = rnd(12); kind = rnd(V === 4 ? 5 : 4);
+        sub = V === 4 ? CIVL[kind] : SIVL[kind]; nlen = sub.length; step = 0;
+        note = PN[root] + ' ' + (V === 4 ? CHORD[kind] : SCALE[kind]);
+      }
+    }
+    if (V >= 2 && V <= 5 || V === 8) newQuestion();
+
+    var MODE = {0:'VIRTUAL PIANO',1:'RHYTHM RUNNER',2:'NOTE TRAINER',3:'EAR TRAINING',
+                4:'CHORD BUILDER',5:'SCALE PRACTICE',6:'DRUM MACHINE',7:'MELODY MEMORY',
+                8:'PERFECT PITCH',9:'METRONOME',10:'SEQUENCER'}[V] || 'PIANO';
+
     return {
+      tick: function () {
+        tick++;
+        if (V === 1) {
+          for (var i = 0; i < 6; i++) {
+            if (lane[i] >= 0) lane[i]++;
+            if (lane[i] > 8) { lane[i] = -1; misses++; }
+          }
+          if (rnd(100) < 40) lane[rnd(6)] = 0;
+        } else if (V === 6) {
+          for (var d = 0; d < 4; d++) if (drum[d][tick % 16]) tone(120 + d * 180, 60);
+        } else if (V === 9) {
+          if (tick % 4 === 0) tone(880, 70);
+        } else if (V === 7 && phase === 'show') {
+          timer++;
+          if (timer >= 5) { timer = 0; flash++; if (flash >= seq.length) { phase = 'input'; step = 0; } }
+        } else if (V === 7 && phase === 'grow') {
+          seq.push(rnd(12)); flash = 0; timer = 0; phase = 'show';
+        }
+      },
       key: function (k) {
-        var idx = KEYS.indexOf(k);
+        var idx = idxOf(k);
+        if (V === 0 || V === 10) {
+          if (idx < 0) return;
+          tone(PF[idx], 180);
+          history.push(PN[idx]);
+          if (history.length > 14) history.shift();
+          if (V === 10) score++;
+          return;
+        }
+        if (V === 1) {
+          if (idx < 0 || idx >= 6) return;
+          if (lane[idx] >= 6) { score++; tone(PF[idx], 120); lane[idx] = -1; } else misses++;
+          return;
+        }
+        if (V === 6) { if (k >= '1' && k <= '4') drum[+k - 1][tick % 16] = drum[+k - 1][tick % 16] ? 0 : 1; return; }
+        if (V === 9) { if (k === 'space') { if (tick % 4 !== 2) score++; else misses++; } return; }
+        if (V === 7) {
+          if (phase !== 'input') return;
+          if (idx < 0) return;
+          tone(PF[idx], 150);
+          if (idx !== seq[step]) { note = 'Wrong note — phrase was ' + seq.length + ' long.'; host.saveScore(seq.length - 1); seq = []; phase = 'grow'; return; }
+          step++;
+          if (step >= seq.length) { score = seq.length; phase = 'grow'; }
+          return;
+        }
+        if (V === 3) {
+          var DIG = ['0','1','2','3','4','5','6','7','8','9','0','-','='];
+          var got = -1;
+          for (var i = 1; i <= 12; i++) if (k === DIG[i]) got = i;
+          if (got < 0) return;
+          asked++;
+          if (got === step) { score++; note = 'Correct — ' + IVAL[step]; }
+          else note = 'It was a ' + IVAL[step] + '.';
+          host.saveScore(score);
+          newQuestion();
+          return;
+        }
+        if (V === 4 || V === 5) {
+          if (idx < 0) return;
+          tone(PF[idx], 160);
+          if (idx !== root + sub[step]) { note = 'Not quite — wanted ' + PN[root + sub[step]] + '.'; asked++; newQuestion(); return; }
+          step++;
+          if (step >= nlen) { score++; asked++; note = 'Correct!'; host.saveScore(score); newQuestion(); }
+          return;
+        }
+        /* modes 2 and 8: name the note */
         if (idx < 0) return;
-        last = idx;
-        tone(FREQ[idx]);
-        history.push(NAMES[idx]);
-        if (history.length > 16) history.shift();
+        tone(PF[idx], 180);
+        asked++;
+        if (idx === target) { score++; note = 'Correct — ' + PN[target]; }
+        else note = 'That was ' + PN[idx] + '; wanted ' + PN[target] + '.';
+        host.saveScore(score);
+        newQuestion();
       },
       draw: function (t) {
-        t.header('VIRTUAL PIANO', 'z s x d c v g b h n j m  ·  q 2 w 3 e r 5 t 6 y 7 u');
-        t.text(10, 5, '  ┌─┬┬─┬┬─┬─┬┬─┬┬─┬┬─┬─┐  ┌─┬┬─┬┬─┬─┬┬─┬┬─┬┬─┬─┐', C.white);
-        t.text(10, 6, '  │ ││ ││ │ ││ ││ ││ │ │  │ ││ ││ │ ││ ││ ││ │ │', C.white);
-        t.text(10, 7, '  │ └┘ └┘ │ └┘ └┘ └┘ │ │  │ └┘ └┘ │ └┘ └┘ └┘ │ │', C.white);
-        t.text(10, 8, '  │  │  │  │  │  │  │  │  │  │  │  │  │  │  │  │', C.white);
-        t.text(10, 9, '  └──┴──┴──┴──┴──┴──┴──┘  └──┴──┴──┴──┴──┴──┴──┘', C.white);
-        t.text(10, 10, '   z  x  c  v  b  n  m     q  w  e  r  t  y  u', C.dim);
-        t.text(10, 13, 'Recent: ' + (history.join(' ') + '                                        ').slice(0, 50), C.dim);
-        if (last !== null)
-          t.text(10, 15, '♪  ' + NAMES[last] + '   ' + FREQ[last] + ' Hz        ', C.yellow, null, true);
+        t.header(MODE, {0:'Play with z s x d c v g b h n j m / q 2 w 3 e r 5 t 6 y 7 u',
+                        1:'Hit the note key as it reaches the line',
+                        2:'Find the named note on the keyboard',
+                        3:'Name the interval: 1-9 then 0 - = for 10-12',
+                        4:'Play the chord, lowest note first',
+                        5:'Play the scale upwards',
+                        6:'1-4 toggle a drum on the current step',
+                        7:'Listen, then play the phrase back',
+                        8:'Which note did you hear?',
+                        9:'Tap SPACE on the beat',
+                        10:'Press keys to record'}[V] || '');
+        if (V === 0 || V === 10) {
+          t.text(10, 6, '  +-++-++-+-++-++-++-+-+  +-++-++-+-++-++-++-+-+', C.grey);
+          t.text(10, 7, '  | || || | || || || | |  | || || | || || || | |', C.grey);
+          t.text(10, 8, '  | ++ ++ | ++ ++ ++ | |  | ++ ++ | ++ ++ ++ | |', C.grey);
+          t.text(10, 9, '  +--+--+--+--+--+--+--+  +--+--+--+--+--+--+--+', C.grey);
+          t.text(10, 10, '   z  x  c  v  b  n  m     q  w  e  r  t  y  u', C.dim);
+          t.text(10, 13, 'Recent: ' + history.join(' ').padEnd(52, ' '), C.yellow);
+          if (V === 10) t.text(10, 15, 'Recorded ' + score + ' notes   ', C.cyan);
+        } else if (V === 1) {
+          for (var i = 0; i < 6; i++) {
+            var x = 18 + i * 8;
+            t.text(x, 5, PKEYS[i], C.grey);
+            for (var y = 0; y <= 9; y++) t.text(x, 6 + y, '  ', C.grey);
+            if (lane[i] >= 0) t.text(x, 6 + lane[i], lane[i] >= 6 ? '##' : '[]',
+                                     lane[i] >= 6 ? C.green : C.cyan, null, true);
+          }
+          t.hline(16, 12, 50, C.dim);
+          t.text(18, 15, 'Hits ' + score + '   Misses ' + misses + '   ', C.fg);
+        } else if (V === 6) {
+          var DN = ['kick','snare','hihat','clap'];
+          for (var d = 0; d < 4; d++) {
+            t.text(14, 6 + d * 2, DN[d].padEnd(7, ' '), C.cyan);
+            for (var s2 = 0; s2 < 16; s2++)
+              t.put(22 + s2 * 2, 6 + d * 2, drum[d][s2] ? '#' : '.',
+                    drum[d][s2] ? C.yellow : C.grey,
+                    s2 === tick % 16 ? '#2b4a6b' : null);
+          }
+        } else if (V === 9) {
+          t.text(30, 8, tick % 4 === 0 ? '  * BEAT *  ' : '            ', C.yellow, null, true);
+          t.text(28, 12, 'Hits ' + score + '   Misses ' + misses + '   ', C.fg);
+        } else if (V === 7) {
+          t.text(24, 7, 'Phrase of ' + Math.max(1, seq.length) + ' note(s)   ', C.fg);
+          if (phase === 'show' && flash < seq.length && timer < 3)
+            t.text(24, 9, PN[seq[flash]] + '      ', C.yellow, null, true);
+          else t.text(24, 9, '          ', C.grey);
+          if (phase === 'input') t.text(24, 11, 'Your turn      ', C.cyan);
+          else t.text(24, 11, '               ', C.grey);
+          t.text(24, 13, note + '                              ', C.white);
+        } else {
+          t.text(20, 7, note + '                                        ', C.white, null, true);
+          t.text(20, 9, 'Score ' + score + ' / ' + asked + '     ', C.fg);
+          if ((V === 4 || V === 5) && sub.length)
+            t.text(20, 11, 'Note ' + (step + 1) + ' of ' + nlen + '     ', C.cyan);
+        }
       }
     };
   }
