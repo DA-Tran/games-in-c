@@ -1,6 +1,6 @@
 # Games in C
 
-A thousand games catalogued and bound to engines; 594 playable so far — in the
+A thousand games catalogued and bound to engines; 686 playable so far — in the
 terminal and in the browser, from the same design.
 
 - **Terminal:** pure C99, ANSI escapes, zero dependencies. Builds with `make`
@@ -19,7 +19,7 @@ open web/index.html      # the browser version
 | | |
 |---|---|
 | Catalogued games | 1000, across 17 genres |
-| Playable now | 594, in both C and JavaScript |
+| Playable now | 686, in both C and JavaScript |
 | External dependencies | none, on either side |
 | Compiler warnings | zero, at `-Wall -Wextra` |
 
@@ -45,8 +45,8 @@ A marker names the family it vouches for (`GIC:PARAMETERISED hangman`), so
 several families can share a source file without one of them accidentally
 vouching for the others.
 
-Current state: 53 families done (594 entries), **no engine is left ignoring
-its parameters**, and 27 engines are not yet written (406 entries).
+Current state: 58 families done (686 entries), **no engine is left ignoring
+its parameters**, and 22 engines are not yet written (314 entries).
 
 ## Families completed so far
 
@@ -101,6 +101,17 @@ its parameters**, and 27 engines are not yet written (406 entries).
   bands are separate question pools, not a shorter timer over the same
   questions — band 0 is common knowledge and band 3 is specialist. 384
   questions in all, written once in C and derived for the browser.
+- **Constrained grids** — 32 entries across sixteen puzzle types: kakuro,
+  futoshiki, hitori, binairo, suguru, skyscrapers, kenken, magic square,
+  unruly, dominosa, str8ts, norinori, killer and jigsaw sudoku, nurikabe and
+  shikaku. Each generates a real solution first and derives its clues from it,
+  so no board is unsolvable; the win test checks the puzzle's own constraints
+  rather than equality with the generated grid, because several legitimately
+  admit more than one solution.
+- **Number drills** (20), **reaction tests** (18 — latency, span, Stroop
+  interference, aim and tracking are different faculties, not one timer
+  relabelled), **word games** (12) and **idle games** (10, each with its own
+  resource, upgrades and cost curve).
 - **Word Search** (10 themed grids), **Match Three** (6 symbol sets),
   **Peg Solitaire** (5 board shapes — English, European, triangular, diamond
   and square, which are genuinely different puzzles, not skins).
@@ -197,7 +208,7 @@ Both harnesses drive **every playable catalogue entry with its own
 parameters**, not one representative per engine — so all thirty sudoku
 variants are generated and played, not just one.
 
-Both suites currently pass 594/594.
+Both suites currently pass 686/686.
 
 ## Adding a game
 
