@@ -2,7 +2,7 @@
 #   make            build ./games
 #   make run        build and launch the catalog browser
 #   make play G=snake   build and launch one game directly
-#   make catalog    regenerate the 1000-game catalog from tools/gen_catalog.py
+#   make catalog    regenerate the dictionaries and the 1000-game catalogue
 #   make smoke      run the scripted no-crash harness over every game
 #   make web        report how to open the browser version
 #   make clean      remove build artefacts
@@ -33,6 +33,7 @@ play: $(BIN)
 	./$(BIN) $(G)
 
 catalog:
+	python3 tools/sync_words.py
 	python3 tools/gen_catalog.py
 
 smoke: $(BIN)

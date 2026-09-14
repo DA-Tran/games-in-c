@@ -1,6 +1,6 @@
 # Games in C
 
-A thousand games catalogued and bound to engines; 160 playable so far — in the
+A thousand games catalogued and bound to engines; 215 playable so far — in the
 terminal and in the browser, from the same design.
 
 - **Terminal:** pure C99, ANSI escapes, zero dependencies. Builds with `make`
@@ -19,7 +19,7 @@ open web/index.html      # the browser version
 | | |
 |---|---|
 | Catalogued games | 1000, across 17 genres |
-| Playable now | 160, in both C and JavaScript |
+| Playable now | 215, in both C and JavaScript |
 | External dependencies | none, on either side |
 | Compiler warnings | zero, at `-Wall -Wextra` |
 
@@ -41,8 +41,12 @@ and so has nothing to configure. That is deliberate: without it, one
 hard-coded sudoku would claim credit for thirty variants it would silently
 ignore. `tools/gen_catalog.py` prints the remaining work every time it runs.
 
-Current state: 16 families done (160 entries), 34 engines built but still
-ignoring their parameters (319 entries), 32 engines not yet written (521
+A marker names the family it vouches for (`GIC:PARAMETERISED hangman`), so
+several families can share a source file without one of them accidentally
+vouching for the others.
+
+Current state: 22 families done (215 entries), 26 engines built but still
+ignoring their parameters (240 entries), 32 engines not yet written (545
 entries).
 
 ## Families completed so far
@@ -62,6 +66,10 @@ entries).
   Threes merge rules.
 - **Towers of Hanoi** (8), **Memory Match** (6), **Flood It** (6),
   **Sokoban** (6), **Sliding Puzzle** (5).
+- **Hangman** — 21 entries, one per themed dictionary.
+- **Anagram** — 11 themed entries. **Typing Test** — 9 drill modes.
+- **Wordle** — 5 entries, 4 to 8 letters, each with its own word list.
+- **Guess the Number** (5 ranges), **Bulls and Cows** (4 digit counts).
 
 Plus single-configuration families: Pacman, Frogger, Flappy, Dino Run, Pig,
 Higher or Lower.
@@ -69,8 +77,7 @@ Higher or Lower.
 **Built, awaiting parameterisation** — Tic Tac Toe, Connect Four, Reversi,
 Gomoku, Checkers, Mancala, Nim, Dots and Boxes, Battleship, Mastermind, Snake,
 Tetris, Pong, Breakout, Space Invaders, Asteroids, Blackjack, Video Poker,
-War, Go Fish, Yahtzee, Slots, Hangman, Wordle, Anagram, Typing Test, Guess the
-Number, Bulls and Cows, Rock Paper Scissors, Simon, Snakes and Ladders,
+War, Go Fish, Yahtzee, Slots, Rock Paper Scissors, Simon, Snakes and Ladders,
 Dungeon Crawl, Virtual Piano. These play today at their default configuration;
 their remaining variants are catalogued and waiting.
 
@@ -85,7 +92,7 @@ src/games/    one file per family (plus shared cards.c and words.c)
 src/          main.c (catalogue browser), registry.c, catalog_data.c [generated]
 web/          index.html + js/ — the browser build
 data/         catalog.json [generated]
-tools/        gen_catalog.py, smoke_test.sh, web_test.js
+tools/        gen_catalog.py, sync_words.py, smoke_test.sh, web_test.js
 legacy/       the original 14-file prototype, kept for reference
 ```
 
@@ -99,6 +106,11 @@ rules and difficulty match exactly.
 **The catalogue is a listing.** 1000 entries printed on green-bar continuous-feed
 paper: ledger bands, sprocket margins, line numbers. Playing switches to the lit
 terminal the games really run in.
+
+**Dictionaries have one source.** `src/games/words.c` holds the themed word
+lists, the by-length guess lists and the typing passages; `tools/sync_words.py`
+derives `web/js/words.js` from it, so the two builds cannot drift. It also
+validates the data — it caught seven words filed under the wrong length.
 
 **Input works when piped.** `key_poll()` selects on stdin whether it is a tty or
 a pipe, and treats EOF as a quit. That is what makes the smoke test possible:
@@ -116,7 +128,7 @@ Both harnesses drive **every playable catalogue entry with its own
 parameters**, not one representative per engine — so all thirty sudoku
 variants are generated and played, not just one.
 
-Both suites currently pass 160/160.
+Both suites currently pass 215/215.
 
 ## Adding a game
 

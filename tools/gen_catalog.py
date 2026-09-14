@@ -832,14 +832,17 @@ reg_src = open(os.path.join(ROOT, "src", "registry.c")).read()
 fam_to_fn = dict(re.findall(r'\{"([a-z0-9]+)",\s*fam_(\w+)\}', reg_src))
 built = set(fam_to_fn)
 
+# A marker names the family it vouches for, e.g. "GIC:PARAMETERISED sudoku".
+# Naming it means several families can share a source file without one of
+# them accidentally vouching for the others.
 marked = set()
-for fam, fn in fam_to_fn.items():
-    for path in glob.glob(os.path.join(ROOT, "src", "games", "*.c")):
-        src = open(path).read()
-        if re.search(r'\bvoid fam_%s\s*\(' % re.escape(fn), src):
-            if "GIC:PARAMETERISED" in src:
-                marked.add(fam)
-            break
+for path in glob.glob(os.path.join(ROOT, "src", "games", "*.c")):
+    src = open(path).read()
+    for fam in re.findall(r"GIC:PARAMETERISED\s+([a-z0-9]+)", src):
+        marked.add(fam)
+unknown = marked - built
+if unknown:
+    raise SystemExit("marker names unknown family: %s" % sorted(unknown))
 
 counts = {}
 for e in entries:

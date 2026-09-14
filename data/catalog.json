@@ -1,6 +1,6 @@
 {
  "count": 1000,
- "playable": 160,
+ "playable": 215,
  "families": {
   "abstract": 16,
   "anagram": 11,
@@ -14683,8 +14683,8 @@
     "players": 0,
     "theme": "Animals"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-countries",
@@ -14706,8 +14706,8 @@
     "players": 0,
     "theme": "Countries"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-capitals",
@@ -14729,8 +14729,8 @@
     "players": 0,
     "theme": "Capitals"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-computing",
@@ -14752,8 +14752,8 @@
     "players": 0,
     "theme": "Computing"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-space",
@@ -14775,8 +14775,8 @@
     "players": 0,
     "theme": "Space"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-food",
@@ -14798,8 +14798,8 @@
     "players": 0,
     "theme": "Food"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-sports",
@@ -14821,8 +14821,8 @@
     "players": 0,
     "theme": "Sports"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-films",
@@ -14844,8 +14844,8 @@
     "players": 0,
     "theme": "Films"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-music",
@@ -14867,8 +14867,8 @@
     "players": 0,
     "theme": "Music"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-nature",
@@ -14890,8 +14890,8 @@
     "players": 0,
     "theme": "Nature"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-science",
@@ -14913,8 +14913,8 @@
     "players": 0,
     "theme": "Science"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-history",
@@ -14936,8 +14936,8 @@
     "players": 0,
     "theme": "History"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-occupations",
@@ -14959,8 +14959,8 @@
     "players": 0,
     "theme": "Occupations"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-colours",
@@ -14982,8 +14982,8 @@
     "players": 0,
     "theme": "Colours"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-vehicles",
@@ -15005,8 +15005,8 @@
     "players": 0,
     "theme": "Vehicles"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-instruments",
@@ -15028,8 +15028,8 @@
     "players": 0,
     "theme": "Instruments"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-weather",
@@ -15051,8 +15051,8 @@
     "players": 0,
     "theme": "Weather"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-body-parts",
@@ -15074,8 +15074,8 @@
     "players": 0,
     "theme": "Body Parts"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-tools",
@@ -15097,8 +15097,8 @@
     "players": 0,
     "theme": "Tools"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-plants",
@@ -15120,8 +15120,8 @@
     "players": 0,
     "theme": "Plants"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hangman-mythology",
@@ -15143,8 +15143,8 @@
     "players": 0,
     "theme": "Mythology"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "wordle-4-letters",
@@ -15166,8 +15166,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "wordle-5-letters",
@@ -15189,8 +15189,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "wordle-6-letters",
@@ -15212,8 +15212,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "wordle-7-letters",
@@ -15235,8 +15235,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "wordle-8-letters",
@@ -15258,8 +15258,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-animals",
@@ -15281,8 +15281,8 @@
     "players": 0,
     "theme": "Animals"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-countries",
@@ -15304,8 +15304,8 @@
     "players": 0,
     "theme": "Countries"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-capitals",
@@ -15327,8 +15327,8 @@
     "players": 0,
     "theme": "Capitals"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-computing",
@@ -15350,8 +15350,8 @@
     "players": 0,
     "theme": "Computing"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-space",
@@ -15373,8 +15373,8 @@
     "players": 0,
     "theme": "Space"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-food",
@@ -15396,8 +15396,8 @@
     "players": 0,
     "theme": "Food"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-sports",
@@ -15419,8 +15419,8 @@
     "players": 0,
     "theme": "Sports"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-films",
@@ -15442,8 +15442,8 @@
     "players": 0,
     "theme": "Films"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-music",
@@ -15465,8 +15465,8 @@
     "players": 0,
     "theme": "Music"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-nature",
@@ -15488,8 +15488,8 @@
     "players": 0,
     "theme": "Nature"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "anagram-science",
@@ -15511,8 +15511,8 @@
     "players": 0,
     "theme": "Science"
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "word-search-animals",
@@ -16040,8 +16040,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "typing-test-quotations",
@@ -16063,8 +16063,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "typing-test-code-snippets",
@@ -16086,8 +16086,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "typing-test-numbers",
@@ -16109,8 +16109,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "typing-test-punctuation",
@@ -16132,8 +16132,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "typing-test-long-passage",
@@ -16155,8 +16155,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "typing-test-sixty-second",
@@ -16178,8 +16178,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "typing-test-accuracy-mode",
@@ -16201,8 +16201,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "typing-test-pangrams",
@@ -16224,8 +16224,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "guess-the-number-to-10",
@@ -16247,8 +16247,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "guess-the-number-to-100",
@@ -16270,8 +16270,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "guess-the-number-to-1000",
@@ -16293,8 +16293,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "guess-the-number-to-10000",
@@ -16316,8 +16316,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "guess-the-number-to-1000000",
@@ -16339,8 +16339,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "bulls-and-cows-3-digits",
@@ -16362,8 +16362,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "bulls-and-cows-4-digits",
@@ -16385,8 +16385,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "bulls-and-cows-5-digits",
@@ -16408,8 +16408,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "bulls-and-cows-6-digits",
@@ -16431,8 +16431,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "logic-grid-detective-standard",
