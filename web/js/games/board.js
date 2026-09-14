@@ -823,80 +823,147 @@ reg('mastermind', {
 reg('battleship', {
   title: 'Battleship', help: 'Arrows aim · Enter fires · Q quits',
   start: function (host, p) {
-    var N = 10, LEN = [5,4,3,3,2];
-    var you, cpu, cr = 0, cc = 0, msg = '', queue = [], over = null;
+    var VAR = (p.variant >= 0 && p.variant <= 5) ? p.variant : 0;
+    var N = Math.max(8, Math.min(12, p.size > 0 ? p.size : 10));
+    var LEN = [5, 4, 3, 3, 2];
+    var SUB = ['Sink the enemy fleet', 'SALVO: one shot per surviving ship',
+               'Sink the enemy fleet', 'MOVING: undamaged ships redeploy',
+               'FOG: results stay hidden until a ship sinks',
+               'Sink the enemy fleet'][VAR];
+    var you, cpu, cr, cc, queue, msg, turns, shotsLeft;
+
     function blank() {
-      var g = []; for (var r = 0; r < N; r++) g.push(new Array(N).fill(0));
+      var g = [];
+      for (var r = 0; r < N; r++) g.push(new Array(N).fill(0));
       return g;
     }
     function place(g) {
-      LEN.forEach(function (len) {
-        for (;;) {
-          var h = rnd(2), r = rnd(N), c = rnd(N), ok = true, i;
-          if (h ? c + len > N : r + len > N) continue;
-          for (i = 0; i < len; i++) if (g[r + (h ? 0 : i)][c + (h ? i : 0)]) ok = false;
+      for (var s = 0; s < LEN.length; s++) {
+        for (var guard = 0; guard < 500; guard++) {
+          var horiz = rnd(2), r = rnd(N), c = rnd(N), ok = true, i;
+          if (horiz ? c + LEN[s] > N : r + LEN[s] > N) continue;
+          for (i = 0; i < LEN[s]; i++) if (g[r + (horiz ? 0 : i)][c + (horiz ? i : 0)]) { ok = false; break; }
           if (!ok) continue;
-          for (i = 0; i < len; i++) g[r + (h ? 0 : i)][c + (h ? i : 0)] = 1;
-          return;
+          for (i = 0; i < LEN[s]; i++) g[r + (horiz ? 0 : i)][c + (horiz ? i : 0)] = 1;
+          break;
         }
-      });
+      }
     }
-    function afloat(g) {
+    function remaining(g) {
       var n = 0;
       for (var r = 0; r < N; r++) for (var c = 0; c < N; c++) if (g[r][c] === 1) n++;
       return n;
     }
-    function reset() { you = blank(); cpu = blank(); place(you); place(cpu); queue = []; over = null; msg = ''; }
-    function push(r, c) { if (r >= 0 && r < N && c >= 0 && c < N) queue.push([r, c]); }
+    /* Roughly how many hulls are still afloat — salvo size comes from this. */
+    function shipCount(g) {
+      var n = remaining(g);
+      return n > 5 ? 5 : (n > 0 ? Math.ceil(n / 3) : 0);
+    }
+    /* Moving-ships mode lifts every unhit hull and redeploys it. */
+    function redeploy(g) {
+      var intact = 0, r, c, s, i;
+      for (r = 0; r < N; r++) for (c = 0; c < N; c++) if (g[r][c] === 1) { g[r][c] = 0; intact++; }
+      for (s = 0; s < LEN.length && intact > 0; s++) {
+        if (LEN[s] > intact) continue;
+        for (var tries = 0; tries < 200; tries++) {
+          var horiz = rnd(2), r2 = rnd(N), c2 = rnd(N), ok = true;
+          if (horiz ? c2 + LEN[s] > N : r2 + LEN[s] > N) continue;
+          for (i = 0; i < LEN[s]; i++) if (g[r2 + (horiz ? 0 : i)][c2 + (horiz ? i : 0)]) { ok = false; break; }
+          if (!ok) continue;
+          for (i = 0; i < LEN[s]; i++) g[r2 + (horiz ? 0 : i)][c2 + (horiz ? i : 0)] = 1;
+          intact -= LEN[s];
+          break;
+        }
+      }
+    }
+    function pushTarget(r, c) {
+      if (r < 0 || r >= N || c < 0 || c >= N) return;
+      if (queue.length < 8) queue.push([r, c]);
+    }
     function cpuShot() {
-      var r, c;
+      var r, c, guard = 0;
       for (;;) {
+        if (++guard > 4000) return;
         if (queue.length) { var q = queue.pop(); r = q[0]; c = q[1]; }
-        else { r = rnd(N); c = rnd(N); if ((r + c) % 2) continue; }
+        else {
+          r = rnd(N); c = rnd(N);
+          /* Parity search: nothing shorter than two hides on one colour. */
+          if ((r + c) % 2) continue;
+        }
         if (you[r][c] === 2 || you[r][c] === 3) continue;
         break;
       }
-      if (you[r][c] === 1) { you[r][c] = 3; push(r-1,c); push(r+1,c); push(r,c-1); push(r,c+1); }
-      else you[r][c] = 2;
+      if (you[r][c] === 1) {
+        you[r][c] = 3;
+        pushTarget(r-1, c); pushTarget(r+1, c); pushTarget(r, c-1); pushTarget(r, c+1);
+      } else you[r][c] = 2;
     }
-    function grid(t, top, left, g, hide, sr, sc) {
-      t.text(left, top, '   0 1 2 3 4 5 6 7 8 9', C.dim);
-      for (var r = 0; r < N; r++) {
-        t.text(left, top + 1 + r, String.fromCharCode(65 + r), C.dim);
-        for (var c = 0; c < N; c++) {
-          var v = g[r][c], ch = '·', fg = C.blue;
-          if (v === 3) { ch = 'X'; fg = C.red; }
-          else if (v === 2) { ch = 'o'; fg = C.grey; }
-          else if (v === 1 && !hide) { ch = '▩'; fg = C.cyan; }
-          t.put(left + 3 + c * 2, top + 1 + r, ch, fg,
-                (sr === r && sc === c) ? '#2b4a6b' : null, v === 3);
-        }
-      }
+    function newVolley() { shotsLeft = (VAR === 1) ? Math.max(1, shipCount(you)) : 1; }
+    function reset() {
+      you = blank(); cpu = blank();
+      place(you); place(cpu);
+      cr = 0; cc = 0; queue = []; msg = null; turns = 0;
+      newVolley();
     }
     reset();
     return {
       key: function (k) {
-        if (over) { reset(); return; }
-        if (k === 'up'    && cr > 0) cr--;
+        if (msg) { reset(); return; }
+        if (k === 'up'    && cr > 0)     cr--;
         if (k === 'down'  && cr < N - 1) cr++;
-        if (k === 'left'  && cc > 0) cc--;
+        if (k === 'left'  && cc > 0)     cc--;
         if (k === 'right' && cc < N - 1) cc++;
         if (k !== 'enter' && k !== 'space') return;
         if (cpu[cr][cc] === 2 || cpu[cr][cc] === 3) return;
-        if (cpu[cr][cc] === 1) { cpu[cr][cc] = 3; msg = 'HIT!'; } else { cpu[cr][cc] = 2; msg = 'Miss.'; }
-        if (afloat(cpu) === 0) { over = 'Enemy fleet destroyed — you win!'; host.saveScore(afloat(you) * 100); return; }
-        cpuShot();
-        if (afloat(you) === 0) over = 'Your fleet is lost — computer wins.';
+
+        cpu[cr][cc] = (cpu[cr][cc] === 1) ? 3 : 2;
+        shotsLeft--;
+        if (remaining(cpu) === 0) {
+          msg = 'Enemy fleet destroyed — you win!';
+          host.saveScore(remaining(you) * 100);
+          return;
+        }
+        if (shotsLeft > 0) return;
+
+        var salvo = (VAR === 1) ? Math.max(1, shipCount(cpu)) : 1;
+        for (var s = 0; s < salvo; s++) {
+          cpuShot();
+          if (remaining(you) === 0) break;
+        }
+        if (remaining(you) === 0) { msg = 'Your fleet is lost — computer wins.'; return; }
+
+        if (VAR === 3 && ++turns % 4 === 0) { redeploy(cpu); redeploy(you); queue = []; }
+        newVolley();
       },
       draw: function (t) {
-        t.header('BATTLESHIP', 'Arrows aim · Enter fires · Q quits');
-        t.text(4, 4, 'YOUR FLEET', C.cyan, null, true);
-        grid(t, 5, 4, you, false, -1, -1);
-        t.text(46, 4, 'ENEMY WATERS', C.red, null, true);
-        grid(t, 5, 46, cpu, true, cr, cc);
-        t.text(4, 17, 'Ships afloat: ' + afloat(you) + '  ', C.fg);
-        t.text(46, 17, 'Enemy afloat: ' + afloat(cpu) + '  ', C.fg);
-        t.text(4, 19, over || msg, over ? C.white : C.yellow, null, true);
+        t.header('BATTLESHIP', SUB);
+        var right = 10 + N * 3 + 8;
+        function grid(left, g, hide) {
+          var hdr = '   ', c;
+          for (c = 0; c < N; c++) hdr += String(c % 10) + '  ';
+          t.text(left, 4, hdr, C.dim);
+          for (var r = 0; r < N; r++) {
+            t.text(left, 5 + r, String.fromCharCode(65 + r) + ' ', C.dim);
+            for (c = 0; c < N; c++) {
+              var v = g[r][c], sel = (!hide ? false : (cr === r && cc === c));
+              var ch, fg;
+              if (VAR === 4 && hide && (v === 2 || v === 3)) { ch = '?'; fg = C.magenta; }
+              else if (v === 3) { ch = 'X'; fg = C.red; }
+              else if (v === 2) { ch = 'o'; fg = C.grey; }
+              else if (v === 1 && !hide) { ch = '#'; fg = C.cyan; }
+              else { ch = '.'; fg = C.blue; }
+              t.text(left + 2 + c * 3, 5 + r, ' ' + ch + ' ', fg, sel ? '#2b4a6b' : null, v === 3);
+            }
+          }
+        }
+        t.text(10, 3, 'YOUR FLEET', C.cyan, null, true);
+        grid(10, you, false);
+        t.text(right, 3, 'ENEMY WATERS', C.red, null, true);
+        grid(right, cpu, true);
+        t.text(10, 6 + N, 'Ships afloat: ' + remaining(you) + '    ', C.fg);
+        t.text(right, 6 + N, 'Enemy afloat: ' + remaining(cpu) + '    ', C.fg);
+        if (VAR === 1) t.text(10, 7 + N, 'Shots left this volley: ' + shotsLeft + '   ', C.yellow);
+        if (msg) t.center(9 + N, msg + ' Press any key.', C.white, true);
       }
     };
   }

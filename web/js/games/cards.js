@@ -24,82 +24,138 @@ function drawCard(t, x, y, card, up) {
 
 /* -------------------------------------------------------------- blackjack */
 reg('blackjack', {
-  title: 'Blackjack', help: 'H hit · S stand · D double · Enter deals · Q quits',
+  title: 'Blackjack', help: 'H hit · S stand · D double · Q quits',
   start: function (host, p) {
-    var deck, top, phand, dhand, chips, bet, phase, msg;
-    function deal() { if (top >= 52) { deck = newDeck(); top = 0; } return deck[top++]; }
+    /* decks, holeUp, hitSoft17, bjNum, bjDen, tiesDealer, noTens, fiveCard,
+     * surrender, name — these move the edge, not the wallpaper. */
+    var RULES = [
+      [2,0,0,3,2,0,0,0,0,'Blackjack'],
+      [1,0,1,3,2,0,0,0,0,'Single Deck'],
+      [6,0,0,3,2,0,0,0,0,'Six Deck'],
+      [8,1,1,1,1,1,0,0,0,'Double Exposure'],
+      [6,0,1,3,2,0,1,1,0,'Spanish 21'],
+      [4,0,0,3,2,0,0,0,0,'Vegas Strip'],
+      [8,0,0,3,2,0,0,0,1,'Atlantic City'],
+      [8,1,0,1,1,1,0,0,0,'Face Up 21'],
+      [1,0,1,2,1,1,0,1,0,'Pontoon']];
+    var R = RULES[(p.variant >= 0 && p.variant <= 8) ? p.variant : 0];
+    var DECKS=R[0], HOLEUP=R[1], HITS17=R[2], BJN=R[3], BJD=R[4],
+        TIES=R[5], NOTENS=R[6], FIVE=R[7], SURR=R[8], RNAME=R[9];
+
+    var deck, top, ph, dh, chips, bet, phase, msg;
+
+    function shoe() {
+      deck = [];
+      for (var d = 0; d < DECKS; d++) for (var s = 0; s < 4; s++) for (var r = 0; r < 13; r++) {
+        if (NOTENS && r === 9) continue;       /* Spanish 21 strips the tens */
+        deck.push(s * 13 + r);
+      }
+      deck = shuffle(deck);
+      top = 0;
+    }
+    function deal() { if (top >= deck.length) shoe(); return deck[top++]; }
     function value(h) {
       var total = 0, aces = 0;
-      h.forEach(function (c) {
-        var r = c % 13;
+      for (var i = 0; i < h.length; i++) {
+        var r = h[i] % 13;
         if (r === 0) { total += 11; aces++; }
         else if (r >= 9) total += 10;
         else total += r + 1;
-      });
+      }
       while (total > 21 && aces > 0) { total -= 10; aces--; }
       return total;
     }
-    function reset() { deck = newDeck(); top = 0; chips = 100; bet = 10; phase = 'bet'; msg = null; }
-    function start() {
-      phand = [deal(), deal()];
-      dhand = [deal(), deal()];
-      phase = 'play';
-      msg = null;
-      if (value(phand) === 21) { chips += Math.floor(bet * 1.5); msg = 'Blackjack! Pays 3:2.'; phase = 'done'; }
+    function soft(h) {
+      var total = 0, aces = 0;
+      for (var i = 0; i < h.length; i++) {
+        var r = h[i] % 13;
+        if (r === 0) { total += 11; aces++; }
+        else if (r >= 9) total += 10;
+        else total += r + 1;
+      }
+      while (total > 21 && aces > 0) { total -= 10; aces--; }
+      return aces > 0;
     }
-    function settle() {
-      while (value(dhand) < 17 && dhand.length < 11) dhand.push(deal());
-      var pv = value(phand), dv = value(dhand);
-      if (pv > 21)      { msg = 'Bust — you lose.'; chips -= bet; }
-      else if (dv > 21) { msg = 'Dealer busts — you win!'; chips += bet; }
-      else if (dv > pv) { msg = 'Dealer wins.'; chips -= bet; }
-      else if (dv < pv) { msg = 'You win!'; chips += bet; }
+    function natural(h) { return h.length === 2 && value(h) === 21; }
+
+    function newHand() {
+      ph = [deal(), deal()];
+      dh = [deal(), deal()];
+      phase = 'play'; msg = null;
+      if (natural(ph)) {
+        if (HOLEUP && natural(dh)) { msg = 'Both naturals — dealer takes the tie.'; chips -= bet; }
+        else { msg = 'Natural! Pays ' + BJN + ':' + BJD + '.'; chips += Math.floor(bet * BJN / BJD); }
+        phase = 'over';
+        host.saveScore(chips);
+      }
+    }
+    function dealerPlay() {
+      for (var guard = 0; guard < 20; guard++) {
+        var dv = value(dh);
+        if (dv < 17) { dh.push(deal()); continue; }
+        if (dv === 17 && soft(dh) && HITS17) { dh.push(deal()); continue; }
+        break;
+      }
+      var pv = value(ph), dv2 = value(dh);
+      if (dv2 > 21) { msg = 'Dealer busts — you win!'; chips += bet; }
+      else if (dv2 > pv) { msg = 'Dealer wins.'; chips -= bet; }
+      else if (dv2 < pv) { msg = 'You win!'; chips += bet; }
+      else if (TIES) { msg = 'Tie — dealer takes it.'; chips -= bet; }
       else msg = 'Push.';
-      phase = 'done';
+      phase = 'over';
       host.saveScore(chips);
     }
+    function reset() { chips = 100; bet = 10; shoe(); phase = 'bet'; msg = null; ph = []; dh = []; }
     reset();
     return {
       key: function (k) {
+        if (chips <= 0 && phase === 'over') { reset(); return; }
         if (phase === 'bet') {
-          if (k === 'up'   && bet + 10 <= chips) bet += 10;
+          if (k === 'up' && bet + 10 <= chips) bet += 10;
           if (k === 'down' && bet > 10) bet -= 10;
-          if (k === 'enter' || k === 'space') start();
+          if (k === 'enter' || k === 'space') newHand();
           return;
         }
-        if (phase === 'done') {
-          if (chips <= 0) { reset(); return; }
-          phase = 'bet';
-          bet = Math.min(bet, chips);
-          msg = null;
-          return;
-        }
+        if (phase === 'over') { if (chips > 0) { if (bet > chips) bet = chips; phase = 'bet'; } return; }
         if (k === 'h') {
-          phand.push(deal());
-          if (value(phand) > 21) settle();
+          ph.push(deal());
+          if (value(ph) > 21) { msg = 'Bust — you lose.'; chips -= bet; phase = 'over'; host.saveScore(chips); }
+          else if (FIVE && ph.length >= 5) { msg = 'Five-card trick — you win!'; chips += bet; phase = 'over'; host.saveScore(chips); }
           return;
         }
-        if (k === 's') { settle(); return; }
-        if (k === 'd' && phand.length === 2 && chips >= bet * 2) {
-          bet *= 2; phand.push(deal()); settle();
+        if (k === 's') { dealerPlay(); return; }
+        if (k === 'r' && SURR && ph.length === 2) {
+          msg = 'Surrendered — half the stake back.';
+          chips -= Math.floor(bet / 2);
+          phase = 'over'; host.saveScore(chips);
+          return;
+        }
+        if (k === 'd' && ph.length === 2 && chips >= bet * 2) {
+          bet *= 2; ph.push(deal());
+          if (value(ph) > 21) { msg = 'Bust — you lose.'; chips -= bet; phase = 'over'; host.saveScore(chips); }
+          else dealerPlay();
         }
       },
       draw: function (t) {
-        t.header('BLACKJACK', 'H hit · S stand · D double · Enter deals · Q quits');
+        t.header('TWENTY-ONE', RNAME + ' — ' + DECKS + ' deck' + (DECKS === 1 ? '' : 's') +
+                 ', dealer ' + (HITS17 ? 'hits' : 'stands') + ' soft 17, natural pays ' +
+                 BJN + ':' + BJD + (NOTENS ? ', no tens' : '') + (FIVE ? ', five-card trick' : ''));
         if (phase === 'bet') {
-          t.text(30, 8, 'Chips: ' + chips, C.fg);
-          t.text(30, 10, 'Bet:   ' + bet, C.yellow, null, true);
-          t.text(30, 13, 'Up/Down changes the bet, Enter deals.', C.dim);
+          t.text(28, 8, 'Chips: ' + chips + '     ', C.fg);
+          t.text(28, 10, 'Bet:   ' + bet + '     ', C.yellow, null, true);
+          t.text(28, 12, 'Up/Down change bet, Enter deals', C.dim);
           return;
         }
-        t.text(18, 4, 'Dealer', C.red, null, true);
-        dhand.forEach(function (c, i) { drawCard(t, 18 + i * 7, 5, c, phase !== 'play' || i !== 1); });
-        t.text(18, 8, phase === 'play' ? 'Total: ?  ' : 'Total: ' + value(dhand) + '  ', C.fg);
-        t.text(18, 11, 'You', C.cyan, null, true);
-        phand.forEach(function (c, i) { drawCard(t, 18 + i * 7, 12, c, true); });
-        t.text(18, 15, 'Total: ' + value(phand) + '  ', C.fg);
-        t.text(18, 18, 'Chips: ' + chips + '   Bet: ' + bet + '   ', C.fg);
-        if (msg) t.text(18, 20, msg + (phase === 'done' ? '  (press any key)' : ''), C.white, null, true);
+        var i;
+        t.text(14, 4, 'Dealer', C.red, null, true);
+        for (i = 0; i < dh.length; i++) drawCard(t, 14 + i * 7, 5, dh[i], HOLEUP || phase === 'over' || i !== 1);
+        t.text(14, 8, 'Total: ' + ((HOLEUP || phase === 'over') ? value(dh) : '?') + '    ', C.fg);
+        t.text(14, 11, 'You', C.cyan, null, true);
+        for (i = 0; i < ph.length; i++) drawCard(t, 14 + i * 7, 12, ph[i], true);
+        t.text(14, 15, 'Total: ' + value(ph) + (soft(ph) ? ' (soft)' : '      '), C.fg);
+        t.text(14, 17, 'Chips: ' + chips + '   Bet: ' + bet + '    ', C.fg);
+        t.text(14, 19, 'H hit, S stand, D double' + (SURR ? ', R surrender' : ''), C.dim);
+        if (msg) t.text(14, 21, msg + '   Press a key.', C.white, null, true);
       }
     };
   }
@@ -109,84 +165,125 @@ reg('blackjack', {
 reg('videopoker', {
   title: 'Video Poker', help: 'Left/Right select · Space holds · Enter draws · Q quits',
   start: function (host, p) {
-    var PAY_NAME = ['Royal Flush','Straight Flush','Four of a Kind','Full House',
-                    'Flush','Straight','Three of a Kind','Two Pair','Jacks or Better'];
-    var PAYOUT = [800,50,25,9,6,4,3,2,1];
+    var CATN = ['Royal Flush','Four Deuces','Wild Royal','Five of a Kind','Straight Flush',
+                'Four Aces + kicker','Four Aces','Four 2s-4s','Four J-K','Four of a Kind',
+                'Full House','Flush','Straight','Three of a Kind','Two Pair','Pair'];
+    var TABLES = [
+      ['Jacks or Better',0,10,[800,0,0,0,50,0,0,0,0,25,9,6,4,3,2,1]],
+      ['Bonus Poker',0,10,[800,0,0,0,50,0,80,40,0,25,8,5,4,3,2,1]],
+      ['Double Bonus Poker',0,10,[800,0,0,0,50,0,160,80,0,50,9,7,5,3,1,1]],
+      ['Double Double Bonus',0,10,[800,0,0,0,50,400,160,80,0,50,9,6,4,3,1,1]],
+      ['Deuces Wild',1,0,[800,200,25,15,9,0,0,0,0,5,3,2,2,1,0,0]],
+      ['Joker Poker',2,11,[800,0,100,200,50,0,0,0,0,20,7,5,3,2,1,1]],
+      ['Aces and Faces',0,10,[800,0,0,0,50,0,80,0,40,25,8,5,4,3,2,1]],
+      ['Tens or Better',0,9,[800,0,0,0,50,0,0,0,0,25,6,5,4,3,2,1]],
+      ['All American',0,10,[800,0,0,0,200,0,0,0,0,40,8,8,8,3,1,1]]];
+    var T = TABLES[(p.level >= 0 && p.level <= 8) ? p.level : 0];
+    var TNAME = T[0], WILD = T[1], QUAL = T[2], PAY = T[3];
     var deck, top, hand, hold, credits, cur, phase, msg;
+
+    function isWild(c) { return WILD === 1 ? (c % 13 === 1) : WILD === 2 ? (c >= 52) : false; }
+    function shuffleDeck() {
+      var d = [];
+      for (var i = 0; i < 52; i++) d.push(i);
+      if (WILD === 2) d.push(52);              /* joker poker deals 53 cards */
+      deck = shuffle(d); top = 0;
+    }
+    /* Best category the hand reaches, wilds filling whatever helps most. */
     function evaluate() {
-      var counts = new Array(13).fill(0), suits = [0,0,0,0];
-      hand.forEach(function (c) { counts[c % 13]++; suits[c / 13 | 0]++; });
-      var pairs = 0, three = false, four = false, jacks = false;
-      var flush = suits.some(function (s) { return s === 5; });
-      var lo = 13, hi = -1, distinct = 0;
-      counts.forEach(function (n, i) {
-        if (n === 2) { pairs++; if (i === 0 || i >= 10) jacks = true; }
-        if (n === 3) three = true;
-        if (n === 4) four = true;
-        if (n) { distinct++; lo = Math.min(lo, i); hi = Math.max(hi, i); }
-      });
-      var straight = 0;
-      if (distinct === 5) {
-        if (hi - lo === 4) straight = 1;
-        if (counts[0] && counts[9] && counts[10] && counts[11] && counts[12]) straight = 2;
+      var counts = new Array(13).fill(0), suits = [0,0,0,0], wilds = 0, ranks = [], i;
+      for (i = 0; i < 5; i++) {
+        if (isWild(hand[i])) { wilds++; continue; }
+        counts[hand[i] % 13]++; suits[hand[i] / 13 | 0]++; ranks.push(hand[i] % 13);
       }
-      if (straight === 2 && flush) return 0;
-      if (straight && flush) return 1;
-      if (four) return 2;
-      if (three && pairs === 1) return 3;
-      if (flush) return 4;
-      if (straight) return 5;
-      if (three) return 6;
-      if (pairs === 2) return 7;
-      if (pairs === 1 && jacks) return 8;
+      var maxc = 0, distinct = 0, pairs = 0, three = false;
+      for (i = 0; i < 13; i++) {
+        if (counts[i] > maxc) maxc = counts[i];
+        if (counts[i]) distinct++;
+        if (counts[i] === 2) pairs++;
+        if (counts[i] >= 3) three = true;
+      }
+      var flush = false, fsuit = -1;
+      for (i = 0; i < 4; i++) if (suits[i] + wilds >= 5) { flush = true; fsuit = i; }
+      var straight = 0;
+      if (distinct + wilds >= 5 && distinct === ranks.length) {
+        for (var lo = 0; lo + 4 <= 12 && !straight; lo++) {
+          var need = 0;
+          for (var k = 0; k < 5; k++) if (!counts[lo + k]) need++;
+          if (need <= wilds) straight = 1;
+        }
+        var needA = 0;
+        [0,9,10,11,12].forEach(function (r) { if (!counts[r]) needA++; });
+        if (needA <= wilds) straight = 2;
+      }
+      var royal = false;
+      if (straight === 2 && flush) {
+        royal = true;
+        for (i = 0; i < 5; i++) if (!isWild(hand[i]) && (hand[i] / 13 | 0) !== fsuit) royal = false;
+      }
+      if (royal && wilds === 0) return 0;
+      if (WILD === 1 && wilds === 4) return 1;
+      if (royal) return 2;
+      if (maxc + wilds >= 5) return 3;
+      if (straight && flush) return 4;
+      if (maxc + wilds >= 4) {
+        var quad = -1;
+        for (i = 0; i < 13; i++) if (counts[i] + wilds >= 4) { quad = i; break; }
+        if (quad === 0) {
+          if (PAY[5]) for (i = 0; i < ranks.length; i++) if (ranks[i] >= 1 && ranks[i] <= 3) return 5;
+          if (PAY[6]) return 6;
+        }
+        if (quad >= 1 && quad <= 3 && PAY[7]) return 7;
+        if (quad >= 10 && quad <= 12 && PAY[8]) return 8;
+        return 9;
+      }
+      if ((three && pairs >= 1) || (pairs === 2 && wilds >= 1)) return 10;
+      if (flush) return 11;
+      if (straight) return 12;
+      if (maxc + wilds >= 3) return 13;
+      if (pairs === 2) return 14;
+      if (pairs === 1) {
+        for (var r2 = 0; r2 < 13; r2++)
+          if (counts[r2] === 2 && (r2 === 0 || r2 >= QUAL)) return 15;
+      }
       return -1;
     }
     function newHand() {
-      if (top > 40) { deck = newDeck(); top = 0; }
+      if (top > deck.length - 12) shuffleDeck();
       hand = []; hold = [false,false,false,false,false];
       for (var i = 0; i < 5; i++) hand.push(deck[top++]);
-      credits -= 5;
-      phase = 'hold';
-      msg = null;
+      credits -= 5; cur = 0; phase = 'hold'; msg = null;
     }
-    function reset() { deck = newDeck(); top = 0; credits = 100; cur = 0; newHand(); }
+    function reset() { credits = 100; shuffleDeck(); newHand(); }
     reset();
     return {
       key: function (k) {
-        if (phase === 'draw') {
-          if (credits <= 0) { reset(); return; }
-          newHand();
-          return;
-        }
-        if (k === 'left')  cur = (cur + 4) % 5;
+        if (phase === 'done') { if (credits > 0) newHand(); else reset(); return; }
+        if (k === 'left') cur = (cur + 4) % 5;
         if (k === 'right') cur = (cur + 1) % 5;
         if (k === 'space') hold[cur] = !hold[cur];
         if (k !== 'enter') return;
-        for (var i = 0; i < 5; i++) {
-          if (hold[i]) continue;
-          if (top >= 52) { deck = newDeck(); top = 0; }
-          hand[i] = deck[top++];
-        }
-        var r = evaluate();
-        if (r >= 0) {
-          credits += PAYOUT[r] * 5;
-          msg = PAY_NAME[r] + ' — pays ' + (PAYOUT[r] * 5) + '!';
-        } else msg = 'No win.';
-        phase = 'draw';
+        for (var i = 0; i < 5; i++) if (!hold[i]) { if (top >= deck.length) shuffleDeck(); hand[i] = deck[top++]; }
+        var res = evaluate();
+        if (res >= 0 && PAY[res]) { credits += PAY[res] * 5; msg = CATN[res] + ' — pays ' + PAY[res] * 5 + '!'; }
+        else msg = 'No win.';
+        phase = 'done';
         host.saveScore(credits);
       },
       draw: function (t) {
-        t.header('VIDEO POKER', 'Left/Right select · Space holds · Enter draws · Q quits');
-        PAY_NAME.forEach(function (n, i) {
-          t.text(52, 4 + i, (n + '                ').slice(0, 17) + String(PAYOUT[i]).padStart(4, ' '), C.dim);
-        });
-        hand.forEach(function (c, i) {
-          drawCard(t, 12 + i * 7, 7, c, true);
-          t.text(12 + i * 7, 10, hold[i] ? ' HOLD ' : '      ', C.yellow, null, true);
-          t.text(12 + i * 7, 11, i === cur ? '  ^^  ' : '      ', C.cyan, null, true);
-        });
-        t.text(12, 14, 'Credits: ' + credits + '   ' + (phase === 'hold' ? 'Hold phase' : 'Draw phase'), C.fg);
-        if (msg) t.text(12, 16, msg + '  (press any key)', C.white, null, true);
+        t.header('VIDEO POKER', TNAME + (WILD === 1 ? ' (deuces are wild)' : WILD === 2 ? ' (joker is wild)' : ''));
+        var row = 3, i;
+        for (i = 0; i < 16; i++) {
+          if (!PAY[i]) continue;
+          t.text(50, row++, (CATN[i] + '                    ').slice(0, 20) + String(PAY[i]).padStart(4, ' '), C.dim);
+        }
+        for (i = 0; i < 5; i++) {
+          drawCard(t, 10 + i * 7, 7, hand[i], true);
+          t.text(10 + i * 7, 10, hold[i] ? ' HOLD ' : '      ', hold[i] ? C.yellow : C.grey, null, hold[i]);
+          t.text(10 + i * 7, 11, i === cur ? '  ^^  ' : '      ', C.white, i === cur ? '#2b4a6b' : null);
+        }
+        t.text(10, 14, 'Credits: ' + credits + '   ' + (phase === 'done' ? 'Draw phase ' : 'Hold phase '), C.fg);
+        if (msg) t.text(10, 16, msg + '   Press a key.', C.white, null, true);
       }
     };
   }
@@ -194,50 +291,154 @@ reg('videopoker', {
 
 /* -------------------------------------------------------------------- war */
 reg('war', {
-  title: 'War', help: 'Enter plays the next round · Q quits',
+  title: 'War', help: 'Enter plays · Q quits',
   start: function (host, p) {
-    var p, c, pot, pc_, cc_, msg, rounds, over;
-    function rankOf(card) { var r = card % 13; return r === 0 ? 13 : r; }
-    function reset() {
-      var d = newDeck();
-      p = d.slice(0, 26); c = d.slice(26);
-      pot = []; pc_ = cc_ = null; msg = 'Press Enter to play.'; rounds = 0; over = null;
-    }
-    function round() {
-      if (!p.length || !c.length) return;
-      rounds++;
-      pot = [];
-      pc_ = p.shift(); cc_ = c.shift();
-      pot.push(pc_, cc_);
-      while (rankOf(pc_) === rankOf(cc_) && p.length > 3 && c.length > 3) {
-        for (var i = 0; i < 3; i++) { pot.push(p.shift()); pot.push(c.shift()); }
-        pc_ = p.shift(); cc_ = c.shift();
-        pot.push(pc_, cc_);
+    var VAR = (p.variant >= 0 && p.variant <= 2) ? p.variant : 0;
+    function rankOf(c) { var r = c % 13; return r === 0 ? 13 : r; }
+
+    /* ---- classic attrition war ---- */
+    if (VAR === 0) {
+      var pq, cq, a, b, pot, msg, note;
+      function reset() {
+        var d = newDeck();
+        pq = d.slice(0, 26); cq = d.slice(26);
+        a = b = null; pot = 0; msg = null; note = '';
       }
-      if (rankOf(pc_) > rankOf(cc_)) { p = p.concat(pot); msg = 'You take ' + pot.length + ' cards.'; }
-      else if (rankOf(cc_) > rankOf(pc_)) { c = c.concat(pot); msg = 'Computer takes ' + pot.length + ' cards.'; }
-      else msg = 'Tie held.';
-      if (!p.length || !c.length || rounds > 600) {
-        over = p.length > c.length ? 'You win the war!' : p.length < c.length ? 'Computer wins.' : 'A draw.';
-        host.saveScore(p.length);
-      }
+      reset();
+      return {
+        key: function (k) {
+          if (msg) { reset(); return; }
+          if (k !== 'enter' && k !== 'space') return;
+          if (!pq.length || !cq.length) return;
+          var stack = [];
+          a = pq.shift(); b = cq.shift();
+          stack.push(a, b);
+          var guard = 0;
+          while (rankOf(a) === rankOf(b) && pq.length > 1 && cq.length > 1 && guard++ < 6) {
+            for (var i = 0; i < 3 && pq.length > 1 && cq.length > 1; i++) { stack.push(pq.shift()); stack.push(cq.shift()); }
+            a = pq.shift(); b = cq.shift();
+            stack.push(a, b);
+            note = 'WAR! Three down, one up.';
+          }
+          pot = stack.length;
+          if (rankOf(a) > rankOf(b)) { pq = pq.concat(shuffle(stack)); note = 'You take ' + pot + ' cards.'; }
+          else { cq = cq.concat(shuffle(stack)); note = 'Computer takes ' + pot + ' cards.'; }
+          if (!pq.length || !cq.length) {
+            msg = pq.length > cq.length ? 'You hold the deck — you win!' : 'The computer takes the deck.';
+            host.saveScore(pq.length);
+          }
+        },
+        draw: function (t) {
+          t.header('WAR', 'Enter plays a card · Q quits');
+          t.text(20, 5, 'You: ' + pq.length + ' cards     ', C.cyan, null, true);
+          t.text(42, 5, 'Computer: ' + cq.length + ' cards   ', C.red, null, true);
+          if (a !== null) { drawCard(t, 20, 8, a, true); drawCard(t, 42, 8, b, true); }
+          t.text(20, 13, note + '                                ', C.white);
+          if (msg) t.center(16, msg + ' Press any key.', C.white, true);
+        }
+      };
     }
-    reset();
+
+    /* ---- casino war: one hand, and the tie is the whole game ---- */
+    if (VAR === 1) {
+      var deck1, top1, chips1 = 100, bet1 = 10, ca, cb, phase1 = 'bet', note1 = '';
+      function fresh() { deck1 = newDeck(); top1 = 0; }
+      fresh();
+      return {
+        key: function (k) {
+          if (phase1 === 'bet') {
+            if (k === 'up' && bet1 + 10 <= chips1) bet1 += 10;
+            if (k === 'down' && bet1 > 10) bet1 -= 10;
+            if (k === 'enter' || k === 'space') {
+              if (top1 > 46) fresh();
+              ca = deck1[top1++]; cb = deck1[top1++];
+              if (rankOf(ca) > rankOf(cb)) { chips1 += bet1; note1 = 'Your card is higher — you win ' + bet1 + '.'; phase1 = 'done'; }
+              else if (rankOf(ca) < rankOf(cb)) { chips1 -= bet1; note1 = 'Dealer takes it.'; phase1 = 'done'; }
+              else { note1 = 'TIE. W goes to war (double), S surrenders half.'; phase1 = 'tie'; }
+              host.saveScore(chips1);
+            }
+            return;
+          }
+          if (phase1 === 'tie') {
+            if (k === 's') { chips1 -= Math.floor(bet1 / 2); note1 = 'Surrendered half.'; phase1 = 'done'; }
+            else if (k === 'w') {
+              if (chips1 < bet1 * 2) { chips1 -= Math.floor(bet1 / 2); note1 = 'Not enough to go to war.'; }
+              else {
+                if (top1 > 48) fresh();
+                ca = deck1[top1++]; cb = deck1[top1++];
+                if (rankOf(ca) >= rankOf(cb)) { chips1 += bet1; note1 = 'You win the war — ' + bet1 + '.'; }
+                else { chips1 -= bet1 * 2; note1 = 'You lose the war — ' + bet1 * 2 + '.'; }
+              }
+              phase1 = 'done';
+            }
+            host.saveScore(chips1);
+            return;
+          }
+          if (chips1 <= 0) { chips1 = 100; bet1 = 10; }
+          if (bet1 > chips1) bet1 = chips1;
+          phase1 = 'bet';
+        },
+        draw: function (t) {
+          t.header('CASINO WAR', 'Up/Down change bet · Enter deals · ties double or surrender');
+          t.text(26, 6, 'Chips: ' + chips1 + '     ', C.fg);
+          t.text(26, 8, 'Bet:   ' + bet1 + '     ', C.yellow, null, true);
+          if (ca !== undefined) { drawCard(t, 24, 11, ca, true); drawCard(t, 40, 11, cb, true); }
+          t.text(24, 15, note1 + '                                     ', C.white, null, true);
+        }
+      };
+    }
+
+    /* ---- red dog: bet on the spread between two cards ---- */
+    var deck2, top2, chips2 = 100, bet2 = 10, ra, rb, rc, phase2 = 'bet', note2 = '', gap = 0;
+    var SPREAD_PAY = [5, 4, 2, 1];
+    function fresh2() { deck2 = newDeck(); top2 = 0; }
+    fresh2();
     return {
       key: function (k) {
-        if (over) { reset(); return; }
-        if (k === 'enter' || k === 'space') round();
+        if (phase2 === 'bet') {
+          if (k === 'up' && bet2 + 10 <= chips2) bet2 += 10;
+          if (k === 'down' && bet2 > 10) bet2 -= 10;
+          if (k === 'enter' || k === 'space') {
+            if (top2 > 46) fresh2();
+            ra = deck2[top2++]; rb = deck2[top2++]; rc = undefined;
+            var lo = Math.min(rankOf(ra), rankOf(rb)), hi = Math.max(rankOf(ra), rankOf(rb));
+            gap = hi - lo - 1;
+            if (hi === lo) {
+              rc = deck2[top2++];
+              if (rankOf(rc) === lo) { chips2 += bet2 * 11; note2 = 'Three of a kind — pays 11:1!'; }
+              else note2 = 'Pair, no third match — push.';
+              phase2 = 'done';
+            } else if (gap <= 0) { note2 = 'Consecutive cards — push.'; phase2 = 'done'; }
+            else { note2 = 'Spread of ' + gap + '. Enter draws.'; phase2 = 'draw'; }
+            host.saveScore(chips2);
+          }
+          return;
+        }
+        if (phase2 === 'draw') {
+          if (k !== 'enter' && k !== 'space') return;
+          rc = deck2[top2++];
+          var lo2 = Math.min(rankOf(ra), rankOf(rb)), hi2 = Math.max(rankOf(ra), rankOf(rb));
+          var pay = SPREAD_PAY[gap > 4 ? 3 : gap - 1];
+          if (rankOf(rc) > lo2 && rankOf(rc) < hi2) { chips2 += bet2 * pay; note2 = 'Inside! Pays ' + pay + ':1 — ' + bet2 * pay + '.'; }
+          else { chips2 -= bet2; note2 = 'Outside the spread — you lose.'; }
+          phase2 = 'done';
+          host.saveScore(chips2);
+          return;
+        }
+        if (chips2 <= 0) { chips2 = 100; bet2 = 10; }
+        if (bet2 > chips2) bet2 = chips2;
+        phase2 = 'bet';
       },
       draw: function (t) {
-        t.header('WAR', 'Enter plays the next round · Q quits');
-        t.text(30, 5, 'You', C.cyan, null, true);
-        if (pc_ !== null) drawCard(t, 30, 6, pc_, true);
-        t.text(44, 5, 'CPU', C.red, null, true);
-        if (cc_ !== null) drawCard(t, 44, 6, cc_, true);
-        t.text(30, 11, msg + '                        ', C.white);
-        t.text(30, 13, 'Your cards: ' + p.length + '   CPU cards: ' + c.length +
-                       '   Round ' + rounds + '   ', C.fg);
-        if (over) t.center(16, over + ' Press any key.', C.white, true);
+        t.header('RED DOG', 'Gap 1 pays 5:1, 2 pays 4:1, 3 pays 2:1, 4+ pays 1:1');
+        t.text(24, 6, 'Chips: ' + chips2 + '     ', C.fg);
+        t.text(24, 8, 'Bet:   ' + bet2 + '     ', C.yellow, null, true);
+        if (ra !== undefined) {
+          drawCard(t, 22, 11, ra, true);
+          drawCard(t, 36, 11, rb, true);
+          if (rc !== undefined) drawCard(t, 50, 11, rc, true);
+        }
+        t.text(22, 15, note2 + '                                    ', C.white, null, true);
       }
     };
   }
@@ -338,96 +539,145 @@ reg('gofish', {
 
 /* ---------------------------------------------------------------- yahtzee */
 reg('yahtzee', {
-  title: 'Yahtzee', help: 'Space holds · R rerolls · Tab switches · Enter scores',
+  title: 'Yahtzee', help: 'Space holds · R rerolls · Tab switches · Enter scores · Q quits',
   start: function (host, p) {
-    var CAT = ['Ones','Twos','Threes','Fours','Fives','Sixes','Three of a Kind',
-               'Four of a Kind','Full House','Small Straight','Large Straight','Yahtzee','Chance'];
-    var dice, keep, used, sc, rolls, cur, selecting, turn, finalScore;
-    function roll() { for (var i = 0; i < 5; i++) if (!keep[i]) dice[i] = G.rndRange(1, 6); }
+    var CATS = ['Ones','Twos','Threes','Fours','Fives','Sixes','Three of a Kind',
+                'Four of a Kind','Full House','Small Straight','Large Straight',
+                'Yahtzee','Chance'];
+    var V = (p.variant >= 0 && p.variant <= 5) ? p.variant : 0;
+    var ND = V === 2 ? 6 : 5, NROLL = V === 4 ? 2 : 3, NCOL = V === 1 ? 3 : 1;
+    var DUP = V === 3, TARGET = V === 5 ? 220 : 0;
+    var dice, keep, used, sc, cpuUsed, cpuSc, col, turn, rolls, cur, selecting, msg;
+
+    function countFace(f) { var n = 0; for (var i = 0; i < ND; i++) if (dice[i] === f) n++; return n; }
+    /* Sum of the best five, so a sixth die does not inflate the set boxes. */
+    function sumBest(n) {
+      var s = dice.slice().sort(function (a, b) { return b - a; }), t = 0;
+      for (var i = 0; i < n && i < s.length; i++) t += s[i];
+      return t;
+    }
     function scoreFor(cat) {
-      var counts = new Array(7).fill(0), f;
-      dice.forEach(function (d) { counts[d]++; });
-      var sum = dice.reduce(function (a, b) { return a + b; }, 0);
-      var three = false, four = false, pair = false, triple = false;
+      var counts = [0,0,0,0,0,0,0], i, f, three = false, four = false, five = false, pair = false, triple = false;
+      for (i = 0; i < ND; i++) counts[dice[i]]++;
       for (f = 1; f <= 6; f++) {
         if (counts[f] >= 3) three = true;
         if (counts[f] >= 4) four = true;
+        if (counts[f] >= 5) five = true;
         if (counts[f] === 2) pair = true;
         if (counts[f] === 3) triple = true;
       }
-      if (cat < 6) return counts[cat + 1] * (cat + 1);
-      if (cat === 6) return three ? sum : 0;
-      if (cat === 7) return four ? sum : 0;
+      if (cat < 6) return countFace(cat + 1) * (cat + 1);
+      if (cat === 6) return three ? sumBest(5) : 0;
+      if (cat === 7) return four ? sumBest(5) : 0;
       if (cat === 8) return (pair && triple) ? 25 : 0;
-      if (cat === 9) {
-        for (f = 1; f <= 3; f++) if (counts[f] && counts[f+1] && counts[f+2] && counts[f+3]) return 30;
-        return 0;
-      }
-      if (cat === 10) {
-        for (f = 1; f <= 2; f++)
-          if (counts[f] && counts[f+1] && counts[f+2] && counts[f+3] && counts[f+4]) return 40;
-        return 0;
-      }
-      if (cat === 11) { for (f = 1; f <= 6; f++) if (counts[f] === 5) return 50; return 0; }
-      return sum;
+      if (cat === 9) { for (f = 1; f <= 3; f++) if (counts[f] && counts[f+1] && counts[f+2] && counts[f+3]) return 30; return 0; }
+      if (cat === 10) { for (f = 1; f <= 2; f++) if (counts[f] && counts[f+1] && counts[f+2] && counts[f+3] && counts[f+4]) return 40; return 0; }
+      if (cat === 11) return five ? 50 : 0;
+      return sumBest(5);
     }
-    function total() {
-      var t = 0, upper = 0;
-      sc.forEach(function (v, i) { if (used[i]) { t += v; if (i < 6) upper += v; } });
-      return t + (upper >= 63 ? 35 : 0);
+    function roll() { for (var i = 0; i < ND; i++) if (!keep[i]) dice[i] = 1 + rnd(6); }
+    function colTotal(c) {
+      var upper = 0, total = 0, i;
+      for (i = 0; i < 13; i++) { if (!used[c][i]) continue; total += sc[c][i]; if (i < 6) upper += sc[c][i]; }
+      if (upper >= 63) total += 35;
+      return total * (NCOL > 1 ? c + 1 : 1);
     }
-    function nextTurn() {
-      keep = [false,false,false,false,false];
+    function grand() { var t = 0; for (var c = 0; c < NCOL; c++) t += colTotal(c); return t; }
+    function cpuTotal() {
+      var t = 0, u = 0;
+      for (var i = 0; i < 13; i++) if (cpuUsed[i]) { t += cpuSc[i]; if (i < 6) u += cpuSc[i]; }
+      return u >= 63 ? t + 35 : t;
+    }
+    /* The duplicate opponent plays the same dice, taking its best open box. */
+    function cpuPlace() {
+      var best = -1, bi = -1;
+      for (var i = 0; i < 13; i++) {
+        if (cpuUsed[i]) continue;
+        var v = scoreFor(i) + (i >= 6 ? 2 : 0);
+        if (v > best) { best = v; bi = i; }
+      }
+      if (bi >= 0) { cpuSc[bi] = scoreFor(bi); cpuUsed[bi] = 1; }
+    }
+    function newTurn() {
+      keep = new Array(ND).fill(false);
       roll();
-      rolls = 2;
-      selecting = false;
-      cur = 0;
+      rolls = NROLL - 1;
+      cur = 0; selecting = false;
     }
     function reset() {
-      dice = [1,1,1,1,1]; used = new Array(13).fill(false); sc = new Array(13).fill(0);
-      turn = 0; finalScore = null;
-      nextTurn();
+      dice = new Array(ND).fill(1);
+      used = []; sc = [];
+      for (var c = 0; c < NCOL; c++) { used.push(new Array(13).fill(0)); sc.push(new Array(13).fill(0)); }
+      cpuUsed = new Array(13).fill(0); cpuSc = new Array(13).fill(0);
+      col = 0; turn = 0; msg = null;
+      newTurn();
     }
     reset();
     return {
       key: function (k) {
-        if (finalScore !== null) { reset(); return; }
+        if (msg) { reset(); return; }
         if (k === 'tab') { selecting = !selecting; cur = 0; return; }
         if (!selecting) {
-          if (k === 'left')  cur = (cur + 4) % 5;
-          if (k === 'right') cur = (cur + 1) % 5;
+          if (k === 'left') cur = (cur + ND - 1) % ND;
+          if (k === 'right') cur = (cur + 1) % ND;
           if (k === 'space') keep[cur] = !keep[cur];
           if (k === 'r' && rolls > 0) { roll(); rolls--; }
           if (k === 'enter') { selecting = true; cur = 0; }
           return;
         }
-        if (k === 'up')   cur = (cur + 12) % 13;
+        if (k === 'up') cur = (cur + 12) % 13;
         if (k === 'down') cur = (cur + 1) % 13;
         if (k === 'left' || k === 'right') { selecting = false; cur = 0; return; }
         if (k !== 'enter' && k !== 'space') return;
-        if (used[cur]) return;
-        sc[cur] = scoreFor(cur);
-        used[cur] = true;
+        if (used[col][cur]) return;
+        sc[col][cur] = scoreFor(cur);
+        used[col][cur] = 1;
+        if (DUP) cpuPlace();
         turn++;
-        if (turn >= 13) { finalScore = total(); host.saveScore(finalScore); }
-        else nextTurn();
+        if (turn >= 13) { turn = 0; col++; }
+        if (col >= NCOL) {
+          var total = grand();
+          if (DUP) {
+            var ct = cpuTotal();
+            msg = 'You ' + total + ', computer ' + ct + ' — ' +
+                  (total > ct ? 'you win!' : total < ct ? 'computer wins.' : 'a tie.');
+          } else if (TARGET) {
+            msg = 'Final ' + total + ' — target ' + TARGET + ': ' + (total >= TARGET ? 'beaten!' : 'missed.');
+          } else msg = 'Final score: ' + total;
+          host.saveScore(total);
+          return;
+        }
+        newTurn();
       },
       draw: function (t) {
-        t.header('YAHTZEE', 'Rolls left: ' + rolls + ' · Space holds · R rerolls · Tab switches · Enter scores');
-        dice.forEach(function (d, i) {
-          t.text(16 + i * 8, 4, '┌───┐', keep[i] ? C.green : C.white);
-          t.text(16 + i * 8, 5, '│ ' + d + ' │', keep[i] ? C.green : C.white, null, true);
-          t.text(16 + i * 8, 6, '└───┘', keep[i] ? C.green : C.white);
-          t.text(16 + i * 8, 7, (!selecting && i === cur) ? ' ^^^ ' : '     ', C.cyan);
-          t.text(16 + i * 8, 8, keep[i] ? 'HELD ' : '     ', C.dim);
-        });
-        CAT.forEach(function (n, i) {
-          var shown = used[i] ? sc[i] : scoreFor(i);
-          t.text(16, 10 + i, (n + '                 ').slice(0, 18) + String(shown).padStart(3, ' '),
-                 used[i] ? C.dim : C.white, (selecting && i === cur) ? '#2b4a6b' : null, !used[i]);
-        });
-        t.text(16, 24, 'Total: ' + total() + '   ', C.yellow, null, true);
-        if (finalScore !== null) t.center(26, 'Final score ' + finalScore + ' — press any key.', C.green, true);
+        t.header('YAHTZEE', ND + ' dice, ' + NROLL + ' rolls/turn' +
+                 (NCOL > 1 ? ', 3 columns (x1 x2 x3)' : '') + (DUP ? ', shared dice' : '') +
+                 ' — Space holds, R rerolls, Tab switches');
+        var i, c;
+        for (i = 0; i < ND; i++) {
+          var hl = keep[i] ? '#2f6b2f' : null;
+          t.text(12 + i * 8, 4, '+---+', C.white, hl);
+          t.text(12 + i * 8, 5, '| ' + dice[i] + ' |', C.white, hl, true);
+          t.text(12 + i * 8, 6, '+---+', C.white, hl);
+          t.text(12 + i * 8, 7, (!selecting && i === cur) ? ' ^^^ ' : '     ', C.cyan,
+                 (!selecting && i === cur) ? '#2b4a6b' : null);
+          t.text(12 + i * 8, 8, keep[i] ? 'HELD ' : '     ', C.grey);
+        }
+        t.text(12, 9, 'Rolls left: ' + rolls + '   ', C.fg);
+        for (i = 0; i < 13; i++) {
+          t.text(12, 11 + i, (CATS[i] + '                 ').slice(0, 18),
+                 used[col][i] ? C.grey : C.white,
+                 (selecting && i === cur) ? '#2b4a6b' : null);
+          for (c = 0; c < NCOL; c++) {
+            var shown = used[c][i] ? sc[c][i] : (c === col ? scoreFor(i) : 0);
+            t.text(31 + c * 5, 11 + i, String(shown).padStart(3, ' '),
+                   used[c][i] ? C.grey : (c === col ? C.green : C.grey));
+          }
+          if (DUP) t.text(31 + NCOL * 5 + 4, 11 + i, String(cpuUsed[i] ? cpuSc[i] : 0).padStart(3, ' '), C.magenta);
+        }
+        t.text(12, 25, 'Total: ' + grand() + (DUP ? '    CPU: ' + cpuTotal() : '') +
+               (TARGET ? '    Target: ' + TARGET : '') + '     ', C.fg, null, true);
+        if (msg) t.center(27, msg + ' Press any key.', C.white, true);
       }
     };
   }

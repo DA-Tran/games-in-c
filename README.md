@@ -1,6 +1,6 @@
 # Games in C
 
-A thousand games catalogued and bound to engines; 388 playable so far — in the
+A thousand games catalogued and bound to engines; 455 playable so far — in the
 terminal and in the browser, from the same design.
 
 - **Terminal:** pure C99, ANSI escapes, zero dependencies. Builds with `make`
@@ -19,7 +19,7 @@ open web/index.html      # the browser version
 | | |
 |---|---|
 | Catalogued games | 1000, across 17 genres |
-| Playable now | 388, in both C and JavaScript |
+| Playable now | 455, in both C and JavaScript |
 | External dependencies | none, on either side |
 | Compiler warnings | zero, at `-Wall -Wextra` |
 
@@ -45,9 +45,8 @@ A marker names the family it vouches for (`GIC:PARAMETERISED hangman`), so
 several families can share a source file without one of them accidentally
 vouching for the others.
 
-Current state: 37 families done (388 entries), 11 engines built but still
-ignoring their parameters (67 entries), 32 engines not yet written (545
-entries).
+Current state: 48 families done (455 entries), **no engine is left ignoring
+its parameters**, and 32 engines are not yet written (545 entries).
 
 ## Families completed so far
 
@@ -116,10 +115,23 @@ Higher or Lower.
 - **Simon** (6: four/six/eight colours, reverse, silent, speed),
   **Rock Paper Scissors** (3: classic, lizard-Spock, best of nine).
 
-**Built, awaiting parameterisation** — Battleship, Snake, Tetris, Pong,
-Breakout, Space Invaders, Asteroids, Blackjack, Video Poker, War, Yahtzee.
-These play today at their default configuration; their remaining variants are
-catalogued and waiting.
+- **Twenty-one** — 9 rule sets. Shoe size, exposed hole card, dealer soft-17,
+  natural payout, who takes ties, stripped tens and the five-card trick. These
+  move the house edge, not the wallpaper.
+- **Video Poker** — 9 paytables, two of them wild-card games (Deuces Wild,
+  Joker Poker) that need a different evaluator with five-of-a-kind and wild
+  royals, plus the bonus tables that split four-of-a-kind by rank.
+- **Tetris** — 9 entries: sprint, ultra, zen, big mode, master, invisible,
+  cascade and Pentix. Rotations are derived at run time, which is what makes
+  the twelve pentominoes practical.
+- **Snake** (8: wrap, maze, speed, portals, shrinking arena, poison, nibbles),
+  **Breakout** (7: Arkanoid capsules, multiball, gravity, boss, endless),
+  **Battleship** (6: salvo, moving ships, fog, three board sizes),
+  **Yahtzee** (6: triple card, six dice, duplicate, speed, solo target),
+  **Pong** (6: curve, obstacles, shrinking paddle, four-player, air hockey),
+  **War** (3: attrition war, casino war, red dog),
+  **Space Invaders** (2, Galaga peels divers out of the formation),
+  **Asteroids** (2, deluxe adds a hunting saucer and a deeper split).
 
 ## Layout
 
@@ -168,7 +180,7 @@ Both harnesses drive **every playable catalogue entry with its own
 parameters**, not one representative per engine — so all thirty sudoku
 variants are generated and played, not just one.
 
-Both suites currently pass 388/388.
+Both suites currently pass 455/455.
 
 ## Adding a game
 

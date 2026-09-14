@@ -10,120 +10,263 @@ var G = window.GIC, C = G.COL, reg = G.register, rnd = G.rnd;
 
 /* ------------------------------------------------------------------ snake */
 reg('snake', {
-  title: 'Snake', help: 'Arrows steer · Q quits', realtime: true, step: 120,
+  title: 'Snake', help: 'Arrows steer · Q quits',
   start: function (host, p) {
-    var W = 40, H = 20, sx, sy, dx, dy, fx, fy, score, dead;
+    var W = 40, H = 20;
+    var VAR = (p.variant >= 0 && p.variant <= 7) ? p.variant : 0;
+    var SUB = ['Arrows steer',
+               'WRAP: walls are open — you reappear on the far side',
+               'MAZE: obstacles block the arena',
+               'SPEED: starts fast and keeps accelerating',
+               'PORTAL: the two rings are linked',
+               'SHRINKING: the arena closes in as you eat',
+               'POISON: red food kills — eat only the yellow',
+               'NIBBLES: clear the target, then the maze grows'][VAR];
+    var sx, sy, dx, dy, score, wall, food, portals, margin, dead, level, eaten, need, speed, acc;
+
+    function blocked(x, y) {
+      if (VAR === 5 && (x < margin || x >= W - margin || y < margin || y >= H - margin)) return true;
+      return !!wall[y][x];
+    }
     function onSnake(x, y) {
       for (var i = 0; i < sx.length; i++) if (sx[i] === x && sy[i] === y) return true;
       return false;
     }
-    function food() { do { fx = rnd(W); fy = rnd(H); } while (onSnake(fx, fy)); }
-    function reset() {
-      sx = [20,19,18,17]; sy = [10,10,10,10];
-      dx = 1; dy = 0; score = 0; dead = false;
-      self.step = 120;
-      food();
+    function placeFood(i) {
+      var x, y, guard = 0;
+      do { x = rnd(W); y = rnd(H); } while ((onSnake(x, y) || blocked(x, y)) && ++guard < 500);
+      food[i] = { x: x, y: y, bad: (VAR === 6 && i > 0 && rnd(100) < 55) };
     }
-    var self = {
-      over: false,
+    function buildWalls(lv) {
+      var x, y, i;
+      wall = [];
+      for (y = 0; y < H; y++) wall.push(new Array(W).fill(0));
+      portals = [];
+      if (VAR === 2 || VAR === 7) {
+        var blocks = (VAR === 7) ? 3 + lv * 2 : 8;
+        for (i = 0; i < blocks; i++) {
+          var bx = 3 + rnd(W - 10), by = 2 + rnd(H - 6), len = 3 + rnd(6), vert = rnd(2);
+          for (x = 0; x < len; x++) {
+            var wx = vert ? bx : bx + x, wy = vert ? by + x : by;
+            if (wx > 0 && wx < W - 1 && wy > 0 && wy < H - 1) wall[wy][wx] = 1;
+          }
+        }
+        for (x = W / 2 - 6; x <= W / 2 + 2; x++) if (x > 0 && x < W) wall[H >> 1][x] = 0;
+      }
+      if (VAR === 4) { portals = [{x:5,y:3},{x:W-6,y:H-4}]; }
+    }
+    function reset() {
+      score = 0; margin = 0; level = 1; eaten = 0; need = 5; dead = false;
+      speed = (VAR === 3) ? 4 : 7; acc = 0;
+      buildWalls(level);
+      sx = []; sy = [];
+      for (var i = 0; i < 4; i++) { sx.push((W >> 1) - i); sy.push(H >> 1); }
+      dx = 1; dy = 0;
+      food = [];
+      var n = (VAR === 6) ? 4 : 1;
+      for (i = 0; i < n; i++) placeFood(i);
+      if (VAR === 6) food[0].bad = false;
+    }
+    reset();
+    return {
+      tick: function () {
+        if (dead) return;
+        if (++acc < speed) return;
+        acc = 0;
+        var nx = sx[0] + dx, ny = sy[0] + dy, i;
+        if (VAR === 1) { nx = (nx + W) % W; ny = (ny + H) % H; }
+        else if (nx < 0 || nx >= W || ny < 0 || ny >= H) { dead = true; host.saveScore(score); return; }
+        if (blocked(nx, ny)) { dead = true; host.saveScore(score); return; }
+        for (i = 0; i < sx.length - 1; i++)
+          if (sx[i] === nx && sy[i] === ny) { dead = true; host.saveScore(score); return; }
+        for (i = 0; i < portals.length; i++)
+          if (nx === portals[i].x && ny === portals[i].y) {
+            nx = portals[1 - i].x; ny = portals[1 - i].y; break;
+          }
+        sx.unshift(nx); sy.unshift(ny);
+        var ate = false;
+        for (i = 0; i < food.length; i++) {
+          if (nx !== food[i].x || ny !== food[i].y) continue;
+          if (food[i].bad) { dead = true; host.saveScore(score); return; }
+          score += 10; eaten++; ate = true;
+          if (speed > 2) speed -= 0.08;
+          if (VAR === 5 && eaten % 4 === 0 && margin < 6) margin++;
+          placeFood(i);
+          if (VAR === 7 && eaten >= need) {
+            level++; need += 5; buildWalls(level);
+            sx = [W >> 1]; sy = [H >> 1]; dx = 1; dy = 0;
+            placeFood(0);
+          }
+          break;
+        }
+        if (!ate) { sx.pop(); sy.pop(); }
+      },
       key: function (k) {
-        if (dead) { reset(); self.over = false; return; }
+        if (dead) { reset(); return; }
         if (k === 'up'    && dy === 0) { dx = 0; dy = -1; }
         if (k === 'down'  && dy === 0) { dx = 0; dy = 1; }
         if (k === 'left'  && dx === 0) { dx = -1; dy = 0; }
         if (k === 'right' && dx === 0) { dx = 1; dy = 0; }
       },
-      tick: function () {
-        if (dead) return;
-        var nx = sx[0] + dx, ny = sy[0] + dy, i;
-        if (nx < 0 || nx >= W || ny < 0 || ny >= H) { dead = true; host.saveScore(score); return; }
-        for (i = 0; i < sx.length - 1; i++)
-          if (sx[i] === nx && sy[i] === ny) { dead = true; host.saveScore(score); return; }
-        sx.unshift(nx); sy.unshift(ny);
-        if (nx === fx && ny === fy) {
-          score += 10;
-          if (self.step > 45) self.step -= 3;
-          food();
-        } else { sx.pop(); sy.pop(); }
-      },
       draw: function (t) {
-        t.header('SNAKE', 'Arrows steer · Q quits');
-        t.box(18, 4, W + 2, H + 2, C.blue);
-        for (var i = 0; i < sx.length; i++)
-          t.put(19 + sx[i], 5 + sy[i], i ? 'o' : '@', C.green, null, i === 0);
-        t.put(19 + fx, 5 + fy, '✱', C.red, null, true);
-        t.text(18, H + 7, 'Score: ' + score + '   Best: ' + host.best() + '   ', C.fg);
-        if (dead) t.center(H + 9, 'Game over — press any key.', C.red, true);
+        t.header('SNAKE', SUB);
+        t.box(18, 3, W + 2, H + 2, C.blue);
+        for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
+          if (wall[y][x]) t.put(19 + x, 4 + y, '#', C.blue);
+          else if (VAR === 5 && blocked(x, y)) t.put(19 + x, 4 + y, '%', C.grey);
+          else t.put(19 + x, 4 + y, ' ', C.grey);
+        }
+        for (var i = 0; i < portals.length; i++)
+          t.put(19 + portals[i].x, 4 + portals[i].y, 'O', C.magenta, null, true);
+        for (i = 0; i < sx.length; i++)
+          t.put(19 + sx[i], 4 + sy[i], i ? 'o' : '@', C.green, null, i === 0);
+        for (i = 0; i < food.length; i++)
+          t.put(19 + food[i].x, 4 + food[i].y, food[i].bad ? 'x' : '*',
+                food[i].bad ? C.red : C.yellow, null, true);
+        t.text(18, H + 6, 'Score ' + score + '   Best ' + host.best() + '   ', C.fg);
+        if (dead) t.center(H + 8, 'Game over — press any key.', C.red, true);
       }
     };
-    reset();
-    return self;
   }
 });
 
 /* ----------------------------------------------------------------- tetris */
 reg('tetris', {
   title: 'Tetris', help: 'Arrows move/rotate · Space hard-drops · Q quits',
-  realtime: true, step: 500,
   start: function (host, p) {
-    var W = 10, H = 20;
-    var SHAPES = [
-      [[[0,1],[1,1],[2,1],[3,1]],[[2,0],[2,1],[2,2],[2,3]],[[0,2],[1,2],[2,2],[3,2]],[[1,0],[1,1],[1,2],[1,3]]],
-      [[[0,0],[0,1],[1,1],[2,1]],[[1,0],[2,0],[1,1],[1,2]],[[0,1],[1,1],[2,1],[2,2]],[[1,0],[1,1],[0,2],[1,2]]],
-      [[[2,0],[0,1],[1,1],[2,1]],[[1,0],[1,1],[1,2],[2,2]],[[0,1],[1,1],[2,1],[0,2]],[[0,0],[1,0],[1,1],[1,2]]],
-      [[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]]],
-      [[[1,0],[2,0],[0,1],[1,1]],[[1,0],[1,1],[2,1],[2,2]],[[1,1],[2,1],[0,2],[1,2]],[[0,0],[0,1],[1,1],[1,2]]],
-      [[[1,0],[0,1],[1,1],[2,1]],[[1,0],[1,1],[2,1],[1,2]],[[0,1],[1,1],[2,1],[1,2]],[[1,0],[0,1],[1,1],[1,2]]],
-      [[[0,0],[1,0],[1,1],[2,1]],[[2,0],[1,1],[2,1],[1,2]],[[0,1],[1,1],[1,2],[2,2]],[[1,0],[0,1],[1,1],[0,2]]]
-    ];
-    var PCOL = [C.cyan, C.blue, C.yellow, C.yellow, C.green, C.magenta, C.red];
-    var PTS = [0, 100, 300, 500, 800];
-    var board, piece, rot, px, py, score, lines, level, bag, nextp, dead;
-    function refill() { bag = G.shuffle([0,1,2,3,4,5,6]); }
-    function take() { if (!bag.length) refill(); return bag.pop(); }
-    function collides(p, r, x, y) {
-      for (var i = 0; i < 4; i++) {
-        var cx = x + SHAPES[p][r][i][0], cy = y + SHAPES[p][r][i][1];
+    var VAR = (p.variant >= 0 && p.variant <= 8) ? p.variant : 0;
+    var W = VAR === 4 ? 8 : 10, H = VAR === 4 ? 16 : 20, CW = VAR === 4 ? 3 : 2;
+    var TETRO = [
+      [[0,1],[1,1],[2,1],[3,1]], [[0,0],[0,1],[1,1],[2,1]], [[2,0],[0,1],[1,1],[2,1]],
+      [[1,0],[2,0],[1,1],[2,1]], [[1,0],[2,0],[0,1],[1,1]], [[1,0],[0,1],[1,1],[2,1]],
+      [[0,0],[1,0],[1,1],[2,1]]];
+    var PENTO = [
+      [[0,0],[0,1],[0,2],[0,3],[0,4]], [[0,0],[0,1],[0,2],[0,3],[1,3]],
+      [[1,0],[1,1],[1,2],[0,3],[1,3]], [[0,0],[0,1],[1,1],[1,2],[1,3]],
+      [[0,0],[1,0],[0,1],[1,1],[0,2]], [[0,0],[0,1],[1,1],[0,2],[1,2]],
+      [[1,0],[0,1],[1,1],[0,2],[1,2]], [[0,0],[1,0],[1,1],[1,2],[2,2]],
+      [[0,0],[1,0],[2,0],[1,1],[1,2]], [[0,0],[2,0],[0,1],[1,1],[2,1]],
+      [[0,0],[0,1],[0,2],[1,2],[2,2]], [[1,0],[0,1],[1,1],[2,1],[1,2]]];
+    var COL = [C.cyan,C.blue,C.yellow,C.yellow,C.green,C.magenta,C.red,
+               C.cyan,C.green,C.blue,C.magenta,C.white];
+    var SUB = ['Arrows move/rotate, Space hard-drops',
+               'SPRINT: clear 40 lines as fast as you can',
+               'ULTRA: score as much as possible in two minutes',
+               'ZEN: no game over, no speed-up',
+               'BIG MODE: wide board, chunky blocks',
+               'MASTER: fast from the first piece',
+               'INVISIBLE: locked blocks fade — F flashes them',
+               'CASCADE: loose blocks fall again after a clear',
+               'PENTIX: twelve pentominoes'][VAR];
+
+    /* Rotations are derived, not tabulated — the pentominoes would otherwise
+     * need 240 literals that could drift out of step with the C table. */
+    function rotate(cells) {
+      var maxy = 0, i, out = [];
+      for (i = 0; i < cells.length; i++) if (cells[i][1] > maxy) maxy = cells[i][1];
+      for (i = 0; i < cells.length; i++) out.push([maxy - cells[i][1], cells[i][0]]);
+      var minx = 99, miny = 99;
+      for (i = 0; i < out.length; i++) { if (out[i][0] < minx) minx = out[i][0]; if (out[i][1] < miny) miny = out[i][1]; }
+      for (i = 0; i < out.length; i++) { out[i][0] -= minx; out[i][1] -= miny; }
+      return out;
+    }
+    var base = VAR === 8 ? PENTO : TETRO, NP = base.length;
+    var rots = base.map(function (b) {
+      var r = [b], i;
+      for (i = 1; i < 4; i++) r.push(rotate(r[i - 1]));
+      return r;
+    });
+
+    var board, lockAt, piece, rot, px, py, score, lines, level, bag, nextp, dead, flash, started, acc, msg;
+
+    function nextPiece() {
+      if (!bag || !bag.length) {
+        bag = [];
+        for (var i = 0; i < NP; i++) bag.push(i);
+        for (i = bag.length - 1; i > 0; i--) { var j = rnd(i + 1), t = bag[i]; bag[i] = bag[j]; bag[j] = t; }
+      }
+      return bag.pop();
+    }
+    function collides(pc, r, x, y) {
+      var s = rots[pc][r], i;
+      for (i = 0; i < s.length; i++) {
+        var cx = x + s[i][0], cy = y + s[i][1];
         if (cx < 0 || cx >= W || cy >= H) return true;
         if (cy >= 0 && board[cy][cx]) return true;
       }
       return false;
     }
-    function lock() {
-      for (var i = 0; i < 4; i++) {
-        var cx = px + SHAPES[piece][rot][i][0], cy = py + SHAPES[piece][rot][i][1];
-        if (cy >= 0 && cy < H && cx >= 0 && cx < W) board[cy][cx] = piece + 1;
+    function lockPiece() {
+      var s = rots[piece][rot], i;
+      for (i = 0; i < s.length; i++) {
+        var cx = px + s[i][0], cy = py + s[i][1];
+        if (cy >= 0 && cy < H && cx >= 0 && cx < W) { board[cy][cx] = piece + 1; lockAt[cy][cx] = Date.now(); }
+      }
+    }
+    function cascade() {
+      var moved = true, guard = 0;
+      while (moved && guard++ < 40) {
+        moved = false;
+        for (var r = H - 2; r >= 0; r--) for (var c = 0; c < W; c++)
+          if (board[r][c] && !board[r + 1][c]) {
+            board[r + 1][c] = board[r][c]; lockAt[r + 1][c] = lockAt[r][c];
+            board[r][c] = 0; moved = true;
+          }
       }
     }
     function clearLines() {
-      var cleared = 0;
-      for (var r = H - 1; r >= 0; r--) {
-        if (board[r].some(function (v) { return !v; })) continue;
-        board.splice(r, 1);
+      var PTS = [0,100,300,500,800,1200], cleared = 0, r, c;
+      for (r = H - 1; r >= 0; r--) {
+        var full = true;
+        for (c = 0; c < W; c++) if (!board[r][c]) { full = false; break; }
+        if (!full) continue;
+        board.splice(r, 1); lockAt.splice(r, 1);
         board.unshift(new Array(W).fill(0));
+        lockAt.unshift(new Array(W).fill(0));
         cleared++; r++;
       }
       if (cleared) {
         lines += cleared;
-        score += PTS[Math.min(4, cleared)] * (level + 1);
-        level = lines / 10 | 0;
-        self.step = Math.max(80, 500 - level * 40);
+        score += PTS[Math.min(5, cleared)] * (level + 1);
+        if (VAR !== 3) level = Math.floor(lines / 10);
+        if (VAR === 7) cascade();
       }
     }
     function spawn() {
-      piece = nextp; nextp = take();
-      rot = 0; px = (W / 2 | 0) - 2; py = -1;
-      if (collides(piece, rot, px, py)) { dead = true; host.saveScore(score); }
+      piece = nextp; rot = 0; px = (W >> 1) - 2; py = -1;
+      nextp = nextPiece();
+      if (collides(piece, rot, px, py)) {
+        if (VAR === 3) {                          /* zen just clears the stack */
+          board = []; lockAt = [];
+          for (var r = 0; r < H; r++) { board.push(new Array(W).fill(0)); lockAt.push(new Array(W).fill(0)); }
+        } else { dead = true; host.saveScore(score); }
+      }
     }
     function reset() {
-      board = []; for (var r = 0; r < H; r++) board.push(new Array(W).fill(0));
-      score = 0; lines = 0; level = 0; dead = false;
-      refill(); nextp = take(); spawn();
-      self.step = 500;
+      board = []; lockAt = [];
+      for (var r = 0; r < H; r++) { board.push(new Array(W).fill(0)); lockAt.push(new Array(W).fill(0)); }
+      score = 0; lines = 0; level = (VAR === 5) ? 9 : 0;
+      bag = null; dead = false; flash = false; msg = null;
+      started = Date.now(); acc = 0;
+      nextp = nextPiece();
+      spawn();
     }
-    var self = {
+    reset();
+    return {
+      tick: function () {
+        if (dead) return;
+        var speed = Math.max(2, 10 - level);
+        if (VAR === 3) speed = 9;
+        if (++acc < speed) return;
+        acc = 0;
+        if (!collides(piece, rot, px, py + 1)) py++;
+        else { lockPiece(); clearLines(); spawn(); }
+        if (VAR === 1 && lines >= 40) { dead = true; msg = '40 lines in ' + Math.round((Date.now() - started) / 1000) + 's!'; host.saveScore(score); }
+        if (VAR === 2 && Date.now() - started > 120000) { dead = true; msg = 'Time!'; host.saveScore(score); }
+      },
       key: function (k) {
         if (dead) { reset(); return; }
+        if (k === 'f') flash = !flash;
         if (k === 'left'  && !collides(piece, rot, px - 1, py)) px--;
         if (k === 'right' && !collides(piece, rot, px + 1, py)) px++;
         if (k === 'down'  && !collides(piece, rot, px, py + 1)) py++;
@@ -132,95 +275,146 @@ reg('tetris', {
           if (!collides(piece, nr, px, py)) rot = nr;
           else if (!collides(piece, nr, px - 1, py)) { rot = nr; px--; }
           else if (!collides(piece, nr, px + 1, py)) { rot = nr; px++; }
+          else if (!collides(piece, nr, px + 2, py)) { rot = nr; px += 2; }
         }
         if (k === 'space') {
           while (!collides(piece, rot, px, py + 1)) { py++; score += 2; }
-          lock(); clearLines(); spawn();
+          lockPiece(); clearLines(); spawn();
         }
-      },
-      tick: function () {
-        if (dead) return;
-        if (!collides(piece, rot, px, py + 1)) py++;
-        else { lock(); clearLines(); spawn(); }
       },
       draw: function (t) {
-        t.header('TETRIS', 'Arrows move/rotate · Space hard-drops · Q quits');
-        t.box(24, 3, W * 2 + 2, H + 2, C.blue);
-        for (var r = 0; r < H; r++) for (var c = 0; c < W; c++)
-          t.text(25 + c * 2, 4 + r, board[r][c] ? '██' : ' ·',
-                 board[r][c] ? PCOL[board[r][c] - 1] : C.grey);
-        if (!dead) for (var i = 0; i < 4; i++) {
-          var cx = px + SHAPES[piece][rot][i][0], cy = py + SHAPES[piece][rot][i][1];
-          if (cy >= 0 && cy < H) t.text(25 + cx * 2, 4 + cy, '██', PCOL[piece]);
+        t.header('TETRIS', SUB);
+        var bx = 40 - (W * CW) / 2, now = Date.now();
+        t.box(bx - 1, 3, W * CW + 2, H + 2, C.blue);
+        for (var r = 0; r < H; r++) for (var c = 0; c < W; c++) {
+          var v = board[r][c];
+          var hidden = (VAR === 6 && v && !flash && now - lockAt[r][c] > 1000);
+          t.text(bx + c * CW, 4 + r, (v && !hidden) ? '##'.slice(0, CW) : ' .'.slice(0, CW),
+                 (v && !hidden) ? COL[v - 1] : C.grey, null, !!v && !hidden);
         }
-        t.text(50, 5, 'Score ' + score, C.fg);
-        t.text(50, 6, 'Lines ' + lines, C.fg);
-        t.text(50, 7, 'Level ' + level, C.fg);
-        t.text(50, 9, 'Next:', C.dim);
-        for (var j = 0; j < 4; j++)
-          t.text(50 + SHAPES[nextp][0][j][0] * 2, 10 + SHAPES[nextp][0][j][1], '██', PCOL[nextp]);
-        if (dead) t.center(H + 6, 'Game over — press any key.', C.red, true);
+        var s = rots[piece][rot];
+        for (var i = 0; i < s.length; i++) {
+          var cy = py + s[i][1];
+          if (cy >= 0 && cy < H) t.text(bx + (px + s[i][0]) * CW, 4 + cy, '##'.slice(0, CW), COL[piece], null, true);
+        }
+        var ix = bx + W * CW + 4;
+        t.text(ix, 5, 'Score ' + score + '    ', C.fg);
+        t.text(ix, 6, 'Lines ' + lines + '    ', C.fg);
+        t.text(ix, 7, 'Level ' + level + '    ', C.fg);
+        if (VAR === 1) t.text(ix, 8, 'Left  ' + Math.max(0, 40 - lines) + '    ', C.cyan);
+        if (VAR === 2) t.text(ix, 8, 'Time  ' + Math.max(0, 120 - Math.round((Date.now() - started) / 1000)) + '   ', C.cyan);
+        t.text(ix, 10, 'Next:', C.dim);
+        for (r = 0; r < 5; r++) t.text(ix, 11 + r, '          ', C.grey);
+        var n = rots[nextp][0];
+        for (i = 0; i < n.length; i++) t.text(ix + n[i][0] * 2, 11 + n[i][1], '##', COL[nextp], null, true);
+        if (dead) t.center(H + 6, (msg || 'Game over') + ' — press any key.', C.red, true);
       }
     };
-    reset();
-    return self;
   }
 });
 
 /* ------------------------------------------------------------------- pong */
 reg('pong', {
-  title: 'Pong', help: 'Up/Down move · first to 7 · Q quits', realtime: true, step: 40,
+  title: 'Pong', help: 'Up/Down move · first to 7 · Q quits',
   start: function (host, p) {
-    var W = 60, H = 20, P = 4;
-    var bx, by, vx, vy, py_, ay, ps, as, over;
-    function serve(dir) { bx = W / 2; by = H / 2; vx = dir * 0.9; vy = rnd(2) ? 0.4 : -0.4; }
-    function reset() { py_ = ay = (H - P) / 2 | 0; ps = as = 0; over = null; serve(1); }
+    var W = 60, H = 20;
+    var VAR = (p.variant >= 0 && p.variant <= 5) ? p.variant : 0;
+    var SUB = ['CLASSIC', 'CURVE: the ball carries spin', 'OBSTACLES in the court',
+               'SHRINKING: your paddle shortens each rally',
+               'FOUR-PLAYER: defend two walls', 'AIR HOCKEY: free-moving striker'][VAR];
+    var bx, by, vx, vy, spin, pyv, ay, ps, as, paddle, blocks, tx, bxp, phx, phy, msg;
+
+    function serve(dir) { bx = W / 2; by = H / 2; vx = dir * 0.9; vy = rnd(2) ? 0.4 : -0.4; spin = 0; }
+    function reset() {
+      paddle = 4; pyv = ay = (H >> 1) - 2; ps = as = 0; msg = null;
+      phx = 4; phy = H / 2; tx = bxp = (W >> 1) - 3;
+      blocks = [];
+      if (VAR === 2) for (var i = 0; i < 5; i++) blocks.push({x:(W>>1)-8+rnd(16), y:2+rnd(H-4)});
+      serve(1);
+    }
     reset();
     return {
-      key: function (k) {
-        if (over) { reset(); return; }
-        if (k === 'up'   && py_ > 0) py_--;
-        if (k === 'down' && py_ < H - P) py_++;
-      },
       tick: function () {
-        if (over) return;
+        if (msg) return;
+        var i;
+        if (VAR === 1) vy += spin * 0.06;
         bx += vx; by += vy;
-        if (by <= 0) { by = 0; vy = -vy; }
-        if (by >= H - 1) { by = H - 1; vy = -vy; }
-        if (bx <= 2 && vx < 0) {
-          if (by >= py_ - 0.5 && by <= py_ + P) {
-            vx = -vx;
-            vy += ((by - (py_ + P / 2)) / (P / 2)) * 0.45;
+
+        if (VAR === 4) {
+          if (by <= 0) { if (bx >= tx && bx <= tx + 6) { by = 0; vy = -vy; } else { as++; serve(1); } }
+          if (by >= H - 1) { if (bx >= bxp && bx <= bxp + 6) { by = H - 1; vy = -vy; } else { ps++; serve(-1); } }
+        } else {
+          if (by <= 0) { by = 0; vy = -vy; }
+          if (by >= H - 1) { by = H - 1; vy = -vy; }
+        }
+        for (i = 0; i < blocks.length; i++)
+          if ((bx | 0) === blocks[i].x && (by | 0) === blocks[i].y) { vx = -vx; bx += vx; }
+
+        if (VAR === 5) {
+          var ddx = bx - phx, ddy = by - phy;
+          if (ddx * ddx + ddy * ddy < 2.2 && vx < 0) { vx = -vx; vy += ddy * 0.35; }
+          vx *= 0.999; vy *= 0.999;
+          if (bx <= 1) { as++; serve(1); }
+        } else if (bx <= 2 && vx < 0) {
+          if (by >= pyv - 0.5 && by <= pyv + paddle) {
+            var off = (by - (pyv + paddle / 2)) / (paddle / 2);
+            vx = -vx; vy += off * 0.45;
+            if (VAR === 1) spin = off;
             vy = Math.max(-0.9, Math.min(0.9, vy));
-          } else { as++; serve(1); }
+            if (VAR === 3 && paddle > 2) paddle--;
+          } else { as++; serve(1); if (VAR === 3) paddle = 4; }
         }
         if (bx >= W - 2 && vx > 0) {
-          if (by >= ay - 0.5 && by <= ay + P) {
-            vx = -vx;
-            vy += ((by - (ay + P / 2)) / (P / 2)) * 0.45;
+          if (by >= ay - 0.5 && by <= ay + paddle) {
+            vx = -vx; vy += ((by - (ay + paddle / 2)) / (paddle / 2)) * 0.45;
           } else { ps++; serve(-1); }
         }
         if (vx > 0) {
-          var target = by - P / 2;
-          if (ay < target - 0.5 && ay < H - P) ay++;
+          var target = by - paddle / 2;
+          if (ay < target - 0.5 && ay < H - paddle) ay++;
           else if (ay > target + 0.5 && ay > 0) ay--;
         }
-        if (ps >= 7 || as >= 7) {
-          over = ps > as ? 'You win!' : 'Computer wins.';
-          host.saveScore(ps * 100 - as * 50);
+        if (VAR === 4) {
+          if (vy < 0) { if (tx < bx - 3) tx++; else if (tx > bx - 3) tx--; }
+          else { if (bxp < bx - 3) bxp++; else if (bxp > bx - 3) bxp--; }
+          tx = Math.max(0, Math.min(W - 7, tx));
+          bxp = Math.max(0, Math.min(W - 7, bxp));
+        }
+        if (ps >= 7 || as >= 7) { msg = ps > as ? 'You win!' : 'Computer wins.'; host.saveScore(ps * 100 - as * 50); }
+      },
+      key: function (k) {
+        if (msg) { reset(); return; }
+        if (VAR === 5) {
+          if (k === 'up' && phy > 1) phy--;
+          if (k === 'down' && phy < H - 2) phy++;
+          if (k === 'left' && phx > 1) phx--;
+          if (k === 'right' && phx < W / 2 - 2) phx++;
+        } else {
+          if (k === 'up' && pyv > 0) pyv--;
+          if (k === 'down' && pyv < H - paddle) pyv++;
         }
       },
       draw: function (t) {
-        t.header('PONG', 'Up/Down move · first to 7 · Q quits');
-        t.box(10, 4, W + 2, H + 2, C.blue);
-        for (var i = 0; i < H; i++) t.put(10 + W / 2, 5 + i, '│', '#2e333a');
-        for (i = 0; i < P; i++) {
-          t.put(12, 5 + py_ + i, '█', C.cyan);
-          t.put(10 + W - 1, 5 + ay + i, '█', C.red);
+        t.header('PONG', SUB + ' — first to 7');
+        t.box(9, 3, W + 2, H + 2, C.blue);
+        for (var i = 0; i < H; i++) t.put(10 + (W >> 1), 4 + i, '|', C.grey);
+        for (i = 0; i < blocks.length; i++) t.put(10 + blocks[i].x, 4 + blocks[i].y, '#', C.magenta, null, true);
+        if (VAR === 5) {
+          t.put(10 + (phx | 0), 4 + (phy | 0), 'U', C.cyan, null, true);
+          for (i = 0; i < paddle; i++) t.put(9 + W, 4 + ay + i, '#', C.red, null, true);
+        } else {
+          for (i = 0; i < paddle; i++) {
+            t.put(11, 4 + pyv + i, '#', C.cyan, null, true);
+            t.put(9 + W, 4 + ay + i, '#', C.red, null, true);
+          }
         }
-        t.put(11 + (bx | 0), 5 + (by | 0), '●', C.yellow, null, true);
-        t.center(3, ps + '   ' + as, C.fg, true);
-        if (over) t.center(H + 8, over, C.white, true);
+        if (VAR === 4) for (i = 0; i < 6; i++) {
+          t.put(10 + tx + i, 4, '=', C.yellow, null, true);
+          t.put(10 + bxp + i, 3 + H, '=', C.green, null, true);
+        }
+        t.put(10 + (bx | 0), 4 + (by | 0), 'O', C.yellow, null, true);
+        t.text((W >> 1) + 4, 2, ps + '   ' + as + '  ', C.white, null, true);
+        if (msg) t.center(H + 6, msg + ' Press any key.', C.white, true);
       }
     };
   }
@@ -228,68 +422,114 @@ reg('pong', {
 
 /* --------------------------------------------------------------- breakout */
 reg('breakout', {
-  title: 'Breakout', help: 'Left/Right move · Q quits', realtime: true, step: 35,
+  title: 'Breakout', help: 'Left/Right move · Q quits',
   start: function (host, p) {
-    var W = 48, H = 22, BR = 5, BC = 12, P = 7;
+    var W = 48, H = 22, BR = 5, BC = 12;
+    var VAR = (p.variant >= 0 && p.variant <= 6) ? p.variant : 0;
+    var SUB = ['Left/Right move', 'ARKANOID: catch the falling capsules',
+               'MULTIBALL: three at once', 'GRAVITY: the ball is pulled down',
+               'BOSS: one heavy target that moves', 'ENDLESS: the wall rebuilds, tougher',
+               'ULTRA: fast ball, hard bricks'][VAR];
     var RC = [C.red, C.magenta, C.yellow, C.green, C.cyan];
-    var brick, bx, by, vx, vy, paddle, score, lives, level, over;
-    function levelReset() {
+    var brick, balls, paddle, PAD, score, lives, level, bossX, bossHP, drop, dead;
+
+    function launch(x) { return { x: x, y: H - 4, vx: rnd(2) ? 0.7 : -0.7, vy: -0.7, live: true }; }
+    function resetLevel() {
+      var r, c;
       brick = [];
-      for (var r = 0; r < BR; r++) {
-        var row = [];
-        for (var c = 0; c < BC; c++) row.push((BR - r) > 2 ? 2 : 1);
-        brick.push(row);
+      for (r = 0; r < BR; r++) {
+        brick.push([]);
+        for (c = 0; c < BC; c++)
+          brick[r].push((VAR === 5 || VAR === 6) ? 1 + rnd(3) : ((BR - r) > 2 ? 2 : 1));
       }
-      bx = W / 2; by = H - 4; vx = 0.7; vy = -0.7;
-      paddle = (W - P) / 2 | 0;
+      if (VAR === 4) {
+        for (r = 0; r < BR; r++) for (c = 0; c < BC; c++) brick[r][c] = 0;
+        bossX = BC >> 1; bossHP = 20 + level * 6;
+      } else bossHP = 0;
+      PAD = 7;
+      balls = [];
+      var n = (VAR === 2) ? 3 : 1;
+      for (var i = 0; i < n; i++) balls.push(launch(W / 2 + i * 2));
+      paddle = (W >> 1) - 3;
+      drop = null;
     }
-    function reset() { score = 0; lives = 3; level = 1; over = false; levelReset(); }
-    function left() {
+    function bricksLeft() {
       var n = 0;
-      brick.forEach(function (r) { r.forEach(function (v) { if (v) n++; }); });
-      return n;
+      for (var r = 0; r < BR; r++) for (var c = 0; c < BC; c++) if (brick[r][c]) n++;
+      return n + (bossHP > 0 ? bossHP : 0);
     }
+    function reset() { score = 0; lives = 3; level = 1; dead = false; resetLevel(); }
     reset();
     return {
-      key: function (k) {
-        if (over) { reset(); return; }
-        if (k === 'left')  paddle = Math.max(0, paddle - 2);
-        if (k === 'right') paddle = Math.min(W - P, paddle + 2);
-      },
       tick: function () {
-        if (over) return;
-        bx += vx; by += vy;
-        if (bx <= 0) { bx = 0; vx = -vx; }
-        if (bx >= W - 1) { bx = W - 1; vx = -vx; }
-        if (by <= 0) { by = 0; vy = -vy; }
-        var r = (by | 0) - 2, c = (bx / (W / BC)) | 0;
-        if (r >= 0 && r < BR && c >= 0 && c < BC && brick[r][c]) {
-          brick[r][c]--; score += 10; vy = -vy;
+        if (dead) return;
+        var i, alive = 0;
+        if (VAR === 4 && bossHP > 0) {
+          bossX += rnd(100) < 50 ? 1 : -1;
+          bossX = Math.max(0, Math.min(BC - 3, bossX));
         }
-        if ((by | 0) >= H - 2 && vy > 0 && bx >= paddle - 1 && bx <= paddle + P) {
-          var hit = (bx - (paddle + P / 2)) / (P / 2);
-          vy = -Math.abs(vy);
-          vx = Math.max(-1.1, Math.min(1.1, vx + hit * 0.5));
-          by = H - 2;
+        for (i = 0; i < balls.length; i++) {
+          var b = balls[i];
+          if (!b.live) continue;
+          if (VAR === 3) b.vy += 0.035;
+          b.x += b.vx; b.y += b.vy;
+          if (b.x <= 0) { b.x = 0; b.vx = -b.vx; }
+          if (b.x >= W - 1) { b.x = W - 1; b.vx = -b.vx; }
+          if (b.y <= 0) { b.y = 0; b.vy = -b.vy; }
+          var r = (b.y | 0) - 2, c = Math.floor(b.x / (W / BC));
+          if (VAR === 4 && r === 0 && bossHP > 0 && c >= bossX && c <= bossX + 2) {
+            bossHP--; score += 25; b.vy = -b.vy;
+          } else if (r >= 0 && r < BR && c >= 0 && c < BC && brick[r][c]) {
+            brick[r][c]--; score += 10; b.vy = -b.vy;
+            if (VAR === 1 && !drop && rnd(100) < 18) drop = { x: b.x, y: b.y, kind: rnd(2) };
+          }
+          if ((b.y | 0) >= H - 2 && b.vy > 0 && b.x >= paddle - 1 && b.x <= paddle + PAD) {
+            var hit = (b.x - (paddle + PAD / 2)) / (PAD / 2);
+            b.vy = -Math.abs(b.vy);
+            b.vx += hit * 0.5;
+            b.vx = Math.max(-1.1, Math.min(1.1, b.vx));
+            b.y = H - 2;
+          }
+          if (b.y >= H - 1) b.live = false;
+          if (b.live) alive++;
         }
-        if (by >= H - 1) {
+        if (drop) {
+          drop.y += 0.35;
+          if (drop.y >= H - 2 && drop.x >= paddle && drop.x <= paddle + PAD) {
+            if (drop.kind && PAD < 13) PAD += 2; else if (!drop.kind && PAD > 3) PAD -= 2;
+            drop = null;
+          } else if (drop.y >= H - 1) drop = null;
+        }
+        if (alive === 0) {
           lives--;
-          if (lives <= 0) { over = true; host.saveScore(score); }
-          else { bx = W / 2; by = H - 4; vx = 0.7; vy = -0.7; }
+          if (lives > 0) {
+            balls = [];
+            var n = (VAR === 2) ? 3 : 1;
+            for (i = 0; i < n; i++) balls.push(launch(W / 2 + i * 2));
+          } else { dead = true; host.saveScore(score); }
         }
-        if (left() === 0) { level++; score += 200; levelReset(); }
+        if (bricksLeft() === 0) { level++; score += 200; resetLevel(); }
+      },
+      key: function (k) {
+        if (dead) { reset(); return; }
+        if (k === 'left') paddle = Math.max(0, paddle - 2);
+        if (k === 'right') paddle = Math.min(W - PAD, paddle + 2);
       },
       draw: function (t) {
-        t.header('BREAKOUT', 'Left/Right move · Q quits');
-        t.box(14, 3, W + 2, H + 2, C.blue);
+        t.header('BREAKOUT', SUB);
+        t.box(13, 3, W + 2, H + 2, C.blue);
         for (var r = 0; r < BR; r++) for (var c = 0; c < BC; c++) {
-          if (!brick[r][c]) continue;
-          t.text(15 + c * 4, 6 + r, brick[r][c] === 2 ? '███' : '▒▒▒', RC[r]);
+          var v = brick[r][c];
+          t.text(14 + c * 4, 6 + r, v >= 2 ? '###' : v === 1 ? ':::' : '   ', RC[r]);
         }
-        for (var i = 0; i < P; i++) t.put(15 + paddle + i, 4 + H - 1, '█', C.white);
-        t.put(15 + (bx | 0), 4 + (by | 0), '●', C.yellow, null, true);
-        t.text(14, H + 6, 'Score ' + score + '  Lives ' + lives + '  Level ' + level + '   ', C.fg);
-        if (over) t.center(H + 8, 'Game over — press any key.', C.red, true);
+        if (VAR === 4 && bossHP > 0) t.text(14 + bossX * 4, 6, '[BOSS ' + bossHP + ']', C.red, null, true);
+        for (var i = 0; i < PAD; i++) t.put(14 + paddle + i, 3 + H, '#', C.white, null, true);
+        for (i = 0; i < balls.length; i++)
+          if (balls[i].live) t.put(14 + (balls[i].x | 0), 4 + (balls[i].y | 0), 'O', C.yellow, null, true);
+        if (drop) t.put(14 + (drop.x | 0), 4 + (drop.y | 0), drop.kind ? 'W' : 'S',
+                        drop.kind ? C.green : C.red, null, true);
+        t.text(13, H + 6, 'Score ' + score + '  Lives ' + lives + '  Level ' + level + '  Paddle ' + PAD + '   ', C.fg);
+        if (dead) t.center(H + 8, 'Game over — press any key.', C.red, true);
       }
     };
   }
@@ -302,7 +542,10 @@ reg('invaders', {
   start: function (host, p) {
     var W = 48, H = 22, AR = 4, AC = 10;
     var ACOL = [C.magenta, C.cyan, C.green, C.yellow];
-    var alive, ax, ay, adir, ship, score, lives, wave, shots, bombs, phase, over;
+    /* Galaga pulls attackers out of the grid to dive at the ship; that is the
+     * difference between the two entries, not a faster formation. */
+    var DIVING = p.variant === 1;
+    var alive, ax, ay, adir, ship, score, lives, wave, shots, bombs, phase, over, diver;
     function count() {
       var n = 0;
       alive.forEach(function (r) { r.forEach(function (v) { n += v; }); });
@@ -311,7 +554,7 @@ reg('invaders', {
     function waveReset() {
       alive = [];
       for (var r = 0; r < AR; r++) alive.push(new Array(AC).fill(1));
-      ax = 2; ay = 1; adir = 1; shots = []; bombs = [];
+      ax = 2; ay = 1; adir = 1; shots = []; bombs = []; diver = null;
     }
     function reset() {
       score = 0; lives = 3; wave = 1; ship = W / 2 | 0; phase = 0; over = false;
@@ -360,16 +603,49 @@ reg('invaders', {
           }
           return true;
         });
-        if (count() === 0) { wave++; score += 500; waveReset(); }
+        if (DIVING) {
+          if (!diver && rnd(100) < 4) {
+            for (var tr = 0; tr < 20; tr++) {
+              var dr = rnd(AR), dc = rnd(AC);
+              if (!alive[dr][dc]) continue;
+              diver = { x: ax + dc * 4, y: ay + dr, vx: 0 };
+              alive[dr][dc] = 0;
+              break;
+            }
+          }
+          if (diver) {
+            diver.vx += (ship > diver.x) ? 0.12 : -0.12;
+            diver.vx = Math.max(-0.8, Math.min(0.8, diver.vx));
+            diver.x += diver.vx;
+            diver.y += 0.45;
+            diver.x = Math.max(0, Math.min(W - 1, diver.x));
+            if ((diver.y | 0) >= H - 1) {
+              if (Math.abs((diver.x | 0) - ship) <= 1) lives--;
+              diver = null;
+            } else {
+              shots = shots.filter(function (s2) {
+                if (diver && s2.x === (diver.x | 0) && s2.y === (diver.y | 0)) {
+                  diver = null; score += 150;      /* divers are worth more */
+                  return false;
+                }
+                return true;
+              });
+            }
+          }
+        }
+        if (count() === 0 && !diver) { wave++; score += 500; waveReset(); }
         if (lives <= 0) { over = true; host.saveScore(score); }
       },
       draw: function (t) {
-        t.header('SPACE INVADERS', 'Left/Right move · Space fires · Q quits');
+        t.header(DIVING ? 'GALAGA' : 'SPACE INVADERS',
+                 DIVING ? 'Attackers peel off and dive — Left/Right move, Space fires'
+                        : 'Left/Right move · Space fires · Q quits');
         t.box(14, 3, W + 2, H + 2, C.blue);
         for (var r = 0; r < AR; r++) for (var c = 0; c < AC; c++)
           if (alive[r][c]) t.put(15 + ax + c * 4, 4 + ay + r, r === 0 ? 'Ѫ' : 'ᙢ', ACOL[r], null, true);
         shots.forEach(function (s) { t.put(15 + s.x, 4 + s.y, '|', C.white); });
         bombs.forEach(function (b) { t.put(15 + b.x, 4 + b.y, '!', C.red); });
+        if (diver) t.put(15 + (diver.x | 0), 4 + (diver.y | 0), 'W', C.red, null, true);
         t.put(15 + ship, 4 + H - 1, '▲', C.cyan, null, true);
         t.text(14, H + 6, 'Score ' + score + '  Lives ' + lives + '  Wave ' + wave + '   ', C.fg);
         if (over) t.center(H + 8, 'Game over — press any key.', C.red, true);
@@ -632,6 +908,9 @@ reg('asteroids', {
   realtime: true, step: 55,
   start: function (host, p) {
     var W = 60, H = 22, rocks, shots, sx, sy, svx, svy, angle, score, lives, wave, over;
+    /* Deluxe splits rocks one stage further and sends a saucer hunting. */
+    var DELUXE = p.variant === 1;
+    var saucer = null;
     function wrap(o) {
       if (o.x < 0) o.x += W;
       if (o.x >= W) o.x -= W;
@@ -642,7 +921,10 @@ reg('asteroids', {
       rocks = [];
       for (var i = 0; i < n; i++)
         rocks.push({ x: rnd(W), y: rnd(H),
-                     vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.4, size: 3 });
+                     vx: (Math.random() - 0.5) * (DELUXE ? 0.9 : 0.6),
+                     vy: (Math.random() - 0.5) * (DELUXE ? 0.6 : 0.4),
+                     size: DELUXE ? 4 : 3 });
+      saucer = null;
     }
     function reset() {
       sx = W / 2; sy = H / 2; svx = svy = 0; angle = 0;
@@ -685,7 +967,7 @@ reg('asteroids', {
           if (hitBy >= 0) {
             shots.splice(hitBy, 1);
             score += r.size * 20;
-            if (r.size > 1) for (var j = 0; j < 2; j++)
+            if (r.size > 1) for (var j = 0; j < (DELUXE ? 3 : 2); j++)
               next.push({ x: r.x, y: r.y, vx: (Math.random() - 0.5) * 1.2,
                           vy: (Math.random() - 0.5) * 0.8, size: r.size - 1 });
             return;
@@ -697,17 +979,41 @@ reg('asteroids', {
           next.push(r);
         });
         rocks = next;
+        if (DELUXE) {
+          if (!saucer && rnd(1000) < 6) saucer = { x: 0, y: rnd(H), vx: 0.5 };
+          if (saucer) {
+            saucer.x += saucer.vx;
+            if (saucer.y < sy) saucer.y += 0.12; else if (saucer.y > sy) saucer.y -= 0.12;
+            if (saucer.x > W) saucer = null;
+          }
+          if (saucer) {
+            shots = shots.filter(function (s2) {
+              if (saucer && Math.abs(s2.x - saucer.x) < 2 && Math.abs(s2.y - saucer.y) < 2) {
+                saucer = null; score += 500;
+                return false;
+              }
+              return true;
+            });
+          }
+          if (saucer && Math.abs(sx - saucer.x) < 2 && Math.abs(sy - saucer.y) < 2) {
+            lives--; saucer = null; sx = W / 2; sy = H / 2; svx = svy = 0;
+          }
+        }
         if (!rocks.length) { wave++; score += 300; spawnRocks(Math.min(16, wave)); }
         if (lives <= 0) { over = true; host.saveScore(score); }
       },
       draw: function (t) {
-        t.header('ASTEROIDS', 'Left/Right turn · Up thrusts · Space fires · Q quits');
+        t.header(DELUXE ? 'SPACE ROCKS DELUXE' : 'ASTEROIDS',
+                 (DELUXE ? 'Rocks split further and a saucer hunts you — ' : '') +
+                 'Left/Right turn · Up thrusts · Space fires');
         t.box(10, 3, W + 2, H + 2, C.blue);
         rocks.forEach(function (r) {
           t.put(11 + (r.x | 0), 4 + (r.y | 0),
-                r.size === 3 ? 'O' : r.size === 2 ? 'o' : '.', C.grey, null, true);
+                r.size >= 4 ? '@' : r.size === 3 ? 'O' : r.size === 2 ? 'o' : '.',
+                C.grey, null, true);
         });
         shots.forEach(function (s) { t.put(11 + (s.x | 0), 4 + (s.y | 0), '·', C.yellow); });
+        if (saucer) t.text(11 + (saucer.x | 0), 4 + (saucer.y | 0), '<o>', C.red, null, true);
         t.put(11 + (sx | 0), 4 + (sy | 0), '▲', C.cyan, null, true);
         t.text(10, H + 6, 'Score ' + score + '  Lives ' + lives + '  Wave ' + wave + '   ', C.fg);
         if (over) t.center(H + 8, 'Game over — press any key.', C.red, true);
