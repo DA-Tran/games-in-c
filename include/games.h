@@ -56,5 +56,6 @@ void fam_simon(const GParams *p);
 void fam_snakes_ladders(const GParams *p);
 void fam_dungeon(const GParams *p);
 void fam_piano(const GParams *p);
+void fam_maze(const GParams *p);
 
 #endif /* GIC_GAMES_H */
