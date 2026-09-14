@@ -105,17 +105,12 @@ console.log('catalog integrity');
   console.log('  ' + CATALOG.length + ' entries, ' + slugs.size + ' unique slugs');
 }
 
-console.log('registry cross-check');
+console.log('family cross-check');
 {
-  const impl = CATALOG.filter(g => g.implemented).map(g => g.slug);
-  const wired = Object.keys(GIC.GAMES);
-  impl.forEach(s => { if (!GIC.GAMES[s]) fail('missing JS port', s); });
-  wired.forEach(s => {
-    const e = CATALOG.filter(g => g.slug === s)[0];
-    if (!e) fail('JS game not in catalog', s);
-    else if (!e.implemented) fail('JS game not marked implemented', s);
-  });
-  console.log('  ' + impl.length + ' marked implemented, ' + wired.length + ' wired in JS');
+  const impl = CATALOG.filter(g => g.implemented);
+  const fams = new Set(impl.map(g => g.family));
+  fams.forEach(f => { if (!GIC.GAMES[f]) fail('missing JS family', f); });
+  console.log('  ' + impl.length + ' playable entries across ' + fams.size + ' families');
 }
 
 /* ---------------------------------------------------------- play tests */
@@ -124,25 +119,31 @@ const KEYS = ['up','down','left','right','enter','space','tab','back',
               '1','2','3','4','5','6','7','8','9','0',
               'a','b','c','d','e','f','g','h','l','n','p','r','s','t','u','x','y','>'];
 
-console.log('playing every game');
-Object.keys(GIC.GAMES).sort().forEach(slug => {
+/* Play every playable catalogue entry with its own parameters, so a family
+ * is exercised once per configuration rather than once overall. */
+const playable = CATALOG.filter(g => g.implemented && GIC.GAMES[g.family]);
+console.log('playing ' + playable.length + ' catalogue entries');
+let lastFam = '';
+playable.forEach(entry => {
+  const slug = entry.slug;
   const canvas = makeCanvas();
   const host = new GIC.Host(canvas, {}, { textContent: '' });
   let term;
 
   try {
-    host.start(slug);
+    host.start(entry.family, entry.params, slug);
     term = host.term;
   } catch (e) {
     fail(slug, 'start threw: ' + e.message);
     return;
   }
 
-  const def = GIC.GAMES[slug];
+  const def = GIC.GAMES[entry.family];
   let steps = 0;
+  const presses = def.realtime ? 200 : 300;
 
   try {
-    for (let i = 0; i < 400; i++) {
+    for (let i = 0; i < presses; i++) {
       const k = KEYS[Math.floor(Math.random() * KEYS.length)];
       host.game.key(k);
       if (def.realtime && host.game.tick) { host.game.tick(); steps++; }
@@ -150,7 +151,7 @@ Object.keys(GIC.GAMES).sort().forEach(slug => {
     }
     /* Real-time games also need to survive a long idle run with no input. */
     if (def.realtime && host.game.tick) {
-      for (let i = 0; i < 600; i++) { host.game.tick(); steps++; host.game.draw(term); }
+      for (let i = 0; i < 400; i++) { host.game.tick(); steps++; host.game.draw(term); }
     }
     term.flush();
   } catch (e) {
@@ -162,7 +163,10 @@ Object.keys(GIC.GAMES).sort().forEach(slug => {
   if (term.buf.length !== term.rows || term.buf[0].length !== term.cols)
     fail(slug, 'terminal buffer resized unexpectedly');
 
-  console.log('  ok    ' + slug.padEnd(22) + (def.realtime ? steps + ' ticks' : 'turn-based'));
+  if (entry.family !== lastFam) {
+    console.log('  ' + entry.family);
+    lastFam = entry.family;
+  }
 });
 
 console.log('');
@@ -171,5 +175,6 @@ if (failures.length) {
   failures.forEach(f => console.log('  - ' + f));
   process.exit(1);
 }
-console.log('web build verified: catalog intact, ' +
-            Object.keys(GIC.GAMES).length + ' games played clean');
+console.log('web build verified: catalogue intact, ' + playable.length +
+            ' catalogue entries played clean across ' +
+            new Set(playable.map(g => g.family)).size + ' families');

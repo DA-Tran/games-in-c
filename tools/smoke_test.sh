@@ -14,7 +14,13 @@ set -u
 BIN=./games
 [ -x "$BIN" ] || { echo "build first: make"; exit 1; }
 
-SLUGS=$(grep -o '{"[a-z0-9-]*"' src/registry.c | tr -d '{"')
+# Every playable catalogue entry, so each configuration is driven, not just
+# one representative per engine.
+SLUGS=$(python3 -c "
+import json
+d=json.load(open('data/catalog.json'))['games']
+print(' '.join(g['slug'] for g in d if g['implemented']))
+")
 
 # Arrow keys, enter, space, letters used by menus, then a wall of quits.
 INPUT=$(printf '\033[A\033[B\033[C\033[D\n \n1234hsrdflpxngbyu\n\033[A\n \nq\nq\nq\nq\nq\nq\nq\nq\nq\nq\nn\nq\nq\nq\nq\n')
@@ -24,7 +30,7 @@ fail=0
 failed=""
 
 for slug in $SLUGS; do
-    printf '%-22s' "$slug"
+    printf '%-34s' "$slug"
     printf '%s' "$INPUT" | timeout ${TIMEOUT:-30} "$BIN" "$slug" >/dev/null 2>&1
     rc=$?
     case $rc in

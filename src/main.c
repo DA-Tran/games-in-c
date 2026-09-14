@@ -5,6 +5,8 @@
 
 #define PAGE 18
 
+static int entry_playable(const CatalogEntry *e);
+
 static char   filter[64];
 static char   genre_filter[24];
 static int    only_playable;
@@ -32,7 +34,7 @@ static void rebuild_view(void)
     view_n = 0;
     for (i = 0; i < CATALOG_COUNT && view_n < 1024; i++) {
         const CatalogEntry *e = &CATALOG[i];
-        if (only_playable && !e->implemented) continue;
+        if (only_playable && !entry_playable(e)) continue;
         if (genre_filter[0] && strcmp(e->genre, genre_filter) != 0) continue;
         if (filter[0] &&
             !ci_contains(e->title, filter) &&
@@ -41,6 +43,22 @@ static void rebuild_view(void)
             !ci_contains(e->blurb, filter)) continue;
         view[view_n++] = i;
     }
+}
+
+/* Playable means two things: the engine exists, and it actually honours the
+ * parameters this entry specifies. The generator works the second part out
+ * and records it, so a single hard-coded engine cannot claim credit for
+ * variants it would silently ignore. */
+static int entry_playable(const CatalogEntry *e)
+{
+    return e->playable && family_find(e->family) != NULL;
+}
+
+static void launch(const CatalogEntry *e)
+{
+    const FamilyEntry *f = family_find(e->family);
+    if (!f) return;
+    f->run(&e->params);
 }
 
 static void show_detail(const CatalogEntry *e)
@@ -55,21 +73,34 @@ static void show_detail(const CatalogEntry *e)
     for (i = 0; i < 5; i++)
         printf("%s%s%s", i < e->difficulty ? C_YELLOW : C_GREY, "●", C_RESET);
     draw_textf(10, 10, "%sSlug%s        %s", C_GREY, C_RESET, e->slug);
+    draw_textf(11, 10, "%sEngine%s      %s", C_GREY, C_RESET, e->family);
     draw_textf(12, 10, "%s", e->blurb);
 
-    if (e->implemented) {
+    if (entry_playable(e)) {
         int best = score_load(e->slug);
         draw_textf(14, 10, "%sStatus%s      %sPlayable%s", C_GREY, C_RESET, C_GREEN, C_RESET);
         if (best) draw_textf(15, 10, "%sBest score%s  %d", C_GREY, C_RESET, best);
         draw_text(18, 10, "Press Enter to play, or any other key to go back.");
     } else {
-        draw_textf(14, 10, "%sStatus%s      %sCatalogued - not yet implemented%s",
-                   C_GREY, C_RESET, C_YELLOW, C_RESET);
-        draw_text(16, 10, "This entry is a full spec in the catalog. The engine, input");
-        draw_text(17, 10, "layer and rendering helpers it needs are already built.");
+        draw_textf(14, 10, "%sStatus%s      %sAwaiting the %s engine%s",
+                   C_GREY, C_RESET, C_YELLOW, e->family, C_RESET);
+        draw_text(16, 10, "This entry is fully specified and already bound to its engine");
+        draw_text(17, 10, "and parameters. It becomes playable the moment that engine lands.");
         draw_text(19, 10, "Press any key to go back.");
     }
     scr_flush();
+}
+
+/* How many catalogue entries currently have a parameter-aware engine. */
+static int playable_total(void)
+{
+    static int cached = -1;
+    int i;
+    if (cached >= 0) return cached;
+    cached = 0;
+    for (i = 0; i < CATALOG_COUNT; i++)
+        if (entry_playable(&CATALOG[i])) cached++;
+    return cached;
 }
 
 static void draw_menu(int sel, int top)
@@ -79,8 +110,8 @@ static void draw_menu(int sel, int top)
     scr_size(&rows, &cols);
     scr_clear();
 
-    snprintf(sub, sizeof sub, "%d of %d games shown%s%s%s%s",
-             view_n, CATALOG_COUNT,
+    snprintf(sub, sizeof sub, "%d of %d shown  |  %d playable%s%s%s%s",
+             view_n, CATALOG_COUNT, playable_total(),
              genre_filter[0] ? "   genre: " : "", genre_filter,
              filter[0] ? "   search: " : "", filter);
     draw_title("GAMES IN C", sub);
@@ -90,16 +121,19 @@ static void draw_menu(int sel, int top)
         int row = 6 + i;
         int is_sel = (top + i == sel);
         scr_move(row, 4);
-        printf("%s%s%4d %s%-28.28s %s%-11.11s %s%-24.24s %s%s%s",
-               is_sel ? C_REV : "",
-               e->implemented ? C_GREEN : C_GREY,
-               top + i + 1,
-               e->implemented ? C_BOLD C_WHITE : C_GREY, e->title,
-               C_CYAN, e->genre,
-               C_GREY, e->mechanic,
-               e->implemented ? C_GREEN : C_GREY,
-               e->implemented ? "PLAY" : "spec",
-               C_RESET);
+        {
+            int ok = entry_playable(e);
+            printf("%s%s%4d %s%-28.28s %s%-11.11s %s%-24.24s %s%s%s",
+                   is_sel ? C_REV : "",
+                   ok ? C_GREEN : C_GREY,
+                   top + i + 1,
+                   ok ? C_BOLD C_WHITE : C_GREY, e->title,
+                   C_CYAN, e->genre,
+                   C_GREY, e->mechanic,
+                   ok ? C_GREEN : C_GREY,
+                   ok ? "PLAY" : "soon",
+                   C_RESET);
+        }
     }
     for (; i < PAGE; i++) { scr_move(6 + i, 4); printf("\033[2K"); }
 
@@ -161,17 +195,24 @@ int main(int argc, char **argv)
 
     /* Direct launch: ./games <slug> */
     if (argc > 1) {
-        const GameEntry *g = registry_find(argv[1]);
-        if (!g) {
+        int i;
+        for (i = 0; i < CATALOG_COUNT; i++) {
+            if (strcmp(CATALOG[i].slug, argv[1]) != 0) continue;
+            if (!entry_playable(&CATALOG[i])) {
+                scr_shutdown();
+                fprintf(stderr, "'%s' is catalogued but its %s engine is not built yet.\n",
+                        argv[1], CATALOG[i].family);
+                return 2;
+            }
+            launch(&CATALOG[i]);
             scr_shutdown();
-            fprintf(stderr, "No playable game with slug '%s'.\n", argv[1]);
-            fprintf(stderr, "Run without arguments to browse the catalog.\n");
-            return 1;
+            scr_clear();
+            return 0;
         }
-        g->run();
         scr_shutdown();
-        scr_clear();
-        return 0;
+        fprintf(stderr, "No catalogue entry with slug '%s'.\n", argv[1]);
+        fprintf(stderr, "Run without arguments to browse the catalogue.\n");
+        return 1;
     }
 
     filter[0] = genre_filter[0] = '\0';
@@ -213,12 +254,9 @@ int main(int argc, char **argv)
             show_detail(e);
             {
                 int k2 = key_get();
-                if (e->implemented && (k2 == KEY_ENTER || k2 == ' ')) {
-                    const GameEntry *g = registry_find(e->slug);
-                    if (g) {
-                        g->run();
-                        key_flush();
-                    }
+                if (entry_playable(e) && (k2 == KEY_ENTER || k2 == ' ')) {
+                    launch(e);
+                    key_flush();
                 }
             }
         }

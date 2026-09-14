@@ -97,20 +97,35 @@ int    score_load(const char *slug);
 void   score_save(const char *slug, int score);
 void   score_report(const char *slug, int score);
 
-/* ------------------------------------------------------------- registry */
-typedef void (*game_fn)(void);
+/* ------------------------------------------------------- family + params */
+/* One engine serves many catalogue entries. Each entry supplies concrete
+ * parameters; a family reads only the fields that are meaningful to it.
+ * The per-field meaning for every family is documented at the top of its
+ * source file. */
+typedef struct {
+    int width;        /* board columns, lane count, reel count, ...        */
+    int height;       /* board rows                                        */
+    int size;         /* square-board edge, heap count, disc count, ...    */
+    int variant;      /* rule variant selector, family-specific enum       */
+    int count;        /* mines, pairs, colours, pegs, questions, ...       */
+    int level;        /* level/pack index, depth, paytable index           */
+    int difficulty;   /* 1..5, drives generator aggressiveness and AI ply  */
+    int players;      /* seats, where the family supports more than one    */
+    const char *theme;/* dictionary, tile set, question bank, level pack   */
+    const char *title;/* catalogue title, shown in the game header         */
+} GParams;
+
+typedef void (*family_fn)(const GParams *p);
 
 typedef struct {
-    const char *slug;
-    const char *title;
-    const char *genre;
-    game_fn     run;
-} GameEntry;
+    const char *family;   /* family name referenced by catalogue entries   */
+    family_fn   run;
+} FamilyEntry;
 
-extern const GameEntry GAME_REGISTRY[];
-extern const int       GAME_REGISTRY_COUNT;
+extern const FamilyEntry FAMILY_REGISTRY[];
+extern const int         FAMILY_REGISTRY_COUNT;
 
-const GameEntry *registry_find(const char *slug);
+const FamilyEntry *family_find(const char *name);
 
 /* ------------------------------------------------------------- catalog */
 typedef struct {
@@ -121,10 +136,16 @@ typedef struct {
     const char *players;
     int         difficulty;   /* 1..5                                      */
     const char *blurb;
-    int         implemented;  /* 1 if a playable GameEntry exists          */
+    const char *family;       /* engine that plays this entry              */
+    int         playable;     /* 1 when that engine honours these params   */
+    GParams     params;       /* configuration handed to that engine       */
 } CatalogEntry;
 
 extern const CatalogEntry CATALOG[];
 extern const int          CATALOG_COUNT;
+
+/* Convenience for families that want a sensible fallback. */
+int  gp_int(int value, int fallback);
+const char *gp_str(const char *value, const char *fallback);
 
 #endif /* GIC_ENGINE_H */

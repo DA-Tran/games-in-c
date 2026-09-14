@@ -78,7 +78,7 @@ function openGame(slug) {
   slugEl.textContent = g.slug;
   panelC.textContent = '';
 
-  if (g.implemented && GAMES[slug]) {
+  if (g.implemented && GAMES[g.family]) {
     var wrap = document.createElement('div');
     wrap.className = 'screen-wrap';
     var canvas = document.createElement('canvas');
@@ -105,7 +105,7 @@ function openGame(slug) {
 
     overlay.classList.add('open');
     host = new window.GIC.Host(canvas, pad, help);
-    host.start(slug);
+    host.start(g.family, g.params, g.slug);
   } else {
     panelC.appendChild(specSheet(g));
     overlay.classList.add('open');
@@ -126,10 +126,11 @@ function specSheet(g) {
       '<dt>Players</dt><dd>' + esc(g.players) + '</dd>' +
       '<dt>Difficulty</dt><dd class="pips">' + pips + '</dd>' +
       '<dt>Slug</dt><dd>' + esc(g.slug) + '</dd>' +
+      '<dt>Engine</dt><dd>' + esc(g.family) + '</dd>' +
     '</dl>' +
     '<p>' + esc(g.blurb) + '</p>' +
-    '<p style="color:#7b8189">Catalogued, not yet written. The engine, input layer and ' +
-    'renderer this entry needs already exist — it is the game logic that is outstanding.</p>';
+    '<p style="color:#7b8189">Specified and already bound to its engine and parameters. ' +
+    'It becomes playable as soon as the <code>' + esc(g.family) + '</code> engine lands.</p>';
   return d;
 }
 
@@ -187,7 +188,7 @@ document.addEventListener('keydown', function (e) {
   document.getElementById('stat-play').textContent = playable;
   document.getElementById('stat-genre').textContent = Object.keys(genres).length;
 
-  var wired = CATALOG.filter(function (g) { return g.implemented && GAMES[g.slug]; }).length;
+  var wired = CATALOG.filter(function (g) { return g.implemented && GAMES[g.family]; }).length;
   document.getElementById('foot-note').textContent =
     wired + ' games wired to this page';
 

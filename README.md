@@ -1,7 +1,7 @@
 # Games in C
 
-A thousand games catalogued, forty-nine written and playable — in the terminal
-and in the browser, from the same design.
+A thousand games catalogued and bound to engines; 160 playable so far — in the
+terminal and in the browser, from the same design.
 
 - **Terminal:** pure C99, ANSI escapes, zero dependencies. Builds with `make`
   on Linux, macOS and Windows.
@@ -10,7 +10,7 @@ and in the browser, from the same design.
 
 ```
 make && ./games          # browse the catalogue and play
-make play G=tetris       # launch one game directly
+make play G=sudoku-16x16-diagonal   # launch one entry directly by slug
 open web/index.html      # the browser version
 ```
 
@@ -19,36 +19,60 @@ open web/index.html      # the browser version
 | | |
 |---|---|
 | Catalogued games | 1000, across 17 genres |
-| Fully implemented | 49, in both C and JavaScript |
-| C source | ~9,500 lines, no external libraries |
+| Playable now | 160, in both C and JavaScript |
+| External dependencies | none, on either side |
 | Compiler warnings | zero, at `-Wall -Wextra` |
 
-The 951 unimplemented entries are **specifications, not stubs**. Each carries a
-genre, core mechanic, player count, difficulty rating and description — enough
-to build from. The menu marks them `spec`; the playable ones are marked `play`.
+### How 1000 games is being reached
 
-## Playable games
+Every catalogue entry names a **family** (the engine that plays it) and the
+**parameters** that configure it. One well-written engine therefore delivers
+many genuinely different games: the sudoku family covers five board sizes
+crossed with six rule variants — 4x4 up to 16x16, diagonal, anti-knight,
+windoku and the rest — as thirty separate, separately-scored entries.
 
-**Board & strategy** — Tic Tac Toe (unbeatable minimax), Connect Four
-(alpha-beta), Reversi, Gomoku, Checkers (forced jumps, multi-captures, kings),
-Mancala, Nim (perfect nim-sum play), Dots and Boxes, Battleship (parity-search
-AI), Snakes and Ladders
+Work proceeds in batches. When a batch lands, its entries light up on their
+own; nothing in the catalogue needs editing.
 
-**Puzzles** — Minesweeper (safe first click), Sudoku (generated with a
-*guaranteed unique* solution, four difficulties), Fifteen Puzzle, Lights Out,
-Flood It, Sokoban (6 levels, undo), Memory Match, 2048, Towers of Hanoi,
-Nonogram, Mastermind
+**An entry only counts as playable when its engine actually honours the
+parameters the entry promises.** A family is credited when either its source
+carries the `GIC:PARAMETERISED` marker, or it has exactly one catalogue entry
+and so has nothing to configure. That is deliberate: without it, one
+hard-coded sudoku would claim credit for thirty variants it would silently
+ignore. `tools/gen_catalog.py` prints the remaining work every time it runs.
 
-**Arcade** — Snake, Tetris (seven-bag, wall kicks, hard drop), Pong, Breakout,
-Space Invaders, Dino Run, Flappy, Frogger, Pacman (four distinct ghost
-personalities), Asteroids
+Current state: 16 families done (160 entries), 34 engines built but still
+ignoring their parameters (319 entries), 32 engines not yet written (521
+entries).
 
-**Cards & dice** — Blackjack, Video Poker (Jacks or Better), War, Go Fish,
-Yahtzee, Pig, Slot Machine, Higher or Lower
+## Families completed so far
 
-**Word, logic & other** — Hangman, Wordle, Anagram, Typing Test, Guess the
-Number, Bulls and Cows, Rock Paper Scissors, Simon, Dungeon Crawl (procedural
-roguelike), Virtual Piano
+**Fully parameterised** (every catalogue variant genuinely distinct):
+
+- **Sudoku** — 30 entries. 4x4/6x6/9x9/12x12/16x16, box shape derived from the
+  size, plus diagonal, even-odd, consecutive, anti-knight and windoku rules.
+  Generated with a proven-unique solution.
+- **Minesweeper** — 24 entries. Six board sizes across classic, no-guess, wrap
+  and knight adjacency. No-guess boards are re-rolled until a logic-only
+  solver can clear them, so you never have to gamble.
+- **Lights Out** — 18 entries. Six sizes across plus, diagonal and
+  row-and-column toggles.
+- **Nonogram** — 12 entries, 5x5 to 30x30, mono and multi-colour.
+- **Merge (2048)** — 8 entries: sizes 3x3-8x8 plus tripling, Fibonacci and
+  Threes merge rules.
+- **Towers of Hanoi** (8), **Memory Match** (6), **Flood It** (6),
+  **Sokoban** (6), **Sliding Puzzle** (5).
+
+Plus single-configuration families: Pacman, Frogger, Flappy, Dino Run, Pig,
+Higher or Lower.
+
+**Built, awaiting parameterisation** — Tic Tac Toe, Connect Four, Reversi,
+Gomoku, Checkers, Mancala, Nim, Dots and Boxes, Battleship, Mastermind, Snake,
+Tetris, Pong, Breakout, Space Invaders, Asteroids, Blackjack, Video Poker,
+War, Go Fish, Yahtzee, Slots, Hangman, Wordle, Anagram, Typing Test, Guess the
+Number, Bulls and Cows, Rock Paper Scissors, Simon, Snakes and Ladders,
+Dungeon Crawl, Virtual Piano. These play today at their default configuration;
+their remaining variants are catalogued and waiting.
 
 ## Layout
 
@@ -57,7 +81,7 @@ include/      engine.h, games.h, cards.h, words.h
 src/engine/   platform.c  raw-mode input, arrow decoding, timing, beep
               render.c    ANSI drawing primitives
               util.c      RNG, persistent high scores
-src/games/    one file per game (plus shared cards.c and words.c)
+src/games/    one file per family (plus shared cards.c and words.c)
 src/          main.c (catalogue browser), registry.c, catalog_data.c [generated]
 web/          index.html + js/ — the browser build
 data/         catalog.json [generated]
@@ -83,21 +107,24 @@ scripted input drives a real-time game and it exits cleanly instead of spinning.
 ## Tests
 
 ```
-make smoke              # drives all 49 C games through scripted input
-node tools/web_test.js  # plays all 49 JS games headlessly
+make smoke              # drives every playable entry through scripted input
+node tools/web_test.js  # plays every playable entry headlessly
 make catalog            # regenerate the catalogue
 ```
 
-`make smoke` feeds each game arrows, Enter, digits and quits, then asserts a
-clean exit — no crash, no hang, no fault. `web_test.js` loads the browser build
-against a DOM stub and drives 400 random keypresses plus 1000 ticks per game.
+Both harnesses drive **every playable catalogue entry with its own
+parameters**, not one representative per engine — so all thirty sudoku
+variants are generated and played, not just one.
 
-Both suites currently pass 49/49.
+Both suites currently pass 160/160.
 
 ## Adding a game
 
-1. Write `src/games/yourgame.c` exposing `void play_yourgame(void)`.
+1. Write `src/games/yourfamily.c` exposing `void fam_yourfamily(const GParams *p)`,
+   reading the parameter fields its catalogue entries set. Put
+   `GIC:PARAMETERISED` in the header comment once it genuinely honours them.
 2. Declare it in `include/games.h` and add a row to `src/registry.c`.
-3. Add the slug to `IMPLEMENTED` in `tools/gen_catalog.py`, then `make catalog`.
-4. Port it into the matching `web/js/games/*.js` with `GIC.register(slug, {...})`.
+3. Add its entries to `tools/gen_catalog.py`, then `make catalog`.
+4. Port it into `web/js/games/*.js` with `GIC.register('yourfamily', {...})`,
+   whose `start(host, p)` reads the same fields.
 5. `make smoke && node tools/web_test.js`.

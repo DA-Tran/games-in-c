@@ -169,15 +169,19 @@ function Host(canvas, padEl, helpEl) {
   this._onKey = function (e) { self.handleKey(e); };
 }
 
-Host.prototype.start = function (slug) {
-  var def = GAMES[slug];
+/* Start `family` configured by `params`. `slug` only scopes the high score,
+ * so every catalogue entry keeps its own best even when they share an engine. */
+Host.prototype.start = function (family, params, slug) {
+  var def = GAMES[family];
   if (!def) return false;
 
   this.stop();
-  this.slug = slug;
+  this.family = family;
+  this.slug = slug || family;
+  this.params = params || {};
   this.def = def;
   this.term = new Term(this.canvas, def.cols || 84, def.rows || 28);
-  this.game = def.start(this);
+  this.game = def.start(this, this.params);
   this.helpEl.textContent = def.help || '';
 
   global.addEventListener('keydown', this._onKey, { passive: false });

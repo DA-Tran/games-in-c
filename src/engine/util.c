@@ -107,10 +107,17 @@ void score_report(const char *slug, int score)
     scr_flush();
 }
 
-const GameEntry *registry_find(const char *slug)
+const FamilyEntry *family_find(const char *name)
 {
     int i;
-    for (i = 0; i < GAME_REGISTRY_COUNT; i++)
-        if (strcmp(GAME_REGISTRY[i].slug, slug) == 0) return &GAME_REGISTRY[i];
+    for (i = 0; i < FAMILY_REGISTRY_COUNT; i++)
+        if (strcmp(FAMILY_REGISTRY[i].family, name) == 0) return &FAMILY_REGISTRY[i];
     return NULL;
+}
+
+int gp_int(int value, int fallback) { return value > 0 ? value : fallback; }
+
+const char *gp_str(const char *value, const char *fallback)
+{
+    return (value && *value) ? value : fallback;
 }
