@@ -830,7 +830,10 @@ assert len(entries) == TARGET, len(entries)
 # would silently ignore.
 # =========================================================================
 reg_src = open(os.path.join(ROOT, "src", "registry.c")).read()
-fam_to_fn = dict(re.findall(r'\{"([a-z0-9]+)",\s*fam_(\w+)\}', reg_src))
+# Tolerate whitespace anywhere inside the brace: a stricter pattern once
+# silently dropped a family whose entry had an extra space, and the only
+# symptom was an "unknown family" error pointing at the wrong thing.
+fam_to_fn = dict(re.findall(r'\{\s*"([a-z0-9]+)"\s*,\s*fam_(\w+)\s*\}', reg_src))
 built = set(fam_to_fn)
 
 # A marker names the family it vouches for, e.g. "GIC:PARAMETERISED sudoku".

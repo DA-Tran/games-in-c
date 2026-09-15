@@ -4,6 +4,8 @@
 #   make play G=snake   build and launch one game directly
 #   make catalog    regenerate the dictionaries and the 1000-game catalogue
 #   make smoke      run the scripted no-crash harness over every game
+#   make asan       build ./games-asan with the address sanitiser
+#   make smoke-asan run the harness against the sanitised build
 #   make web        report how to open the browser version
 #   make clean      remove build artefacts
 
@@ -16,7 +18,7 @@ BIN     = games
 SRC     = $(wildcard src/*.c) $(wildcard src/engine/*.c) $(wildcard src/games/*.c)
 OBJ     = $(SRC:.c=.o)
 
-.PHONY: all run play catalog smoke web clean
+.PHONY: all run play catalog smoke asan smoke-asan web clean
 
 all: $(BIN)
 
@@ -40,8 +42,23 @@ catalog:
 smoke: $(BIN)
 	./tools/smoke_test.sh
 
+# A sanitised build. The ordinary harness only notices a bug that crashes;
+# a tableau overwritten by one card past its end usually does not, so the
+# same scripted run is also played against this binary.
+ASAN_BIN    = games-asan
+ASAN_FLAGS  = -std=c99 -Wall -Wextra -O1 -g -fsanitize=address,undefined \
+              -fno-omit-frame-pointer
+
+asan: $(ASAN_BIN)
+
+$(ASAN_BIN): $(SRC)
+	$(CC) $(ASAN_FLAGS) $(CPPFLAGS) -o $@ $(SRC) $(LDLIBS)
+
+smoke-asan: $(ASAN_BIN)
+	BIN=./$(ASAN_BIN) TIMEOUT=60 ./tools/smoke_test.sh
+
 web:
 	@echo "Open web/index.html in any browser - no server required."
 
 clean:
-	rm -f $(OBJ) $(BIN)
+	rm -f $(OBJ) $(BIN) $(ASAN_BIN)

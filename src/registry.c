@@ -61,6 +61,7 @@ const FamilyEntry FAMILY_REGISTRY[] = {
     {"mathdrill",          fam_mathdrill},
     {"idle",               fam_idle},
     {"automata",           fam_automata},
+    {"solitaire",          fam_solitaire},
     {"logicgrid",          fam_logicgrid},
     {"wordmisc",           fam_wordmisc},
     {"reaction",           fam_reaction},

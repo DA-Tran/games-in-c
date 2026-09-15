@@ -69,4 +69,7 @@ void fam_pegsolitaire(const GParams *p);
 void fam_matchthree(const GParams *p);
 void fam_wordsearch(const GParams *p);
 
+void fam_solitaire(const GParams *p);
+void solitaire_other(const GParams *p, int v);
+
 #endif /* GIC_GAMES_H */

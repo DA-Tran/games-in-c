@@ -1,6 +1,6 @@
 {
  "count": 1000,
- "playable": 722,
+ "playable": 751,
  "families": {
   "abstract": 16,
   "anagram": 11,
@@ -9600,8 +9600,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "klondike-draw-three",
@@ -9623,8 +9623,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "spider-one-suit",
@@ -9646,8 +9646,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "spider-two-suit",
@@ -9669,8 +9669,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "spider-four-suit",
@@ -9692,8 +9692,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "freecell",
@@ -9715,8 +9715,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "eight-off",
@@ -9738,8 +9738,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "seahaven-towers",
@@ -9761,8 +9761,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "penguin",
@@ -9784,8 +9784,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "pyramid-solitaire",
@@ -9807,8 +9807,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "tripeaks",
@@ -9830,8 +9830,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "golf-solitaire",
@@ -9853,8 +9853,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "yukon-solitaire",
@@ -9876,8 +9876,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "russian-solitaire",
@@ -9899,8 +9899,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "canfield",
@@ -9922,8 +9922,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "scorpion",
@@ -9945,8 +9945,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "forty-thieves",
@@ -9968,8 +9968,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "aces-up",
@@ -9991,8 +9991,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "accordion",
@@ -10014,8 +10014,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "bakers-dozen",
@@ -10037,8 +10037,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "beleaguered-castle",
@@ -10060,8 +10060,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "clock-patience",
@@ -10083,8 +10083,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "la-belle-lucie",
@@ -10106,8 +10106,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "calculation",
@@ -10129,8 +10129,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "napoleon-at-st-helena",
@@ -10152,8 +10152,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "garbage",
@@ -10175,8 +10175,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "kings-corner",
@@ -10198,8 +10198,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "nertz",
@@ -10221,8 +10221,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "spit",
@@ -10244,8 +10244,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "blackjack",

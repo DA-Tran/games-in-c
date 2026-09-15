@@ -11,7 +11,7 @@
 
 set -u
 
-BIN=./games
+BIN=${BIN:-./games}
 [ -x "$BIN" ] || { echo "build first: make"; exit 1; }
 
 # Every playable catalogue entry, so each configuration is driven, not just
@@ -22,13 +22,14 @@ BIN=./games
 # chasing a single bug.
 #   FILTER=slots ./tools/smoke_test.sh     entries whose slug contains "slots"
 #   START=200 COUNT=50 ./tools/smoke_test.sh
-SLUGS=$(FILTER="${FILTER:-}" START="${START:-0}" COUNT="${COUNT:-0}" python3 -c "
+SLUGS=$(FILTER="${FILTER:-}" FAMILY="${FAMILY:-}" START="${START:-0}" COUNT="${COUNT:-0}" python3 -c "
 import json, os
 d = json.load(open('data/catalog.json'))['games']
+fam = os.environ.get('FAMILY', '')
+if fam: d = [g for g in d if g['family'] == fam]
 s = [g['slug'] for g in d if g['implemented']]
 f = os.environ.get('FILTER', '')
-if f:
-    s = [x for x in s if f in x]
+if f: s = [x for x in s if f in x]
 start = int(os.environ.get('START') or 0)
 count = int(os.environ.get('COUNT') or 0)
 s = s[start:start + count] if count else s[start:]

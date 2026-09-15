@@ -78,7 +78,7 @@ load('js/catalog.js');
 load('js/words.js');
 load('js/quiz.js');
 load('js/engine.js');
-['board', 'puzzle', 'puzzle2', 'puzzle3', 'drills', 'arcade', 'cards', 'word'].forEach(m => load('js/games/' + m + '.js'));
+['board', 'puzzle', 'puzzle2', 'puzzle3', 'drills', 'arcade', 'cards', 'word', 'solitaire', 'solitaire2'].forEach(m => load('js/games/' + m + '.js'));
 
 const GIC = sandbox.GIC;
 const CATALOG = sandbox.CATALOG;
