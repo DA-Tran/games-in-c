@@ -96,4 +96,8 @@ void fam_backgammon(const GParams *p);
 
 void fam_tilepuzzle(const GParams *p);
 
+void fam_chess(const GParams *p);
+
+void fam_chesspuzzle(const GParams *p);
+
 #endif /* GIC_GAMES_H */
