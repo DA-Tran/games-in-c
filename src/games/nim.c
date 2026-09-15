@@ -238,8 +238,10 @@ void fam_nim(const GParams *p)
             if (k != KEY_ENTER && k != ' ') continue;
             if (heap[cur] < take || take < 1) continue;
             if (VARIANT == 4 && last_take && take > last_take * 2) {
+                /* Feedback on an illegal move, not a reveal: it should not
+                 * cost the player a second of waiting. */
                 render(cur, take, "That exceeds twice the last take.");
-                sleep_ms(900);
+                sleep_ms(400);
                 continue;
             }
 
@@ -272,7 +274,7 @@ void fam_nim(const GParams *p)
                     over = 1;
                 } else {
                     render(cur, take, msg);
-                    sleep_ms(800);
+                    sleep_ms(550);
                 }
             }
         }
