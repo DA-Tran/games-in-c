@@ -84,4 +84,10 @@ void fam_cardmisc(const GParams *p);
 
 void fam_hexconnect(const GParams *p);
 
+void fam_morris(const GParams *p);
+
+void fam_tafl(const GParams *p);
+
+void fam_go(const GParams *p);
+
 #endif /* GIC_GAMES_H */
