@@ -55,22 +55,63 @@ in the browser, driven from the same catalogue and the same parameters.
 
 ## Verifying
 
+Three layers, each answering a different question.
+
     make            build; the tree builds at zero warnings
-    make smoke      scripted no-crash harness over every playable entry
-    make asan       build with AddressSanitizer and UBSan
-    make smoke-asan play the same scripted run against the sanitised build
+    make strict     compile every file under a much harsher set, with -Werror
+    make smoke      the normal test: does it work
+    make stress     the stress test: can it be broken
     node tools/web_test.js    drive every entry in the browser build
 
-The sanitiser is not optional decoration. Writing the Spit patience revealed a
-stack overflow — thirty-six cards dealt into a thirty-slot hand — that the
-ordinary harness passed without complaint, because overwriting a neighbouring
-local does not reliably crash. Five declarations were undersized in the same
-way. All 1000 entries now play clean under AddressSanitizer and UBSan.
+**`make smoke`** launches all 1000 entries with a scripted run of ordinary
+keystrokes and requires a clean exit from each. It runs them in parallel and
+says so if a run was cut short rather than quietly reporting fewer passes.
 
-`tools/smoke_test.sh` honours `FAMILY`, `FILTER`, `START`, `COUNT`, `TIMEOUT`
-and `BIN`, so one family can be exercised on its own while a batch is in
-progress. Games with spin or race animations need a `TIMEOUT` above ten
-seconds; the default of thirty is generous enough for all of them.
+**`make stress`** attacks each entry with nine adversarial input patterns --
+random bytes, truncated and malformed escape sequences, arrow spam pinned
+against every boundary, walls of Enter, digit floods, hundreds of forced
+replays, a 40KB mixed stream, and high-bit bytes including NUL -- across
+swept RNG seeds, under AddressSanitizer and UBSan. Every failure prints the
+seed and pattern that caused it, so it can be reproduced exactly.
+
+Both honour `FAMILY`, `FILTER`, `START`, `COUNT`, `TIMEOUT`, `JOBS` and `BIN`.
+
+### Why the two differ, and what that bought
+
+The stress test is not the normal test with more keys. It differs in four
+ways, and each one caught something:
+
+- **Random and malformed input.** Found a stack overflow in Quoridor -- the
+  pawns move on a 9x9 grid so a wall index reaches 8, but the arrays were
+  `[8][8]`. It fired on the very first frame, deterministically, including
+  with no input at all.
+- **Empty input.** Found an infinite loop in the anagram games. `read_line`
+  returned 0 both for "the player pressed Enter on an empty line" and for
+  "the stream ended", and the caller retried on an empty line. The normal
+  test could never find this: it always sends a wall of quits, so the stream
+  never runs dry while the game is still asking for a word.
+- **Sustained input.** Found that four games drew the standing high score
+  inside their render loop, and `score_load()` opened and parsed the score
+  file on every call -- a disk round trip sixty times a second in the
+  real-time ones. A ten-thousand-keystroke run of 2048 went from 18.78s to
+  0.08s once the table was held in memory.
+- **Swept seeds.** The RNG seeded from `time(NULL)`, so a suite that launches
+  a thousand games in a few seconds was re-testing a handful of layouts.
+  `GIC_SEED` pins it, which both widens coverage and makes failures
+  reproducible.
+
+`GIC_NODELAY` turns animation pauses into no-ops. Without it a race game
+spends most of a second per round on purpose, so a few hundred scripted
+keystrokes ask for half an hour of legitimate play and then look like a hang.
+With it, Senet driven three hundred turns deep runs in 0.02s instead of
+timing out. Neither variable changes anything for a player, and the ordinary
+smoke run leaves both unset so the timing paths run at their real speed.
+
+`make strict` earns its place too: it found six defects hiding behind ternary
+arms that were identical on both sides -- the chessboard had silently lost
+its light and dark squares, Halma and Chinese Checkers were the same game
+with the same nine-man home, and the word-search list rendered a found word
+exactly like an unfound one.
 
 ## Families completed so far
 
