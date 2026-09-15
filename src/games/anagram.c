@@ -42,7 +42,11 @@ void fam_anagram(const GParams *p)
                 printf("\033[K");
                 scr_flush();
 
-                if (read_line(answer, sizeof answer) == 0) continue;
+                {
+                    int got = read_line(answer, sizeof answer);
+                    if (got < 0) return;          /* Escape, or end of input */
+                    if (got == 0) continue;       /* empty line: ask again   */
+                }
                 for (i = 0; answer[i]; i++) answer[i] = (char)tolower(answer[i]);
                 if (strcmp(answer, "q") == 0) return;
                 if (strcmp(answer, "h") == 0) { hint = 1; continue; }

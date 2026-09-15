@@ -111,7 +111,7 @@ void fam_guess_number(const GParams *p)
             printf("\033[K");
             scr_flush();
 
-            if (read_line(buf, sizeof buf) == 0) return;
+            if (read_line(buf, sizeof buf) <= 0) return;
             if (buf[0] == 'q' || buf[0] == 'Q') return;
             g = atoi(buf);
             if (g < 1 || g > hi) continue;
@@ -173,7 +173,7 @@ void fam_bulls_cows(const GParams *p)
             printf("\033[K");
             scr_flush();
 
-            if (read_line(buf, sizeof buf) == 0) return;
+            if (read_line(buf, sizeof buf) <= 0) return;
             if (buf[0] == 'q' || buf[0] == 'Q') return;
             if ((int)strlen(buf) != nd) continue;
             for (i = 0; i < nd; i++) {

@@ -75,7 +75,7 @@ void   draw_hline(int row, int col, int len, const char *colour);
 int    key_get(void);             /* blocking, decodes arrows/escapes      */
 int    key_poll(void);            /* non-blocking, KEY_NONE if nothing     */
 void   key_flush(void);           /* discard pending input                 */
-int    read_line(char *buf, int max);       /* cooked line entry           */
+int    read_line(char *buf, int max);       /* cooked entry; -1 = abandoned */
 int    read_int(const char *prompt, int lo, int hi);
 int    confirm(const char *prompt);
 void   pause_msg(const char *msg);

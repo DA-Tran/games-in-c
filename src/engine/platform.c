@@ -219,14 +219,18 @@ void key_flush(void)
 }
 
 /* Cooked line entry: echo characters, handle backspace, stop at Enter. */
+/* Returns the number of characters read, or -1 if the entry was abandoned -
+ * Escape pressed, or the input stream ended. Callers that retry on an empty
+ * line must check for -1, or they will spin forever once stdin is exhausted.
+ * That is exactly what the anagram games did. */
 int read_line(char *buf, int max)
 {
-    int n = 0;
+    int n = 0, abandoned = 0;
     scr_show_cursor();
     for (;;) {
         int c = key_get();
         if (c == KEY_ENTER || c == '\n') break;
-        if (c == KEY_ESC) { n = 0; break; }
+        if (c == KEY_ESC) { n = 0; abandoned = 1; break; }
         if (c == KEY_BACKSPACE || c == 8) {
             if (n > 0) { n--; printf("\b \b"); scr_flush(); }
             continue;
@@ -239,7 +243,7 @@ int read_line(char *buf, int max)
     }
     buf[n] = '\0';
     scr_hide_cursor();
-    return n;
+    return abandoned ? -1 : n;
 }
 
 int read_int(const char *prompt, int lo, int hi)
