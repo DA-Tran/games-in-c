@@ -100,4 +100,10 @@ void fam_chess(const GParams *p);
 
 void fam_chesspuzzle(const GParams *p);
 
+void fam_arcademisc(const GParams *p);
+
+void fam_artillery(const GParams *p);
+
+void fam_towerdefence(const GParams *p);
+
 #endif /* GIC_GAMES_H */
