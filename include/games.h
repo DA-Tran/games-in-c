@@ -72,4 +72,12 @@ void fam_wordsearch(const GParams *p);
 void fam_solitaire(const GParams *p);
 void solitaire_other(const GParams *p, int v);
 
+void fam_dice(const GParams *p);
+
+void fam_betting(const GParams *p);
+
+void fam_tricktaking(const GParams *p);
+
+void fam_shedding(const GParams *p);
+
 #endif /* GIC_GAMES_H */

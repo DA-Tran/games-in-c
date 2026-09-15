@@ -1,6 +1,6 @@
 {
  "count": 1000,
- "playable": 751,
+ "playable": 813,
  "families": {
   "abstract": 16,
   "anagram": 11,
@@ -10681,8 +10681,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "spades",
@@ -10704,8 +10704,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "whist",
@@ -10727,8 +10727,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "oh-hell",
@@ -10750,8 +10750,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "euchre",
@@ -10773,8 +10773,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "briscola",
@@ -10796,8 +10796,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "napoleon",
@@ -10819,8 +10819,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sevens",
@@ -10842,8 +10842,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "knockout-whist",
@@ -10865,8 +10865,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "german-whist",
@@ -10888,8 +10888,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "ninety-nine",
@@ -10911,8 +10911,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "scopa",
@@ -10934,8 +10934,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "crazy-eights",
@@ -10957,8 +10957,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "crazy-eights-wild-draw",
@@ -10980,8 +10980,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "president",
@@ -11003,8 +11003,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "cheat",
@@ -11026,8 +11026,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "durak",
@@ -11049,8 +11049,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "old-maid",
@@ -11072,8 +11072,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "snap",
@@ -11095,8 +11095,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slapjack",
@@ -11118,8 +11118,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "beggar-my-neighbour",
@@ -11141,8 +11141,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "egyptian-ratscrew",
@@ -11164,8 +11164,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "go-fish",
@@ -11187,8 +11187,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "rummy",
@@ -11210,8 +11210,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "war",
@@ -11532,8 +11532,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "craps",
@@ -11555,8 +11555,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "liars-dice",
@@ -11578,8 +11578,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "bunco",
@@ -11601,8 +11601,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "shut-the-box",
@@ -11624,8 +11624,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "cee-lo",
@@ -11647,8 +11647,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "chuck-a-luck",
@@ -11670,8 +11670,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "mexico",
@@ -11693,8 +11693,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "beetle",
@@ -11716,8 +11716,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "zonk",
@@ -11739,8 +11739,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "yacht",
@@ -11762,8 +11762,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "balut",
@@ -11785,8 +11785,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "kismet",
@@ -11808,8 +11808,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "drop-dead",
@@ -11831,8 +11831,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "threes",
@@ -11854,8 +11854,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "going-to-boston",
@@ -11877,8 +11877,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "pig-dice",
@@ -11900,8 +11900,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dudo",
@@ -11923,8 +11923,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sic-bo",
@@ -11946,8 +11946,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "klondike-dice",
@@ -11969,8 +11969,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "yahtzee",
@@ -12153,8 +12153,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "roulette-american",
@@ -12176,8 +12176,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "roulette-french",
@@ -12199,8 +12199,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "roulette-mini",
@@ -12222,8 +12222,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "keno",
@@ -12245,8 +12245,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "bingo",
@@ -12268,8 +12268,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "lottery-sim",
@@ -12291,8 +12291,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "coin-streak",
@@ -12314,8 +12314,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "wheel-of-fortune",
@@ -12337,8 +12337,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "scratch-card",
@@ -12360,8 +12360,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "three-card-monte",
@@ -12383,8 +12383,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "plinko",
@@ -12406,8 +12406,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "horse-race-sim",
@@ -12429,8 +12429,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "odds-and-evens",
@@ -12452,8 +12452,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "matching-pennies",
@@ -12475,8 +12475,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "dice-duel",
@@ -12498,8 +12498,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "high-card-draw",
@@ -12521,8 +12521,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "crash",
@@ -12544,8 +12544,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "slots-fruit",
