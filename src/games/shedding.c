@@ -161,7 +161,7 @@ static void play_match(const GParams *p, int ri)
 
                 if (chosen >= 0 && hn[pl] > 0) {
                     pile = hand[pl][chosen];
-                    claimed = R->bluff ? rank_of(pile) : rank_of(pile);
+                    claimed = rank_of(pile);
                     if (R->bluff && rnd(100) < 30) claimed = rnd(13);   /* the lie */
                     stack = R->bluff ? stack + 1 : 0;
                     pilesuit = (R->wild >= 0 && rank_of(pile) == R->wild)

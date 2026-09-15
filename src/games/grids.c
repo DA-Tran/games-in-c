@@ -101,8 +101,18 @@ void fam_wordsearch(const GParams *p)
             }
         }
         for (i = 0; i < ws_n; i++)
+        {
+            /* A found word is struck through as well as recoloured, so the
+             * list stays readable without relying on colour alone. */
+            char shown[20];
+            int j, len = (int)strlen(ws_word[i]);
+            if (ws_found[i]) {
+                for (j = 0; j < len && j < 18; j++) shown[j] = '-';
+                shown[j] = '\0';
+            } else snprintf(shown, sizeof shown, "%s", ws_word[i]);
             draw_textf(4 + i, 48, "%s%-14s%s", ws_found[i] ? C_GREEN : C_GREY,
-                       ws_found[i] ? ws_word[i] : ws_word[i], C_RESET);
+                       shown, C_RESET);
+        }
         draw_textf(4 + WS + 1, 12, "Found %d of %d    ", found, ws_n);
         scr_flush();
 

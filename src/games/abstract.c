@@ -604,11 +604,17 @@ static void play_halma(const GParams *p, int chinese)
     int b[9][9], cr, cc, sr = -1, sc = -1, moves, home, i, j;
 
     for (;;) {
-        int over = 0, N = chinese ? 9 : 8, sz = chinese ? 3 : 3;
+        int over = 0, N = chinese ? 9 : 8, sz = 3, men;
         for (i = 0; i < 9; i++) for (j = 0; j < 9; j++) b[i][j] = 0;
-        for (i = 0; i < sz; i++) for (j = 0; j < sz; j++) {
+        /* Halma's home is a square of nine; Chinese Checkers' is a triangle
+         * of ten, which is why its corner empties in a different order. */
+        men = 0;
+        for (i = 0; i < 4; i++) for (j = 0; j < 4; j++) {
+            int inhome = chinese ? (i + j < 4) : (i < sz && j < sz);
+            if (!inhome) continue;
             b[N - 1 - i][N - 1 - j] = 1;
             b[i][j] = 2;
+            men++;
         }
         cr = N - 1; cc = N - 1; sr = -1; moves = 0;
 
@@ -622,8 +628,9 @@ static void play_halma(const GParams *p, int chinese)
                            b[i][j] == 1 ? C_GREEN : b[i][j] == 2 ? C_RED : C_GREY,
                            b[i][j] == 1 ? 'O' : b[i][j] == 2 ? 'X' : '.', C_RESET);
             home = 0;
-            for (i = 0; i < sz; i++) for (j = 0; j < sz; j++) if (b[i][j] == 1) home++;
-            draw_textf(5 + N, 10, "%s%d of %d men home   moves %d%s", C_GREY, home, sz * sz, moves, C_RESET);
+            for (i = 0; i < 4; i++) for (j = 0; j < 4; j++)
+                if ((chinese ? (i + j < 4) : (i < sz && j < sz)) && b[i][j] == 1) home++;
+            draw_textf(5 + N, 10, "%s%d of %d men home   moves %d%s", C_GREY, home, men, moves, C_RESET);
             scr_flush();
 
             k = key_get();
@@ -648,8 +655,9 @@ static void play_halma(const GParams *p, int chinese)
                 sr = -1; moves++;
             }
             home = 0;
-            for (i = 0; i < sz; i++) for (j = 0; j < sz; j++) if (b[i][j] == 1) home++;
-            if (home == sz * sz) { over = 1; break; }
+            for (i = 0; i < 4; i++) for (j = 0; j < 4; j++)
+                if ((chinese ? (i + j < 4) : (i < sz && j < sz)) && b[i][j] == 1) home++;
+            if (home == men) { over = 1; break; }
 
             {   /* The opponent shuffles towards its own far corner. */
                 int bi = -1, bj = -1, bsi = -1, bsj = -1, bestscore = -9999;
@@ -756,9 +764,14 @@ void fam_backgammon(const GParams *p)
         while (!over) {
             int k, i;
             char sub[160];
+            /* A double is played four times. The unused slots are cleared
+             * rather than left alone, because the consume step below used to
+             * shift d[2] into d[1] on a non-double and read uninitialised
+             * memory - which showed as a garbage die in the header. */
             d[0] = 1 + rnd(6); d[1] = 1 + rnd(6);
-            nd = (d[0] == d[1]) ? 4 : 2;
-            if (nd == 4) { d[2] = d[0]; d[3] = d[0]; }
+            d[2] = 0; d[3] = 0;
+            nd = 2;
+            if (d[0] == d[1]) { d[2] = d[0]; d[3] = d[0]; nd = 4; }
 
             while (nd > 0 && !over) {
                 snprintf(sub, sizeof sub,
@@ -793,6 +806,7 @@ void fam_backgammon(const GParams *p)
                     int die = d[0], to;
                     if (pt[0] > 0) {                       /* you must enter from the bar first */
                         to = 25 - die;
+                        /* Blocked: swap this die to the back and try the other. */
                         if (pt[to] < -1) { d[0] = d[1]; d[1] = die; nd--; continue; }
                         if (pt[to] == -1 && !B->pin && !B->samedir) { pt[to] = 0; pt[25]--; }
                         pt[to]++;
@@ -815,7 +829,7 @@ void fam_backgammon(const GParams *p)
                         }
                     }
                     moves++;
-                    d[0] = d[1]; d[1] = d[2]; d[2] = d[3];
+                    { int s2; for (s2 = 0; s2 + 1 < nd; s2++) d[s2] = d[s2 + 1]; }
                     nd--;
                 }
                 if (borne >= 15 || bg_total(1) == 0) { over = 1; youwin = 1; }

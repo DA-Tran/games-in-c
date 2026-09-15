@@ -134,8 +134,8 @@ static void render(int col, int cur, int rolls, int selecting, const char *msg)
             draw_textf(12 + i, 34 + NCOL * 6 + 4, "%s%3d%s",
                        C_MAGENTA, cpu_used[i] ? cpu_sc[i] : 0, C_RESET);
     }
-    draw_textf(12 + CATS + 1, 14, "Total: %-6d %s%s", grand_total(),
-               DUP ? "  CPU: " : "", DUP ? "" : "");
+    draw_textf(12 + CATS + 1, 14, "Total: %-6d %s", grand_total(),
+               DUP ? "  CPU: " : "");
     if (DUP) {
         int i2, ct = 0, cu = 0;
         for (i2 = 0; i2 < CATS; i2++) if (cpu_used[i2]) { ct += cpu_sc[i2]; if (i2 < 6) cu += cpu_sc[i2]; }

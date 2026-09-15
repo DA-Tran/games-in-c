@@ -189,7 +189,16 @@ int main(int argc, char **argv)
 {
     int sel = 0, top = 0;
 
-    rng_seed((unsigned)time(NULL));
+    /* Seeding from the clock means every run inside the same second deals the
+     * same cards and builds the same maze, so a test suite that launches a
+     * thousand games in a few seconds was re-testing a handful of layouts.
+     * GIC_SEED pins it instead, which lets the stress harness sweep seeds and
+     * lets any failure it finds be reproduced exactly. */
+    {
+        const char *seed = getenv("GIC_SEED");
+        rng_seed(seed && *seed ? (unsigned)strtoul(seed, NULL, 10)
+                               : (unsigned)time(NULL));
+    }
     scr_init();
     atexit(scr_shutdown);
 

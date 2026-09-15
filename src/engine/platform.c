@@ -346,7 +346,3 @@ void scr_size(int *rows, int *cols)
     if (*cols < 40) *cols = 40;
     if (*rows < 10) *rows = 10;
 }
-
-/* Exposed so games needing scanf-style entry can switch temporarily. */
-void gic_mode_cooked(void) { mode_cooked(); }
-void gic_mode_raw(void)    { mode_raw(); }

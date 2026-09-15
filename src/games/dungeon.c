@@ -48,12 +48,12 @@ static Room room[MAXROOM];
 static int  nroom;
 static Mon  mon[MAXMON];
 static int  px, py, hp, maxhp, atk, gold, depth, potions;
-static char log1[96], log2[96];
+static char log1[96], msglog2[96];
 
 static void logmsg(const char *s)
 {
-    strncpy(log2, log1, sizeof log2 - 1);
-    log2[sizeof log2 - 1] = '\0';
+    strncpy(msglog2, log1, sizeof msglog2 - 1);
+    msglog2[sizeof msglog2 - 1] = '\0';
     strncpy(log1, s, sizeof log1 - 1);
     log1[sizeof log1 - 1] = '\0';
 }
@@ -209,7 +209,7 @@ static void render(void)
                hp < maxhp / 3 ? C_RED : C_GREEN, hp, C_RESET, maxhp, atk, gold, potions,
                depth, TARGET_DEPTH);
     draw_textf(H + 8, 8, "%s%-70s%s", C_GREY, log1, C_RESET);
-    draw_textf(H + 9, 8, "%s%-70s%s", C_GREY, log2, C_RESET);
+    draw_textf(H + 9, 8, "%s%-70s%s", C_GREY, msglog2, C_RESET);
     scr_flush();
 }
 
@@ -227,7 +227,7 @@ void fam_dungeon(const GParams *p)
         int dead = 0, won = 0;
         char opening[96];
         depth = 1; hp = maxhp = 24; atk = 4; gold = 0; potions = 1;
-        log1[0] = log2[0] = '\0';
+        log1[0] = msglog2[0] = '\0';
         snprintf(opening, sizeof opening, "You enter the %s. Reach depth %d to escape.",
                  THEMES[THEME_ID].name, TARGET_DEPTH);
         logmsg(opening);

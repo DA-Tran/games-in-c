@@ -715,8 +715,8 @@ static void play_kingscorner(const GParams *p)
                        "Build down in alternating colours; corners need a king — "
                        "arrows move, Enter plays, D draws, Q quits");
             for (i = 0; i < 8; i++) {
-                draw_textf(4 + (i / 4) * 4, 8 + (i % 4) * 14, "%s%s%s%s",
-                           C_GREY, i < 4 ? "side " : "corner ", i < 4 ? "" : "", C_RESET);
+                draw_textf(4 + (i / 4) * 4, 8 + (i % 4) * 14, "%s%s%d%s",
+                           C_GREY, i < 4 ? "side " : "corner ", i + 1, C_RESET);
                 put_card(5 + (i / 4) * 4, 8 + (i % 4) * 14, pn[i] ? pile[i][pn[i] - 1] : -1, 0, 0);
                 if (pn[i] > 1) draw_textf(5 + (i / 4) * 4, 13 + (i % 4) * 14, "%sx%-2d%s", C_GREY, pn[i], C_RESET);
             }

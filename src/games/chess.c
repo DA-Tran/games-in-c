@@ -360,7 +360,7 @@ void fam_chess(const GParams *p)
                 char ch = PIECE[t];
                 const char *bg = (r == cr && c == cc) ? BG_BLUE
                                : (r == sr && c == sc) ? BG_GREEN
-                               : ((r + c) % 2 ? "" : "");
+                               : ((r + c) % 2 ? "" : BG_BLACK);
                 /* Dark Chess hides anything your men do not attack. */
                 if (VAR == V_DARK && v < 0) {
                     int seen = 0, dr2, dc2;

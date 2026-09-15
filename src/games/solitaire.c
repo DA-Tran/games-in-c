@@ -515,7 +515,7 @@ static void render(int cur, int sel, int nsel, const char *msg)
 
 /* ------------------------------------------------------------------ main */
 
-int solitaire_tableau(const GParams *p, int ri)
+static int solitaire_tableau(const GParams *p, int ri)
 {
     int cur = 0, sel = -1, nsel = 0, want = 0;
     const char *msg = NULL;

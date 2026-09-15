@@ -89,13 +89,13 @@ void fam_slots(const GParams *p)
 
         credits -= bet;
         {
-            int i;
+            int frame;
             /* Ten frames with a widening gap reads as reels slowing to a
              * stop; much longer than this and the machine feels sluggish. */
-            for (i = 0; i < 10; i++) {
+            for (frame = 0; frame < 10; frame++) {
                 a = spin_reel(); b = spin_reel(); c = spin_reel();
                 render(a, b, c, credits, bet, "Spinning...");
-                sleep_ms(35 + i * 9);
+                sleep_ms(35 + frame * 9);
             }
         }
         {
