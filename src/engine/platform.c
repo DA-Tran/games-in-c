@@ -285,9 +285,27 @@ void pause_msg(const char *msg)
 
 /* ---------------------------------------------------------------- timing */
 
+/* Animation pauses are the point of a reveal, but they make a game untestable
+ * past a few dozen turns: a race game spends most of a second per round, so a
+ * few hundred scripted keystrokes ask for half an hour of real time and then
+ * look like a hang. GIC_NODELAY turns every pause into a no-op so the test
+ * harness can drive a game thousands of turns deep. It changes nothing for a
+ * player, and the timing paths themselves are still exercised by the ordinary
+ * run, which leaves it unset. */
+static int delays_disabled(void)
+{
+    static int checked, off;
+    if (!checked) {
+        const char *e = getenv("GIC_NODELAY");
+        off = (e && *e && *e != '0');
+        checked = 1;
+    }
+    return off;
+}
+
 void sleep_ms(int ms)
 {
-    if (ms <= 0) return;
+    if (ms <= 0 || delays_disabled()) return;
 #ifdef _WIN32
     Sleep((DWORD)ms);
 #else

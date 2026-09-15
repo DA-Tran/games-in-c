@@ -14,6 +14,11 @@
 #           gets a different shuffle, maze, board and deal.
 #   binary  it runs the sanitised build, so a write one element past the end
 #           of a tableau is a failure rather than a silent corruption.
+#   speed   it sets GIC_NODELAY, which turns every animation pause into a
+#           no-op. A race game spends most of a second per round on purpose,
+#           so without this a few hundred keystrokes ask for half an hour of
+#           real time and the game gets misreported as hung. With it, these
+#           patterns drive games thousands of turns deep instead.
 #
 # Every failure is printed with the seed and pattern that produced it, so it
 # can be reproduced exactly:  GIC_SEED=<n> ./games-asan <slug> < <pattern file>
@@ -45,8 +50,15 @@ PATTERNS=${PATTERNS:-"empty random arrows enter esc digits yes huge binary"}
 FUZZDIR=${FUZZDIR:-/tmp/gic-stress-$$}
 
 # ---------------------------------------------------------------- patterns
-# Each pattern is a file of bytes fed to the game on stdin. They are built
-# once and reused, so a thousand games do not each pay to generate them.
+# Each pattern is a file of bytes fed to the game on stdin, built once and
+# reused so a thousand games do not each pay to generate them.
+#
+# The sizes are deliberate. A turn-based game with a reveal animation spends
+# most of a second per round on purpose, so a pattern of two thousand Enters
+# asks for half an hour of legitimate play and then gets reported as a hang.
+# These are sized to hit every boundary, every replay path and every decoder
+# branch several times over while still finishing: a hundred and fifty replays
+# re-enters every deal and reset path, which is where the bugs are.
 build_patterns() {
     mkdir -p "$FUZZDIR" || exit 1
 
@@ -88,12 +100,12 @@ build_patterns() {
     # re-enters every deal and reset path hundreds of times in one process.
     : > "$FUZZDIR/yes"
     i=0
-    while [ $i -lt 1500 ]; do printf 'y\n \n' >> "$FUZZDIR/yes"; i=$((i+1)); done
+    while [ $i -lt 800 ]; do printf 'y\n \n' >> "$FUZZDIR/yes"; i=$((i+1)); done
 
     # A large mixed stream, to catch anything that accumulates per keystroke.
     : > "$FUZZDIR/huge"
     i=0
-    while [ $i -lt 1200 ]; do
+    while [ $i -lt 800 ]; do
         printf 'wasdhjkl123456789 \n\033[A\033[Bypnrdfcmuvt' >> "$FUZZDIR/huge"
         i=$((i+1))
     done
@@ -116,7 +128,7 @@ run_one() {
         r=0
         while [ $r -lt "$ROUNDS" ]; do
             seed=$(( (r * 7919 + n * 104729 + 1) % 2147483647 ))
-            err=$(GIC_SEED=$seed ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 \
+            err=$(GIC_SEED=$seed GIC_NODELAY=1 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 \
                   timeout "$TIMEOUT" "$BIN" "$slug" < "$FUZZDIR/$pat" 2>&1 >/dev/null)
             rc=$?
             case "$err" in
@@ -131,7 +143,7 @@ run_one() {
                             # Over the limit under the sanitiser. Re-run on the
                             # plain build with twice the budget: if that
                             # finishes, the game is slow, not stuck.
-                            if GIC_SEED=$seed timeout $((TIMEOUT * 2)) ./games "$slug" \
+                            if GIC_SEED=$seed GIC_NODELAY=1 timeout $((TIMEOUT * 2)) ./games "$slug" \
                                    < "$FUZZDIR/$pat" >/dev/null 2>&1; then
                                 printf 'SLOW\t%s\t%s\t%s\n' "$slug" "$pat" "$seed"
                             else

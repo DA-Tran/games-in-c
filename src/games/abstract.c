@@ -444,11 +444,15 @@ static void play_quarto(const GParams *p, int gobblet)
 /* Quoridor: race to the far side, and you may drop fences to slow the other. */
 static void play_quoridor(const GParams *p)
 {
-    int wallh[8][8], wallv[8][8], myr, myc, thr, thc, mywalls, thwalls, i, j;
+    /* The pawns move on a 9x9 grid of cells, so a wall slot is addressed by a
+     * cell coordinate and both indices run to 8. Sizing these [8][8] meant the
+     * ninth column and the ninth row were read - and written - off the end of
+     * the array, on the very first frame. */
+    int wallh[9][9], wallv[9][9], myr, myc, thr, thc, mywalls, thwalls, i, j;
 
     for (;;) {
         int over = 0, youwin = 0, moves = 0;
-        for (i = 0; i < 8; i++) for (j = 0; j < 8; j++) { wallh[i][j] = 0; wallv[i][j] = 0; }
+        for (i = 0; i < 9; i++) for (j = 0; j < 9; j++) { wallh[i][j] = 0; wallv[i][j] = 0; }
         myr = 8; myc = 4; thr = 0; thc = 4; mywalls = 10; thwalls = 10;
 
         while (!over) {
