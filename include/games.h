@@ -106,4 +106,8 @@ void fam_artillery(const GParams *p);
 
 void fam_towerdefence(const GParams *p);
 
+void fam_sim(const GParams *p);
+
+void fam_textadv(const GParams *p);
+
 #endif /* GIC_GAMES_H */

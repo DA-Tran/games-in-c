@@ -76,6 +76,8 @@ const FamilyEntry FAMILY_REGISTRY[] = {
     {"abstract",           fam_abstract},
     {"chesspuzzle",        fam_chesspuzzle},
     {"chess",              fam_chess},
+    {"textadv",            fam_textadv},
+    {"sim",                fam_sim},
     {"towerdefence",       fam_towerdefence},
     {"artillery",          fam_artillery},
     {"arcademisc",         fam_arcademisc},
