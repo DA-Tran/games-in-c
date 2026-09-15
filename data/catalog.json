@@ -1,6 +1,6 @@
 {
  "count": 1000,
- "playable": 859,
+ "playable": 888,
  "families": {
   "abstract": 16,
   "anagram": 11,
@@ -4862,8 +4862,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "loop-closer",
@@ -4885,8 +4885,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "flip-grid",
@@ -4908,8 +4908,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "ball-sort",
@@ -4931,8 +4931,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "colour-sort",
@@ -4954,8 +4954,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "rush-hour",
@@ -4977,8 +4977,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "tic-tac-toe-3x3",
@@ -8128,8 +8128,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "clobber",
@@ -8151,8 +8151,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "konane",
@@ -8174,8 +8174,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "surakarta",
@@ -8197,8 +8197,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "game-of-amazons",
@@ -8220,8 +8220,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "lines-of-action",
@@ -8243,8 +8243,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "alquerque",
@@ -8266,8 +8266,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "fanorona",
@@ -8289,8 +8289,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "halma",
@@ -8312,8 +8312,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "chinese-checkers",
@@ -8335,8 +8335,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "pentago",
@@ -8358,8 +8358,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "quarto",
@@ -8381,8 +8381,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "gobblet",
@@ -8404,8 +8404,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "quoridor",
@@ -8427,8 +8427,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "sim",
@@ -8450,8 +8450,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "col",
@@ -8473,8 +8473,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "chess",
@@ -9255,8 +9255,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hypergammon",
@@ -9278,8 +9278,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "nackgammon",
@@ -9301,8 +9301,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "acey-deucey",
@@ -9324,8 +9324,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "plakoto",
@@ -9347,8 +9347,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "fevga",
@@ -9370,8 +9370,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "nardi",
@@ -9393,8 +9393,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "snakes-and-ladders",

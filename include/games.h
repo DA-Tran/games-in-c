@@ -90,4 +90,10 @@ void fam_tafl(const GParams *p);
 
 void fam_go(const GParams *p);
 
+void fam_abstract(const GParams *p);
+
+void fam_backgammon(const GParams *p);
+
+void fam_tilepuzzle(const GParams *p);
+
 #endif /* GIC_GAMES_H */
