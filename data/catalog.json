@@ -1,6 +1,6 @@
 {
  "count": 1000,
- "playable": 813,
+ "playable": 842,
  "families": {
   "abstract": 16,
   "anagram": 11,
@@ -7691,8 +7691,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hex-size-9",
@@ -7714,8 +7714,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hex-size-11",
@@ -7737,8 +7737,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hex-size-13",
@@ -7760,8 +7760,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hex-size-15",
@@ -7783,8 +7783,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "hex-size-19",
@@ -7806,8 +7806,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "havannah-size-7",
@@ -7829,8 +7829,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "havannah-size-9",
@@ -7852,8 +7852,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "havannah-size-11",
@@ -7875,8 +7875,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "havannah-size-13",
@@ -7898,8 +7898,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "havannah-size-15",
@@ -7921,8 +7921,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "havannah-size-19",
@@ -7944,8 +7944,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "y-size-7",
@@ -7967,8 +7967,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "y-size-9",
@@ -7990,8 +7990,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "y-size-11",
@@ -8013,8 +8013,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "y-size-13",
@@ -8036,8 +8036,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "y-size-15",
@@ -8059,8 +8059,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "y-size-19",
@@ -8082,8 +8082,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "twixt",
@@ -8105,8 +8105,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "breakthrough",
@@ -11302,8 +11302,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "cribbage",
@@ -11325,8 +11325,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "gin-rummy",
@@ -11348,8 +11348,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "canasta",
@@ -11371,8 +11371,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "pinochle",
@@ -11394,8 +11394,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "casino",
@@ -11417,8 +11417,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "golf-card-game",
@@ -11440,8 +11440,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "blackjack-switch",
@@ -11463,8 +11463,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "three-card-poker",
@@ -11486,8 +11486,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "five-card-draw",
@@ -11509,8 +11509,8 @@
     "players": 0,
     "theme": ""
    },
-   "implemented": 0,
-   "param_aware": 0
+   "implemented": 1,
+   "param_aware": 1
   },
   {
    "slug": "farkle",

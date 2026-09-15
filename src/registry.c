@@ -66,6 +66,8 @@ const FamilyEntry FAMILY_REGISTRY[] = {
     {"betting",            fam_betting},
     {"tricktaking",        fam_tricktaking},
     {"shedding",           fam_shedding},
+    {"cardmisc",           fam_cardmisc},
+    {"hexconnect",         fam_hexconnect},
     {"logicgrid",          fam_logicgrid},
     {"wordmisc",           fam_wordmisc},
     {"reaction",           fam_reaction},

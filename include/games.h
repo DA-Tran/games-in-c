@@ -80,4 +80,8 @@ void fam_tricktaking(const GParams *p);
 
 void fam_shedding(const GParams *p);
 
+void fam_cardmisc(const GParams *p);
+
+void fam_hexconnect(const GParams *p);
+
 #endif /* GIC_GAMES_H */
