@@ -1,6 +1,6 @@
 # Games in C
 
-A thousand games catalogued and bound to engines; 686 playable so far — in the
+A thousand games catalogued, coded and playable — all 1000 of them, in the
 terminal and in the browser, from the same design.
 
 - **Terminal:** pure C99, ANSI escapes, zero dependencies. Builds with `make`
@@ -45,8 +45,32 @@ A marker names the family it vouches for (`GIC:PARAMETERISED hangman`), so
 several families can share a source file without one of them accidentally
 vouching for the others.
 
-Current state: 58 families done (686 entries), **no engine is left ignoring
-its parameters**, and 22 engines are not yet written (314 entries).
+Current state: **80 families done, all 1000 entries playable**, no engine is
+left ignoring its parameters, and no engine is unwritten. `make catalog`
+recomputes those numbers from the source markers rather than from a hand-kept
+tally, so the claim above cannot drift away from the code.
+
+Both builds move together: every entry is playable in the terminal binary and
+in the browser, driven from the same catalogue and the same parameters.
+
+## Verifying
+
+    make            build; the tree builds at zero warnings
+    make smoke      scripted no-crash harness over every playable entry
+    make asan       build with AddressSanitizer and UBSan
+    make smoke-asan play the same scripted run against the sanitised build
+    node tools/web_test.js    drive every entry in the browser build
+
+The sanitiser is not optional decoration. Writing the Spit patience revealed a
+stack overflow — thirty-six cards dealt into a thirty-slot hand — that the
+ordinary harness passed without complaint, because overwriting a neighbouring
+local does not reliably crash. Five declarations were undersized in the same
+way. All 1000 entries now play clean under AddressSanitizer and UBSan.
+
+`tools/smoke_test.sh` honours `FAMILY`, `FILTER`, `START`, `COUNT`, `TIMEOUT`
+and `BIN`, so one family can be exercised on its own while a batch is in
+progress. Games with spin or race animations need a `TIMEOUT` above ten
+seconds; the default of thirty is generous enough for all of them.
 
 ## Families completed so far
 
