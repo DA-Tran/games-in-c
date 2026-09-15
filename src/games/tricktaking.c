@@ -208,7 +208,16 @@ static void play_tricks(const GParams *p)
                 tricks[pl] = 0; points[pl] = 0;
             }
             if (R->trump == T_FIXED)  trump = R->trumpsuit;
-            else if (R->trump == T_TURNUP) { upcard = deck[R->players * hs]; trump = suit_of(upcard); }
+            else if (R->trump == T_TURNUP) {
+                /* Whist deals the whole pack, so there is no spare card to
+                 * turn - and reading one ran off the end of the deck. The
+                 * real rule is that the dealer exposes their own last card,
+                 * which is exactly the last one dealt. */
+                int up = R->players * hs;
+                if (up >= nd) up = nd - 1;
+                upcard = deck[up];
+                trump = suit_of(upcard);
+            }
             else if (R->trump == T_BID)    trump = rnd(4);
             else trump = -1;
 

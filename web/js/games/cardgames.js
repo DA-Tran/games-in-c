@@ -86,7 +86,11 @@ function tricks(host, v) {
       hand.push(d.slice(pl * hs, pl * hs + hs));
       taken.push(0); pts.push(0);
     }
-    trump = R[4] === T_FIXED ? R[5] : R[4] === T_TURNUP ? su(d[R[1] * hs]) : R[4] === T_BID ? rnd(4) : -1;
+    /* Whist deals the whole pack, so there is no spare card to turn; the
+     * dealer exposes their own last card instead. Indexing past the deck here
+     * silently produced NaN. */
+    var upIdx = Math.min(R[1] * hs, d.length - 1);
+    trump = R[4] === T_FIXED ? R[5] : R[4] === T_TURNUP ? su(d[upIdx]) : R[4] === T_BID ? rnd(4) : -1;
     leader = 0; trickno = 0; played = []; led = -1; cur = 0;
     for (pl = 0; pl < R[1]; pl++) played.push(-1);
     phase = (R[7] === B_NONE) ? 'play' : 'bid';
