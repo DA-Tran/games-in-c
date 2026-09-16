@@ -126,7 +126,19 @@ Term.prototype.flush = function () {
 
 /* --------------------------------------------------------------- helpers */
 
-function rnd(n) { return Math.floor(Math.random() * n); }
+/* The same xorshift the C build uses, so a pinned seed produces the same
+ * sequence in both. Unseeded it falls back to Math.random, which keeps every
+ * ordinary entry as varied as before. */
+var rngState = 0;
+function rngSeed(s) { rngState = (s >>> 0) || 0; }
+function rnd(n) {
+  if (n <= 0) return 0;
+  if (!rngState) return Math.floor(Math.random() * n);
+  rngState ^= rngState << 13; rngState >>>= 0;
+  rngState ^= rngState >>> 17;
+  rngState ^= rngState << 5;  rngState >>>= 0;
+  return rngState % n;
+}
 function rndRange(lo, hi) { return lo + rnd(hi - lo + 1); }
 function shuffle(a) {
   for (var i = a.length - 1; i > 0; i--) {
@@ -179,6 +191,10 @@ Host.prototype.start = function (family, params, slug) {
   this.family = family;
   this.slug = slug || family;
   this.params = params || {};
+  /* A catalogue entry with a pinned seed is a fixed puzzle - the same grid
+   * for everyone, every time - which is what separates "Daily Sudoku 3" from
+   * the ordinary 9x9 entry it otherwise matches parameter for parameter. */
+  rngSeed(this.params.seed || 0);
   this.def = def;
   this.term = new Term(this.canvas, def.cols || 84, def.rows || 28);
   this.game = def.start(this, this.params);

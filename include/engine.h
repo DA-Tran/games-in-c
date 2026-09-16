@@ -111,6 +111,9 @@ typedef struct {
     int level;        /* level/pack index, depth, paytable index           */
     int difficulty;   /* 1..5, drives generator aggressiveness and AI ply  */
     int players;      /* seats, where the family supports more than one    */
+    int seed;         /* 0 = a fresh shuffle each time; non-zero pins the  *
+                       * generator, so a "daily" entry is one fixed puzzle  *
+                       * rather than a second name for an existing config   */
     const char *theme;/* dictionary, tile set, question bank, level pack   */
     const char *title;/* catalogue title, shown in the game header         */
 } GParams;

@@ -61,7 +61,29 @@ Three layers, each answering a different question.
     make strict     compile every file under a much harsher set, with -Werror
     make smoke      the normal test: does it work
     make stress     the stress test: can it be broken
-    node tools/web_test.js    drive every entry in the browser build
+    python3 tools/catalog_test.py   is the catalogue coherent
+    python3 tools/screen_test.py    what does each game actually draw
+    node tools/web_test.js          drive every entry in the browser build
+
+**`catalog_test.py`** checks the catalogue rather than the code: unique slugs
+and titles, every family registered, and - the one that matters for this
+architecture - no two entries in a family sharing an identical parameter set,
+because that means one game under two names.
+
+**`screen_test.py`** emulates a terminal and inspects the grid each game
+draws. These games position with cursor escapes rather than newlines, so the
+raw byte stream is one enormous line and measuring it tells you nothing. It
+catches a game that draws only its header, `(null)` or an unsubstituted `%d`
+reaching the screen, `nan`/`inf`/INT_MIN on display, content positioned off
+the edge, a terminal left with the cursor hidden, and non-determinism between
+two runs at the same seed.
+
+### Terminal size
+
+256 of the 1000 entries need more than an 80x24 terminal; at 100x30 that falls
+to about one in twenty, and the largest board in the catalogue wants 94x52.
+`screen_test.py --cols N --rows M` reports exactly which entries exceed a given
+size and what each one needs.
 
 **`make smoke`** launches all 1000 entries with a scripted run of ordinary
 keystrokes and requires a clean exit from each. It runs them in parallel and
@@ -107,6 +129,17 @@ ways, and each one caught something:
 `ROUNDS` controls seeds per pattern and defaults to 4. Reading the
 `runs completed, N problem(s)` line matters: grepping only for failure markers
 cannot tell a clean run from one that was cut short.
+
+### Daily entries are fixed puzzles
+
+Sixty-one entries whose names promise a specific puzzle - `Sudoku Daily 3`,
+`Maze Daily 7`, `Mixed Quiz Round 9` - carry a `seed` in their parameters,
+derived from the slug so it never shifts when the catalogue is regenerated.
+`launch()` seeds the generator before handing over, so every player opening one
+gets the same grid, and no engine had to change: they all draw from the same
+`rnd()`. Before this they shared every parameter with an ordinary entry and
+were the same game under a second name, which is what `catalog_test.py` flagged.
+The browser build uses the same xorshift so a pinned seed agrees across both.
 
 `GIC_NODELAY` turns animation pauses into no-ops. Without it a race game
 spends most of a second per round on purpose, so a few hundred scripted

@@ -134,6 +134,11 @@ void fam_snake(const GParams *p)
         if (VAR == 6) fbad[0] = 0;
         scr_clear();
         draw_title("SNAKE", SUB[VAR]);
+        /* Draw the board once before entering the loop. The loop only renders
+         * after a tick has elapsed, so without this the player is looking at a
+         * bare title until the first move - and anything inspecting the opening
+         * screen sees nothing at all. */
+        render(slug);
         last = now_ms();
 
         while (!dead) {

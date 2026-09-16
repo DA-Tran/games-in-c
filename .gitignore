@@ -14,3 +14,7 @@
 
 # runtime state
 .gic_scores
+
+# Python bytecode from the test tools
+__pycache__/
+*.pyc

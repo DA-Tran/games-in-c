@@ -58,6 +58,10 @@ static void launch(const CatalogEntry *e)
 {
     const FamilyEntry *f = family_find(e->family);
     if (!f) return;
+    /* A pinned seed makes the entry reproducible: every player opening
+     * "Daily Sudoku 3" gets the same grid, which is what distinguishes it
+     * from the ordinary 9x9 entry it otherwise shares every parameter with. */
+    if (e->params.seed) rng_seed((unsigned)e->params.seed);
     f->run(&e->params);
 }
 

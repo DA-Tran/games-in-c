@@ -97,5 +97,10 @@ void draw_title(const char *title, const char *subtitle)
         snprintf(line, sizeof line, "%s%s%s", C_GREY, subtitle, C_RESET);
         draw_centered(3, cols, line);
     }
-    draw_hline(4, 2, cols - 2, C_GREY);
+    /* No rule under the header. It used to be drawn across row 4, but every
+     * game begins its own drawing on row 4 too, so the rule was overwritten in
+     * pieces and read as a broken board edge - a chessboard appeared to have
+     * its back rank embedded in a horizontal line. The title and subtitle
+     * separate the header well enough on their own, and leaving row 4 clear
+     * is what the games have always assumed. */
 }
