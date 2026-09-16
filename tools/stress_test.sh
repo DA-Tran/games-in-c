@@ -28,6 +28,13 @@
 # forty thousand keystrokes aimed at a 30x30 grid is a lot of genuine work, so
 # "slower than the limit" and "stuck" are reported as different things.
 #
+# That distinction is measured in wall-clock time, so it degrades when JOBS is
+# well above the core count: a run that takes ten seconds alone can take forty
+# under eight-way contention on two cores and be called a hang. The re-try is
+# therefore given a generous budget, and JOBS defaults to something modest.
+# Raise JOBS for throughput, but confirm any HANG at JOBS=1 before believing
+# it.
+#
 #   ./tools/stress_test.sh                    every entry, default rounds
 #   ROUNDS=8 ./tools/stress_test.sh           eight rounds per entry
 #   FAMILY=chess ./tools/stress_test.sh       one family
@@ -143,7 +150,7 @@ run_one() {
                             # Over the limit under the sanitiser. Re-run on the
                             # plain build with twice the budget: if that
                             # finishes, the game is slow, not stuck.
-                            if GIC_SEED=$seed GIC_NODELAY=1 timeout $((TIMEOUT * 2)) ./games "$slug" \
+                            if GIC_SEED=$seed GIC_NODELAY=1 timeout $((TIMEOUT * 6)) ./games "$slug" \
                                    < "$FUZZDIR/$pat" >/dev/null 2>&1; then
                                 printf 'SLOW\t%s\t%s\t%s\n' "$slug" "$pat" "$seed"
                             else

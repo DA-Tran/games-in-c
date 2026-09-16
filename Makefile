@@ -56,8 +56,13 @@ STRICT = -std=c99 $(CPPFLAGS) -O2 -Wall -Wextra -Wshadow -Wstrict-prototypes \
          -Wduplicated-branches -Wnull-dereference -Wformat=2 -Wredundant-decls \
          -Wundef -Wwrite-strings -Werror
 
+# Every file is really compiled, not just parsed. -fsyntax-only stops before
+# code generation, which silently skips -Wunused-function and
+# -Wmaybe-uninitialized - the two that catch a function nothing calls any
+# more and a variable read before it is set.
 strict:
-	@$(CC) $(STRICT) -fsyntax-only $(SRC) && echo "strict: clean across $(words $(SRC)) files"
+	@set -e; for f in $(SRC); do $(CC) $(STRICT) -c $$f -o /dev/null; done; \
+	 echo "strict: clean across $(words $(SRC)) files"
 
 # A sanitised build. The ordinary harness only notices a bug that crashes;
 # a tableau overwritten by one card past its end usually does not, so the

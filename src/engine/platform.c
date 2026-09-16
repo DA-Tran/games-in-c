@@ -65,28 +65,6 @@ void scr_shutdown(void)
     g_raw_active = 0;
 }
 
-/* Temporarily restore cooked mode so scanf/fgets behave normally. */
-static void mode_cooked(void)
-{
-#ifndef _WIN32
-    if (g_raw_active)
-        tcsetattr(STDIN_FILENO, TCSAFLUSH, &g_orig_termios);
-#endif
-}
-
-static void mode_raw(void)
-{
-#ifndef _WIN32
-    if (g_raw_active) {
-        struct termios raw = g_orig_termios;
-        raw.c_lflag &= ~(unsigned)(ECHO | ICANON);
-        raw.c_iflag &= ~(unsigned)(IXON | ICRNL);
-        raw.c_cc[VMIN]  = 1;
-        raw.c_cc[VTIME] = 0;
-        tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-    }
-#endif
-}
 
 /* ----------------------------------------------------------------- input */
 
