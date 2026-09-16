@@ -98,7 +98,15 @@ ways, and each one caught something:
 - **Swept seeds.** The RNG seeded from `time(NULL)`, so a suite that launches
   a thousand games in a few seconds was re-testing a handful of layouts.
   `GIC_SEED` pins it, which both widens coverage and makes failures
-  reproducible.
+  reproducible. Widening from one seed per pattern to four -- 36,000 runs
+  rather than 9,000 -- found a signed overflow in the KenKen generator, where
+  a large cage's product passes `INT_MAX` and wraps to a value the "keep
+  multiplication cages small" test then accepts, producing a cage no
+  arrangement can satisfy.
+
+`ROUNDS` controls seeds per pattern and defaults to 4. Reading the
+`runs completed, N problem(s)` line matters: grepping only for failure markers
+cannot tell a clean run from one that was cut short.
 
 `GIC_NODELAY` turns animation pauses into no-ops. Without it a race game
 spends most of a second per round on purpose, so a few hundred scripted
