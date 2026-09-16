@@ -19,6 +19,7 @@ Checks, each of which can fail independently:
                engines share a source file and that mis-attributes them
   params       sizes within the largest board any engine declares
   duplicates   no two entries in a family share an identical parameter set
+  readme       the counts quoted in README.md still match the catalogue
 """
 import json
 import os
@@ -123,6 +124,27 @@ for g in games:
     if diff and not (1 <= diff <= 5):
         fail("params", "%s has difficulty %d, expected 1-5" % (g["slug"], diff))
 
+# ---------------------------------------------------------------- readme
+# The README quotes counts that are easy to leave behind: it claimed 686
+# playable for some time after the number reached 1000, and 17 genres after a
+# genre was added. Numbers in prose drift silently, so the ones that can be
+# derived are checked here against the catalogue.
+readme_path = os.path.join(ROOT, "README.md")
+if os.path.exists(readme_path):
+    readme = open(readme_path, encoding="utf-8").read()
+    genres = len({g["genre"] for g in games})
+    playable = sum(1 for g in games if g["implemented"])
+    for pattern, actual, what in (
+            (r"across (\d+) genres",            genres,       "genres"),
+            (r"Playable now \| (\d+)",          playable,     "playable entries"),
+            (r"pass (\d+)/\d+",                 playable,     "suite totals"),
+            (r"\*\*(\d+) families done",        len(by_family), "families"),
+    ):
+        m = re.search(pattern, readme)
+        if m and int(m.group(1)) != actual:
+            fail("readme", "says %s %s, catalogue has %d"
+                           % (m.group(1), what, actual))
+
 # ------------------------------------------------------------------ report
 print("catalogue integrity: %d entries, %d families, %d registered engines"
       % (len(games), len(by_family), len(registered)))
@@ -136,4 +158,6 @@ if failures:
         print("  " + f)
     sys.exit(1)
 print("\nno duplicate slugs, no duplicate titles, no duplicate parameter sets,")
-print("every family registered, every board within the largest an engine declares")
+print("every family registered, every board within the largest an engine declares,")
+print("and the counts quoted in the README still match")
+

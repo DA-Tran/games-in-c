@@ -18,10 +18,10 @@ open web/index.html      # the browser version
 
 | | |
 |---|---|
-| Catalogued games | 1000, across 17 genres |
-| Playable now | 686, in both C and JavaScript |
+| Catalogued games | 1000, across 18 genres |
+| Playable now | 1000, in both C and JavaScript |
 | External dependencies | none, on either side |
-| Compiler warnings | zero, at `-Wall -Wextra` |
+| Compiler warnings | zero, and zero again under `make strict` |
 
 ### How 1000 games is being reached
 
@@ -55,12 +55,13 @@ in the browser, driven from the same catalogue and the same parameters.
 
 ## Verifying
 
-Three layers, each answering a different question.
+Eight layers, each answering a question the others cannot.
 
     make            build; the tree builds at zero warnings
     make strict     compile every file under a much harsher set, with -Werror
     make smoke      the normal test: does it work
     make stress     the stress test: can it be broken
+    make parity     do the C and JS generators agree on a seed
     python3 tools/catalog_test.py   is the catalogue coherent
     python3 tools/screen_test.py    what does each game actually draw
     node tools/web_test.js          drive every entry in the browser build
@@ -350,7 +351,7 @@ Both harnesses drive **every playable catalogue entry with its own
 parameters**, not one representative per engine — so all thirty sudoku
 variants are generated and played, not just one.
 
-Both suites currently pass 686/686.
+Both suites currently pass 1000/1000.
 
 ## Adding a game
 
