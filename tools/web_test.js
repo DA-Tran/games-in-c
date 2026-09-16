@@ -122,9 +122,30 @@ const KEYS = ['up','down','left','right','enter','space','tab','back',
               '1','2','3','4','5','6','7','8','9','0',
               'a','b','c','d','e','f','g','h','l','n','p','r','s','t','u','x','y','>'];
 
+/* The screen as text, for comparing one run against another. */
+function render(term) {
+  return term.buf.map(row => row.map(c => c.ch).join('').replace(/\s+$/, '')).join('\n');
+}
+
+function firstDiff(a, b) {
+  const x = a.split('\n'), y = b.split('\n');
+  for (let i = 0; i < Math.max(x.length, y.length); i++) {
+    if (x[i] !== y[i]) return 'first difference on row ' + i;
+  }
+  return '';
+}
+
 /* Play every playable catalogue entry with its own parameters, so a family
- * is exercised once per configuration rather than once overall. */
-const playable = CATALOG.filter(g => g.implemented && GIC.GAMES[g.family]);
+ * is exercised once per configuration rather than once overall.
+ *
+ * FILTER and FAMILY narrow that to a slice, matching the two shell suites. A
+ * full run takes a couple of minutes, which is too slow a loop when chasing
+ * one game:  FILTER=asteroids node tools/web_test.js  */
+const FILTER = process.env.FILTER || '';
+const FAMILY = process.env.FAMILY || '';
+const playable = CATALOG.filter(g => g.implemented && GIC.GAMES[g.family])
+  .filter(g => (!FILTER || g.slug.includes(FILTER)) && (!FAMILY || g.family === FAMILY));
+if (!playable.length) { console.log('no entries matched'); process.exit(1); }
 console.log('playing ' + playable.length + ' catalogue entries');
 let lastFam = '';
 const grew = [];
@@ -134,8 +155,16 @@ playable.forEach(entry => {
   const host = new GIC.Host(canvas, {}, { textContent: '' });
   let term;
 
+  /* Every entry is played under a pinned seed, not just the 61 that ship with
+   * one. Reproducibility at a fixed seed is a property of the engine, so it
+   * should be testable on any entry - and restricting it to the seeded ones
+   * would have missed the bug that prompted the check, since asteroids is not
+   * one of them. Entries with their own seed keep it. */
+  const params = Object.assign({}, entry.params);
+  if (!params.seed) params.seed = 1234567;
+
   try {
-    host.start(entry.family, entry.params, slug);
+    host.start(entry.family, params, slug);
     term = host.term;
   } catch (e) {
     fail(slug, 'start threw: ' + e.message);
@@ -146,9 +175,13 @@ playable.forEach(entry => {
   let steps = 0;
   const presses = def.realtime ? 200 : 300;
 
+  /* Chosen up front so the replay below can drive the game identically. */
+  const script = [];
+  for (let i = 0; i < presses; i++) script.push(KEYS[Math.floor(Math.random() * KEYS.length)]);
+
   try {
     for (let i = 0; i < presses; i++) {
-      const k = KEYS[Math.floor(Math.random() * KEYS.length)];
+      const k = script[i];
       host.game.key(k);
       if (def.realtime && host.game.tick) { host.game.tick(); steps++; }
       host.game.draw(term);
@@ -174,6 +207,37 @@ playable.forEach(entry => {
     fail(slug, term.clipped + ' glyph(s) clipped: needs more than the '
                + term.cols + 'x' + term.rows + ' cap');
   if (term.cols > 84 || term.rows > 28) grew.push(slug + ' ' + term.cols + 'x' + term.rows);
+
+  /* An entry carrying a seed promises one particular puzzle. Replaying it with
+   * the same seed and the same keys has to reproduce the same screen, or the
+   * promise is empty. This is what catches a game reaching past the seeded
+   * generator for Math.random - which asteroids did for its rock velocities,
+   * so no seed could pin it down and the browser disagreed with the C build. */
+  {
+    const a = render(term);
+    let b = null;
+    try {
+      const h2 = new GIC.Host(makeCanvas(), {}, { textContent: '' });
+      h2.start(entry.family, params, slug);
+      for (let i = 0; i < presses; i++) {
+        h2.game.key(script[i]);
+        if (def.realtime && h2.game.tick) h2.game.tick();
+        h2.game.draw(h2.term);
+      }
+      if (def.realtime && h2.game.tick) {
+        for (let i = 0; i < 400; i++) { h2.game.tick(); h2.game.draw(h2.term); }
+      }
+      h2.term.flush();
+      b = render(h2.term);
+    } catch (e) {
+      fail(slug, 'replay at the same seed threw: ' + e.message);
+    }
+    if (b !== null && a !== b) {
+      const line = firstDiff(a, b);
+      fail(slug, 'not reproducible: two runs at seed ' + params.seed
+                 + ' differ' + (line ? ' (' + line + ')' : ''));
+    }
+  }
 
   if (entry.family !== lastFam) {
     console.log('  ' + entry.family);

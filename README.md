@@ -103,6 +103,24 @@ board. 91 entries were being clipped at the old fixed 84x28; none are now.
 `screen_test.py --cols N --rows M` reports exactly which entries exceed a given
 size and what each one needs.
 
+### The two builds must agree
+
+61 entries carry a fixed seed so that a name like "Daily Sudoku 3" means one
+particular puzzle rather than a second name for an existing configuration. That
+only means anything if both builds generate the same puzzle from it, and the
+generators are two separate implementations of xorshift32 -- the JavaScript one
+working in signed 32-bit ints unless coerced back at each step.
+
+**`make parity`** checks them against each other: seven seeds, sixteen integer
+and eight fractional draws each, compared number for number.
+
+`web_test.js` additionally plays every entry twice under a pinned seed and
+requires the two screens to match. That is what caught asteroids reaching past
+the seeded generator for `Math.random` to set its rock velocities -- no seed
+could pin it down, and the browser disagreed with the terminal. Worth noting
+that the check was first written to cover only the 61 seeded entries, and in
+that form it passed while the bug was live; it covers all 1000 now.
+
 **`make smoke`** launches all 1000 entries with a scripted run of ordinary
 keystrokes and requires a clean exit from each. It runs them in parallel and
 says so if a run was cut short rather than quietly reporting fewer passes.

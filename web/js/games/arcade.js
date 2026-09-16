@@ -6,7 +6,7 @@
  */
 (function () {
 'use strict';
-var G = window.GIC, C = G.COL, reg = G.register, rnd = G.rnd;
+var G = window.GIC, C = G.COL, reg = G.register, rnd = G.rnd, rndF = G.rndF;
 
 /* ------------------------------------------------------------------ snake */
 reg('snake', {
@@ -921,8 +921,8 @@ reg('asteroids', {
       rocks = [];
       for (var i = 0; i < n; i++)
         rocks.push({ x: rnd(W), y: rnd(H),
-                     vx: (Math.random() - 0.5) * (DELUXE ? 0.9 : 0.6),
-                     vy: (Math.random() - 0.5) * (DELUXE ? 0.6 : 0.4),
+                     vx: (rndF() - 0.5) * (DELUXE ? 0.9 : 0.6),
+                     vy: (rndF() - 0.5) * (DELUXE ? 0.6 : 0.4),
                      size: DELUXE ? 4 : 3 });
       saucer = null;
     }
@@ -968,8 +968,8 @@ reg('asteroids', {
             shots.splice(hitBy, 1);
             score += r.size * 20;
             if (r.size > 1) for (var j = 0; j < (DELUXE ? 3 : 2); j++)
-              next.push({ x: r.x, y: r.y, vx: (Math.random() - 0.5) * 1.2,
-                          vy: (Math.random() - 0.5) * 0.8, size: r.size - 1 });
+              next.push({ x: r.x, y: r.y, vx: (rndF() - 0.5) * 1.2,
+                          vy: (rndF() - 0.5) * 0.8, size: r.size - 1 });
             return;
           }
           if ((r.x | 0) === (sx | 0) && (r.y | 0) === (sy | 0)) {

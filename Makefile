@@ -19,7 +19,7 @@ BIN     = games
 SRC     = $(wildcard src/*.c) $(wildcard src/engine/*.c) $(wildcard src/games/*.c)
 OBJ     = $(SRC:.c=.o)
 
-.PHONY: all run play catalog smoke stress strict asan smoke-asan web clean
+.PHONY: all run play catalog smoke stress parity strict asan smoke-asan web clean
 
 all: $(BIN)
 
@@ -45,6 +45,12 @@ smoke: $(BIN)
 
 stress: $(ASAN_BIN)
 	./tools/stress_test.sh
+
+# The 61 seeded entries promise the same puzzle in both builds. That holds only
+# if two separate implementations of xorshift32 agree, so it is checked rather
+# than assumed.
+parity:
+	./tools/rng_parity.sh
 
 # The ordinary build only warns about files it happens to recompile, so a
 # clean tree can look silent while a warning sits in an untouched object.

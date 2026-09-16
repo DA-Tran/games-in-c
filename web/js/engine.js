@@ -134,7 +134,12 @@ Term.prototype.header = function (title, subtitle) {
   this.clear();
   this.center(0, title, COL.cyan, true);
   if (subtitle) this.center(1, subtitle, COL.dim);
-  this.hline(1, 2, this.cols - 2, '#2e333a');
+  /* No rule under the header, for the same reason draw_title() in the C engine
+   * no longer draws one. Row 2 here is row 4 there - the first row a game may
+   * use - so the rule was something for a game to collide with. Pong puts its
+   * score exactly there, and had it reading as a break in a horizontal line.
+   * Leaving the row clear also keeps the two builds looking the same, which is
+   * the point of mirroring the C engine rather than reimplementing it. */
 };
 
 Term.prototype.flush = function () {
@@ -168,13 +173,28 @@ Term.prototype.flush = function () {
  * ordinary entry as varied as before. */
 var rngState = 0;
 function rngSeed(s) { rngState = (s >>> 0) || 0; }
-function rnd(n) {
-  if (n <= 0) return 0;
-  if (!rngState) return Math.floor(Math.random() * n);
+
+function rngNext() {
   rngState ^= rngState << 13; rngState >>>= 0;
   rngState ^= rngState >>> 17;
   rngState ^= rngState << 5;  rngState >>>= 0;
-  return rngState % n;
+  return rngState;
+}
+
+function rnd(n) {
+  if (n <= 0) return 0;
+  if (!rngState) return Math.floor(Math.random() * n);
+  return rngNext() % n;
+}
+
+/* A fraction in [0,1), matching the C rnd_f: the top 24 bits over 2^24.
+ * Games that want a direction or a speed need this rather than rnd(), and
+ * before it existed they reached for Math.random - which is not seeded, so a
+ * pinned entry drew different rocks every time and disagreed with the C
+ * build. */
+function rndF() {
+  if (!rngState) return Math.random();
+  return (rngNext() >>> 8) / 16777216;
 }
 function rndRange(lo, hi) { return lo + rnd(hi - lo + 1); }
 function shuffle(a) {
@@ -305,6 +325,11 @@ Host.prototype.best = function () {
 global.GIC = {
   Term: Term, Host: Host, COL: COL, GAMES: GAMES,
   register: register, rnd: rnd, rndRange: rndRange, shuffle: shuffle,
+  /* Exported so the generator can be seeded without starting a game, which is
+   * what lets a test check that a pinned seed produces the same sequence here
+   * as it does in the C build. A "daily" entry is only meaningful if the two
+   * agree. */
+  rngSeed: rngSeed, rndF: rndF,
   Scores: Scores
 };
 
