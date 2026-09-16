@@ -9,6 +9,7 @@
 #endif
 
 #include "engine.h"
+#include <signal.h>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -20,7 +21,9 @@
 #  include <sys/ioctl.h>
 #endif
 
-static int g_raw_active = 0;
+/* Read from a signal handler, so it must be a type the standard says can be
+ * accessed atomically there. */
+static volatile sig_atomic_t g_raw_active = 0;
 
 #ifndef _WIN32
 static struct termios g_orig_termios;
@@ -28,8 +31,53 @@ static struct termios g_orig_termios;
 
 /* ------------------------------------------------------------------ mode */
 
+/* Put the terminal back, from a signal handler.
+ *
+ * scr_shutdown does this on the way out, but it is reached through atexit and
+ * a signal does not run atexit handlers. Ctrl-C is how a player is most likely
+ * to leave a game - the raw mode below deliberately keeps signals working so
+ * that it does - and without this it returns them a terminal with no echo, no
+ * line editing and no cursor, which takes a blind `reset` to undo.
+ *
+ * Deliberately not scr_shutdown itself: that goes through printf, which is not
+ * async-signal-safe, so a signal arriving inside a stdio call could deadlock
+ * on the stream lock. write() and tcsetattr() are both on the safe list. */
+static void restore_terminal_now(void)
+{
+#ifdef _WIN32
+    scr_show_cursor();
+    scr_flush();
+#else
+    static const char seq[] = "\033[?25h\033[0m";
+    ssize_t n = write(STDOUT_FILENO, seq, sizeof seq - 1);
+    (void)n;                                  /* dying anyway; nothing to do */
+    if (g_raw_active)
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &g_orig_termios);
+#endif
+    g_raw_active = 0;
+}
+
+/* Restore, then let the signal do what it would have done. Re-raising rather
+ * than exit()ing keeps the exit status honest: a shell reports 130 for Ctrl-C,
+ * and the test harness distinguishes "killed by a signal" from "chose to
+ * quit". */
+static void on_fatal_signal(int sig)
+{
+    restore_terminal_now();
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
 void scr_init(void)
 {
+    /* Registered before the platform setup below, which can return early when
+     * stdin is not a terminal. */
+    signal(SIGINT, on_fatal_signal);
+    signal(SIGTERM, on_fatal_signal);
+#ifdef SIGHUP
+    signal(SIGHUP, on_fatal_signal);          /* the terminal window closing */
+#endif
+
 #ifdef _WIN32
     /* Ask the console host for ANSI escape processing (Win10+). */
     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);

@@ -41,6 +41,11 @@
 #   START=0 COUNT=50 ./tools/stress_test.sh   a slice
 #   JOBS=4 ./tools/stress_test.sh             four at a time
 #   PATTERNS="random esc" ./tools/stress_test.sh   only those patterns
+#
+# Patterns: empty random arrows enter esc digits yes huge binary utf8 longline
+# quitspam. The last three cover byte sequences that are not one-byte-one-key
+# (multi-byte glyphs, including truncated ones), a line that never ends, and
+# the earliest exit path in each game.
 
 set -u
 
@@ -50,7 +55,7 @@ BIN=${BIN:-./games-asan}
 TIMEOUT=${TIMEOUT:-40}
 JOBS=${JOBS:-2}
 ROUNDS=${ROUNDS:-4}
-PATTERNS=${PATTERNS:-"empty random arrows enter esc digits yes huge binary"}
+PATTERNS=${PATTERNS:-"empty random arrows enter esc digits yes huge binary utf8 longline quitspam"}
 
 [ -x "$BIN" ] || { echo "build the sanitised binary first: make asan"; exit 1; }
 
@@ -125,6 +130,35 @@ build_patterns() {
         printf 'a' | tr 'a' '\000' >> "$FUZZDIR/binary"
         i=$((i+1))
     done
+
+    # Valid multi-byte UTF-8, and truncated multi-byte UTF-8. The input path
+    # reads one byte at a time, so a three-byte glyph arrives as three separate
+    # keys; a decoder that assumes one byte is one key mishandles the tail.
+    : > "$FUZZDIR/utf8"
+    i=0
+    while [ $i -lt 400 ]; do
+        printf '\303\251\342\230\205\360\237\216\262\303\247\342\224\200' >> "$FUZZDIR/utf8"
+        printf '\342\230\360\237\216\n' >> "$FUZZDIR/utf8"   # deliberately cut short
+        i=$((i+1))
+    done
+
+    # One enormous line with no newline in it at all. Every prompt that reads a
+    # line has a fixed buffer, and the interesting question is what happens when
+    # the line never ends - the answer should be "it is truncated", not "it
+    # overruns" and not "it waits for ever".
+    : > "$FUZZDIR/longline"
+    i=0
+    while [ $i -lt 2000 ]; do
+        printf 'abcdefghijklmnopqrstuvwxyz0123456789' >> "$FUZZDIR/longline"
+        i=$((i+1))
+    done
+
+    # Quit immediately, over and over. Exercises the earliest exit path in each
+    # game - the one that runs before most state is set up, and so the one most
+    # likely to free or read something that was never initialised.
+    : > "$FUZZDIR/quitspam"
+    i=0
+    while [ $i -lt 600 ]; do printf 'q\nq\n\033\033' >> "$FUZZDIR/quitspam"; i=$((i+1)); done
 }
 
 # One game, one pattern, one seed. Prints a line only when something is wrong.

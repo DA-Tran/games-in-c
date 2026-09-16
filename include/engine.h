@@ -94,6 +94,7 @@ void   shuffle_int(int *a, int n);
 
 /* ------------------------------------------------------------ high score */
 int    score_load(const char *slug);
+void   score_reload(void);            /* drop the cache; re-read from disk */
 void   score_save(const char *slug, int score);
 void   score_report(const char *slug, int score);
 

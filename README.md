@@ -55,16 +55,39 @@ in the browser, driven from the same catalogue and the same parameters.
 
 ## Verifying
 
-Eight layers, each answering a question the others cannot.
+Ten layers, each answering a question the others cannot.
 
     make            build; the tree builds at zero warnings
     make strict     compile every file under a much harsher set, with -Werror
+    make unit       the engine primitives every game shares
     make smoke      the normal test: does it work
     make stress     the stress test: can it be broken
     make parity     do the C and JS generators agree on a seed
-    python3 tools/catalog_test.py   is the catalogue coherent
-    python3 tools/screen_test.py    what does each game actually draw
-    node tools/web_test.js          drive every entry in the browser build
+    python3 tools/catalog_test.py     is the catalogue coherent
+    python3 tools/screen_test.py      what does each game actually draw
+    python3 tools/behaviour_test.py   does each entry behave, not just exit 0
+    node tools/web_test.js            drive every entry in the browser build
+
+**`make unit`** tests the engine directly rather than through a game: that
+`rnd(n)` lands in `[0,n)` for every `n`, that a shuffle is a permutation, that
+seeding reproduces, and that the score file round-trips. Contracts, not
+remembered values - it asserts `rnd(n) < n`, never that seed 7 gives 583, so it
+stays true when the implementation changes and still fails when it breaks.
+
+This layer exists because of a bug the other nine could not reach. Writing the
+score file is what corrupted it, and whether a scripted run scores at all
+depends on the game, so driving whole games found it only by luck. Running one
+game a thousand ways is not a substitute for testing the thing directly.
+
+**`behaviour_test.py`** asks whether an entry *behaves*, which nothing else
+does: a game that ignores every key, or whose pinned seed pins nothing, passes
+build, smoke, stress and screen. Every expectation is derived from the
+catalogue or from the run itself - there is no table of "chess should draw a
+king", because a thousand such entries would be wrong within a week and would
+only ever cover the ones somebody remembered to write down. It checks that a
+seeded entry draws the same screen whatever `GIC_SEED` says, that Ctrl-C leaves
+the terminal usable, that two very different runs of keys do not produce an
+identical screen, and that playing one game does not destroy another's score.
 
 **`catalog_test.py`** checks the catalogue rather than the code: unique slugs
 and titles, every family registered, and - the one that matters for this
@@ -103,6 +126,29 @@ board. 91 entries were being clipped at the old fixed 84x28; none are now.
 
 `screen_test.py --cols N --rows M` reports exactly which entries exceed a given
 size and what each one needs.
+
+### Two bugs worth recording
+
+Both were found by the layers above, and both had been present from the start.
+
+**Ctrl-C left the terminal unusable.** The engine restores the cursor and the
+termios state from an `atexit` handler, and a signal does not run `atexit`
+handlers. Raw mode deliberately keeps signals working so that Ctrl-C quits - so
+the most natural way to leave a game returned a terminal with no echo, no line
+editing and no cursor, needing a blind `reset` to undo. All 1000 entries. There
+are now `SIGINT`/`SIGTERM`/`SIGHUP` handlers that restore and re-raise, so the
+exit status still reports the signal.
+
+**Playing one game destroyed other games' high scores.** The score file is
+written as `<key> <value>`, and almost every caller passes the entry's title -
+"Nine Men's Morris", not "nine-mens-morris". It was read back with
+`fscanf("%63s %d")`, which takes the key as one whitespace-delimited token. So
+the game never got its own score back, and worse, the failed parse ended the
+read: every entry *below* the first spaced name was dropped from the table, and
+the next save wrote that truncated table back over the file. One game with a
+space in its title silently erased every score recorded after it. The file is
+now parsed a line at a time, splitting on the last space, and a damaged line
+costs that line rather than the rest of the file.
 
 ### The two builds must agree
 

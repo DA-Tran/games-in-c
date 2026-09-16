@@ -22,7 +22,13 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT INT TERM
 
 # The C generator, compiled on its own so the harness pulls in no I/O.
-sed -n '1,35p' src/engine/util.c | sed 's|#include "engine.h"||' > "$TMP/rng.c"
+#
+# Cut at the first function that is not part of the generator rather than at a
+# line number: this was "sed -n 1,35p" until an #include was added at the top
+# of util.c, which shifted every line by one and left the extract ending in the
+# middle of rnd_f. Nothing about a line number says what it is pointing at.
+awk '/^void shuffle_int/ { exit } { print }' src/engine/util.c \
+    | sed 's|#include "engine.h"||' > "$TMP/rng.c"
 cat >> "$TMP/rng.c" <<'EOF'
 #include <stdio.h>
 int main(int argc, char **argv) {

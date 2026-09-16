@@ -1,5 +1,6 @@
 /* util.c - RNG and persistent high scores. */
 #include "engine.h"
+#include <limits.h>
 
 /* xorshift32: small, fast, and reproducible across platforms. */
 static unsigned g_state = 2463534242u;
@@ -63,17 +64,55 @@ static int   sc_val[SCORE_MAX];
 static int   sc_count;
 static int   sc_loaded;
 
+/* Read the score file.
+ *
+ * Parsed a line at a time, splitting on the *last* space, because the key is
+ * whatever the caller passed and almost every caller passes the entry's title:
+ * "Nine Men's Morris", not "nine-mens-morris". The previous "%63s %d" read the
+ * key as a single whitespace-delimited token, which broke that in two ways at
+ * once. The game never got its score back, because "Nine" never matched the
+ * key it asked for. Worse, fscanf returning 1 instead of 2 ended the loop, so
+ * every entry *below* the first spaced name was dropped - and the next save
+ * rewrote the file from the truncated cache, destroying them. One game with a
+ * space in its title silently wiped every score recorded after it.
+ *
+ * A malformed line is now skipped rather than ending the read, so a file that
+ * has been hand-edited or half-written costs at most the lines that are
+ * actually broken. The format on disk is unchanged, so existing files load. */
 static void score_cache_init(void)
 {
     FILE *f;
+    char line[SLUG_MAX + 32];
+
     if (sc_loaded) return;
     sc_loaded = 1;
     sc_count = 0;
     f = fopen(SCORE_FILE, "r");
     if (!f) return;
-    while (sc_count < SCORE_MAX &&
-           fscanf(f, "%63s %d", sc_name[sc_count], &sc_val[sc_count]) == 2)
+
+    while (sc_count < SCORE_MAX && fgets(line, (int)sizeof line, f)) {
+        char *sp, *end;
+        long v;
+        size_t n = strlen(line);
+
+        while (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r'))
+            line[--n] = '\0';
+        if (n == 0) continue;
+
+        sp = strrchr(line, ' ');
+        if (!sp || !sp[1]) continue;              /* no value on this line   */
+
+        v = strtol(sp + 1, &end, 10);
+        if (*end != '\0') continue;               /* value is not a number   */
+        if (v < INT_MIN || v > INT_MAX) continue; /* and has to fit          */
+
+        *sp = '\0';
+        if (sp == line || strlen(line) >= SLUG_MAX) continue;  /* no/long key */
+
+        strcpy(sc_name[sc_count], line);
+        sc_val[sc_count] = (int)v;
         sc_count++;
+    }
     fclose(f);
 }
 
@@ -84,6 +123,20 @@ static void score_cache_write(void)
     if (!f) return;                 /* a read-only directory is not fatal */
     for (i = 0; i < sc_count; i++) fprintf(f, "%s %d\n", sc_name[i], sc_val[i]);
     fclose(f);
+}
+
+/* Forget the in-memory table, so the next read comes from disk.
+ *
+ * The table is loaded once and written through, which is what made the render
+ * loops cheap. That assumes this process is the only writer - fine while a
+ * player runs one game at a time, and not true if a second copy is open in
+ * another terminal, or if the file is edited by hand. Callers that care can
+ * ask for a fresh read; the unit tests use it to check what actually reached
+ * the disk rather than what the cache remembers. */
+void score_reload(void)
+{
+    sc_loaded = 0;
+    sc_count = 0;
 }
 
 int score_load(const char *slug)

@@ -19,7 +19,7 @@ BIN     = games
 SRC     = $(wildcard src/*.c) $(wildcard src/engine/*.c) $(wildcard src/games/*.c)
 OBJ     = $(SRC:.c=.o)
 
-.PHONY: all run play catalog smoke stress parity strict asan smoke-asan web clean
+.PHONY: all run play catalog smoke stress parity unit strict asan smoke-asan web clean
 
 all: $(BIN)
 
@@ -51,6 +51,13 @@ stress: $(ASAN_BIN)
 # than assumed.
 parity:
 	./tools/rng_parity.sh
+
+# Unit tests for the engine primitives every game shares. Driving whole games
+# only exercises the score file when a game happens to score, which is exactly
+# how a data-losing bug in it survived every other suite.
+unit:
+	$(CC) $(CFLAGS) -Iinclude -o /tmp/gic-unit tools/engine_test.c src/engine/util.c
+	cd /tmp && /tmp/gic-unit
 
 # The ordinary build only warns about files it happens to recompile, so a
 # clean tree can look silent while a warning sits in an untouched object.
