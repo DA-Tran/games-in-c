@@ -30,6 +30,7 @@ function Term(canvas, cols, rows) {
   this.rows = rows;
   this.ctx = canvas.getContext('2d');
   this.cell = { w: 0, h: 0 };
+  this.clipped = 0;   /* glyphs lost past the growth cap - always a bug */
   this.buf = [];
   this.clear();
   this.resize();
@@ -61,9 +62,45 @@ Term.prototype.clear = function () {
   }
 };
 
+/* Extend the grid, keeping everything already drawn.
+ *
+ * The terminal build has to warn when a board is bigger than the window,
+ * because it cannot make the window bigger. Here the terminal is a canvas, so
+ * the honest answer is to grow it and show the player the whole board. Growing
+ * mid-frame is safe: existing rows are extended rather than rebuilt, so the
+ * part of the frame already drawn survives and the rest lands in the right
+ * place. The cap is there so that one bad coordinate cannot ask the browser
+ * for a canvas of a hundred thousand cells. */
+var MAXCOLS = 200, MAXROWS = 120;
+
+Term.prototype.grow = function (cols, rows) {
+  var r, c, row;
+  cols = Math.min(Math.max(cols, this.cols), MAXCOLS);
+  rows = Math.min(Math.max(rows, this.rows), MAXROWS);
+  if (cols === this.cols && rows === this.rows) return;
+
+  for (r = 0; r < this.buf.length; r++) {
+    for (c = this.buf[r].length; c < cols; c++) {
+      this.buf[r].push({ ch: ' ', fg: COL.fg, bg: null, bold: false });
+    }
+  }
+  for (r = this.buf.length; r < rows; r++) {
+    row = [];
+    for (c = 0; c < cols; c++) row.push({ ch: ' ', fg: COL.fg, bg: null, bold: false });
+    this.buf.push(row);
+  }
+  this.cols = cols;
+  this.rows = rows;
+  this.resize();
+};
+
 Term.prototype.put = function (x, y, ch, fg, bg, bold) {
   x = Math.round(x); y = Math.round(y);
-  if (x < 0 || x >= this.cols || y < 0 || y >= this.rows) return;
+  if (x < 0 || y < 0) return;
+  if (x >= this.cols || y >= this.rows) {
+    this.grow(x + 1, y + 1);
+    if (x >= this.cols || y >= this.rows) { this.clipped++; return; }
+  }
   var cell = this.buf[y][x];
   cell.ch = ch;
   cell.fg = fg || COL.fg;

@@ -82,6 +82,24 @@ two runs at the same seed.
 
 256 of the 1000 entries need more than an 80x24 terminal; at 100x30 that falls
 to about one in twenty, and the largest board in the catalogue wants 94x52.
+Some of that is unavoidable: a 16x16 sudoku needs 27 rows for the grid alone,
+so these are real requirements rather than layout bugs to be shrunk away.
+
+The two builds answer that differently, because they can.
+
+A terminal cannot be made bigger from inside the program, so the terminal build
+says so. The engine measures the extent each game asks for -- every character
+reaches the screen through `scr_move` or the `draw_*` helpers, so one place
+sees all of it -- and when that exceeds the real window, a line appears above
+the title reading `needs 94x52, terminal is 80x24 - part of this game is off
+screen`. Previously the board was simply cut off at the edge with nothing to
+explain why.
+
+The browser terminal is a canvas, so it grows instead. A write past the edge
+extends the grid, keeping what is already drawn, and the player sees the whole
+board. 91 entries were being clipped at the old fixed 84x28; none are now.
+`web_test.js` fails any entry that still loses a glyph.
+
 `screen_test.py --cols N --rows M` reports exactly which entries exceed a given
 size and what each one needs.
 

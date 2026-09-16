@@ -60,6 +60,7 @@ class Screen:
         self.rows, self.cols = rows, cols
         self.grid = [[" "] * cols for _ in range(rows)]
         self.r = self.c = 0
+        self.saved = (0, 0)         # ESC[s / ESC[u, used by the size warning
         self.overflow = []          # (row, col) writes that fell off the screen
         self.cursor_shown = True
         # Games clear the screen on the way out, so the final grid is empty.
@@ -108,6 +109,10 @@ class Screen:
                     if 0 <= self.r < self.rows:
                         for x in range(max(self.c, 0), self.cols):
                             self.grid[self.r][x] = " "
+                elif cmd == b"s":
+                    self.saved = (self.r, self.c)
+                elif cmd == b"u":
+                    self.r, self.c = self.saved
                 elif cmd == b"h" and args == "?25":
                     self.cursor_shown = True
                 elif cmd == b"l" and args == "?25":

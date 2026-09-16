@@ -2,8 +2,9 @@
  *
  * Loads engine.js and every game module against a minimal DOM/canvas stub,
  * then actually plays each game: hundreds of random keypresses, real ticks
- * for the real-time ones, and a full draw after every step. A game passes
- * only if it never throws and never writes outside its terminal grid.
+ * for the real-time ones, and a full draw after every step. A game passes only
+ * if it never throws, keeps its terminal buffer consistent with the size it
+ * claims, and loses no glyph off the edge of the grid.
  *
  * Run: node tools/web_test.js
  */
@@ -126,6 +127,7 @@ const KEYS = ['up','down','left','right','enter','space','tab','back',
 const playable = CATALOG.filter(g => g.implemented && GIC.GAMES[g.family]);
 console.log('playing ' + playable.length + ' catalogue entries');
 let lastFam = '';
+const grew = [];
 playable.forEach(entry => {
   const slug = entry.slug;
   const canvas = makeCanvas();
@@ -161,15 +163,31 @@ playable.forEach(entry => {
     return;
   }
 
-  /* Every glyph must have landed inside the declared grid. */
+  /* The browser terminal grows to fit a board bigger than its default, so a
+   * wide game is not a failure here the way it is in a real terminal. Two
+   * things still have to hold: the buffer must match the size it claims, or
+   * later draws index past the end of a row; and nothing may be lost past the
+   * growth cap, which would mean the player is looking at a clipped board. */
   if (term.buf.length !== term.rows || term.buf[0].length !== term.cols)
-    fail(slug, 'terminal buffer resized unexpectedly');
+    fail(slug, 'terminal buffer out of step with its declared size');
+  if (term.clipped)
+    fail(slug, term.clipped + ' glyph(s) clipped: needs more than the '
+               + term.cols + 'x' + term.rows + ' cap');
+  if (term.cols > 84 || term.rows > 28) grew.push(slug + ' ' + term.cols + 'x' + term.rows);
 
   if (entry.family !== lastFam) {
     console.log('  ' + entry.family);
     lastFam = entry.family;
   }
 });
+
+if (grew.length) {
+  console.log('');
+  console.log(grew.length + ' entries needed a terminal larger than the default 84x28;');
+  console.log('the canvas grew to fit each one, so none of them is clipped:');
+  grew.slice(0, 6).forEach(g => console.log('  ' + g));
+  if (grew.length > 6) console.log('  ... and ' + (grew.length - 6) + ' more');
+}
 
 console.log('');
 if (failures.length) {
