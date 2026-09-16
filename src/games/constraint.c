@@ -252,18 +252,25 @@ static void build(void)
         gen_latin();
         gen_regions(N + 2);
         for (i = 0; i < nregion; i++) {
-            int sum = 0, prod = 1, n = 0, mn = 99, mx = 0;
+            /* A cage can cover enough cells that the product of its values
+             * overflows an int - nine cells of nine is already past the
+             * limit. The overflow is undefined behaviour and, worse, it wraps
+             * to a value the "prod < 400" test below then accepts, producing a
+             * multiplication cage with a nonsense target. Accumulate in a long
+             * and saturate: only the comparison against 400 matters. */
+            int sum = 0, n = 0, mn = 99, mx = 0;
+            long prod = 1;
             for (r = 0; r < N; r++) for (c = 0; c < N; c++) {
                 if (region[r][c] != i) continue;
                 sum += sol[r][c];
-                prod *= sol[r][c];
+                if (prod <= 400) prod *= sol[r][c];
                 if (sol[r][c] < mn) mn = sol[r][c];
                 if (sol[r][c] > mx) mx = sol[r][c];
                 n++;
             }
             if (VAR == V_KILLER || n == 1 || rnd(100) < 55) { cage_op[i] = '+'; cage_target[i] = sum; }
             else if (n == 2 && rnd(2))                      { cage_op[i] = '-'; cage_target[i] = mx - mn; }
-            else if (prod < 400)                            { cage_op[i] = 'x'; cage_target[i] = prod; }
+            else if (prod < 400)                            { cage_op[i] = 'x'; cage_target[i] = (int)prod; }
             else                                            { cage_op[i] = '+'; cage_target[i] = sum; }
         }
         break;
